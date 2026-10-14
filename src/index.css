@@ -1,0 +1,195 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "PingFang SC", "Hiragino Sans", "Noto Sans", sans-serif;
+  --font-mono: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "SF Mono", Menlo, Monaco, Consolas, sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #000000;
+  color: #FFFFFF;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "PingFang SC", "Hiragino Sans", "Noto Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Precise selection behavior */
+.select-none, .select-none * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+.select-text {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+/* Precise cursor behavior */
+p, article, h1, h2, h3, h4, h5, h6, .cursor-text {
+  cursor: text;
+}
+
+button, a, [role="button"], .cursor-pointer {
+  cursor: pointer;
+}
+
+/* Force pointer on interactive cards, buttons, links, and all their descendants */
+.cursor-pointer, .cursor-pointer *, button, button *, a, a *, [role="button"], [role="button"] * {
+  cursor: pointer !important;
+}
+
+/* Allow explicit cursor-text overrides (e.g. on reading detail pages) */
+.cursor-text, .cursor-text * {
+  cursor: text !important;
+}
+
+.cursor-default {
+  cursor: default !important;
+}
+
+::selection {
+  background-color: #FF5500;
+  color: #000000;
+}
+
+::-moz-selection {
+  background-color: #FF5500;
+  color: #000000;
+}
+
+/* Minimalist Dark Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+::-webkit-scrollbar-thumb {
+  background: #181920;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #FF5500;
+}
+
+/* Terminal cursor blink animation - Authentic step blink (Pure White -> Gone -> Pure White -> Gone) */
+@keyframes terminal-blink {
+  0%, 49.99% {
+    opacity: 1;
+    visibility: visible;
+  }
+  50%, 100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.animate-terminal-blink {
+  animation: terminal-blink 1s infinite;
+}
+
+/* Header Install Extension Button (Default: White bg, Black text, White border; Hover: #FF5500, Black text, White border) */
+.btn-header-install {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  border: 1px solid #FFFFFF !important;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease !important;
+}
+
+.btn-header-install:hover {
+  background-color: #FF5500 !important;
+  color: #000000 !important;
+  border-color: #FFFFFF !important;
+}
+
+.btn-header-install svg,
+.btn-header-install path,
+.btn-header-install circle,
+.btn-header-install rect {
+  color: #000000 !important;
+  fill: currentColor !important;
+  transition: color 150ms ease, fill 150ms ease !important;
+}
+
+.btn-header-install:hover svg,
+.btn-header-install:hover path,
+.btn-header-install:hover circle,
+.btn-header-install:hover rect {
+  color: #000000 !important;
+  fill: #000000 !important;
+}
+
+/* Chrome & Extension Action Buttons (Hero, Feature Page & Changelog)
+   Default: Solid White, Black text, White border
+   Hover: Signature Orange (#FF5500), Black text, White border preserved
+   Instant crisp transition */
+.btn-chrome-action {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  border: 1px solid #FFFFFF !important;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease !important;
+}
+
+.btn-chrome-action svg,
+.btn-chrome-action path,
+.btn-chrome-action circle,
+.btn-chrome-action rect {
+  color: #000000 !important;
+  fill: currentColor !important;
+  transition: color 150ms ease, fill 150ms ease !important;
+}
+
+.btn-chrome-action:hover {
+  background-color: #FF5500 !important;
+  color: #000000 !important;
+  border-color: #FFFFFF !important;
+}
+
+.btn-chrome-action:hover svg,
+.btn-chrome-action:hover path,
+.btn-chrome-action:hover circle,
+.btn-chrome-action:hover rect {
+  color: #000000 !important;
+  fill: #000000 !important;
+}
+
+/* Calm Soft Breathing for Online Indicator Dot (3.5s cycle) */
+@keyframes softBreath {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.animate-soft-breath {
+  animation: softBreath 3.5s ease-in-out infinite;
+}
+
+/* Apple-style Entrance Reveal for Pages */
+@keyframes appleReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  30% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-apple-reveal {
+  animation: appleReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
