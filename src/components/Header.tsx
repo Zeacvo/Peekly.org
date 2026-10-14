@@ -41,7 +41,7 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-black/45 border-b border-white/5 transition-all">
-      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
+      <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6 h-16 sm:h-20 flex items-center justify-between">
         
         {/* Left: Brand Logo (Eye turns #FF5500 on hover, PEEKLY stays purely white) */}
         <div
@@ -49,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
             if (onGoHome) onGoHome();
             else window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          className="flex items-center gap-2.5 sm:gap-3.5 h-12 group cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
+          className="flex items-center gap-2 sm:gap-3 md:gap-3.5 h-12 group cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0"
           role="button"
           tabIndex={0}
           onKeyDown={(e) => {
@@ -71,10 +71,10 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
         </div>
 
         {/* Right: Borderless Minimalist Navigation + Single CTA Accent */}
-        <div className="flex items-center gap-3 sm:gap-4 md:gap-5 lg:gap-6">
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 shrink-0">
           
-          {/* 1. Online: 0 (Displayed on lg+ desktop viewports for clean minimalism on tablets) */}
-          <div className="hidden lg:flex items-center gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 leading-none whitespace-nowrap select-none">
+          {/* 1. Online: 0 (Flexible: stays visible on tablets and medium screens) */}
+          <div className="hidden sm:flex items-center gap-1 sm:gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 leading-none whitespace-nowrap select-none shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0 animate-soft-breath"></span>
             <span>{t.nav.statusLabel}</span>
             <span className="text-white font-mono text-xs md:text-[13px] font-medium leading-none">{t.nav.onlineCount}</span>
@@ -86,7 +86,7 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
             onClick={() => {
               if (onOpenChangelog) onOpenChangelog();
             }}
-            className="group flex items-center gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
+            className="group flex items-center gap-1 sm:gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
             aria-label={t.nav.changelog}
           >
             <span className="font-mono text-white flex items-center">
@@ -101,7 +101,7 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
             <button
               type="button"
               onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-              className="group flex items-center gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 py-1 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
+              className="group flex items-center gap-1 sm:gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 py-1 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
               aria-label="Select language"
               aria-expanded={langDropdownOpen}
               aria-haspopup="listbox"
@@ -144,12 +144,12 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
             )}
           </div>
 
-          {/* 4. Install Extension CTA Button (Only Framed Element, Solid White -> #FF5500 with Black Text on Hover) */}
+          {/* 4. Install Extension CTA Button (Visible on tablets and medium screens with responsive padding & typography) */}
           <a
             href="https://chromewebstore.google.com/detail/peekly-for-faceit/cmfgneodcjfofdcglbbhcghijgcjcokk"
             target="_blank"
             rel="noreferrer"
-            className="hidden md:inline-flex items-center justify-center text-center h-9 px-3.5 lg:px-5 rounded-none btn-header-install font-sans font-bold text-[11px] lg:text-xs tracking-wider uppercase cursor-pointer shadow-lg active:scale-95 ml-1 sm:ml-2 shrink-0 focus-visible:ring-1 focus-visible:ring-white"
+            className="hidden sm:inline-flex items-center justify-center text-center h-8 sm:h-9 px-2.5 sm:px-3 md:px-4 lg:px-5 rounded-none btn-header-install font-sans font-bold text-[10px] sm:text-[11px] md:text-xs tracking-wider uppercase cursor-pointer shadow-lg active:scale-95 ml-0.5 sm:ml-1 md:ml-2 shrink-0 focus-visible:ring-1 focus-visible:ring-white"
           >
             <span>{t.nav.install.toUpperCase()}</span>
           </a>
