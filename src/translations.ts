@@ -41,6 +41,45 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
   { code: 'zh', name: '中文', flag: '🇨🇳' },
 ];
 
+export function getSafeInitialLanguage(): Language {
+  // 1. Safe localStorage read
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const saved = localStorage.getItem('peekly_lang');
+      if (saved && SUPPORTED_LANGUAGES.some((l) => l.code === saved)) {
+        return saved as Language;
+      }
+    }
+  } catch {
+    // Storage access may be blocked in iOS Safari Private mode or Telegram WebView
+  }
+
+  // 2. Safe navigator.language read with basic code extraction (e.g. 'ru-RU' -> 'ru')
+  try {
+    if (typeof navigator !== 'undefined' && navigator.language) {
+      const baseCode = navigator.language.split('-')[0].toLowerCase();
+      if (SUPPORTED_LANGUAGES.some((l) => l.code === baseCode)) {
+        return baseCode as Language;
+      }
+    }
+  } catch {
+    // navigator might fail or be restricted
+  }
+
+  // 3. Guaranteed ironclad fallback
+  return 'en';
+}
+
+export function saveLanguagePreference(lang: Language): void {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem('peekly_lang', lang);
+    }
+  } catch {
+    // Ignore storage write restrictions in sandboxed WebViews
+  }
+}
+
 export const bottomCtaTitleMap: Record<Language, string> = {
   en: 'READY TO DOMINATE?',
   ru: 'ГОТОВ ДОМИНИРОВАТЬ?',

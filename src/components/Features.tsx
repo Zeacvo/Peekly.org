@@ -535,7 +535,7 @@ const CardTextures: Record<string, React.FC> = {
 };
 
 export const Features: React.FC<FeaturesProps> = ({ currentLang, onSelectFeature }) => {
-  const t = translations[currentLang];
+  const t = translations[currentLang] || translations.en;
 
   const iconMap: Record<string, React.ReactNode> = {
     radar: <Map className="w-5 h-5 stroke-[1.75]" />,

@@ -16,7 +16,7 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const t = translations[currentLang];
+  const t = translations[currentLang] || translations.en;
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

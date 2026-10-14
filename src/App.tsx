@@ -3,6 +3,7 @@ import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { Features } from './components/Features';
 import { Footer } from './components/Footer';
+import { getSafeInitialLanguage, saveLanguagePreference } from './translations';
 import type { Language } from './translations';
 
 const FeatureDetailPage = lazy(() =>
@@ -14,69 +15,102 @@ const ChangelogPage = lazy(() =>
 
 export const App: React.FC = () => {
   const [currentLang, setCurrentLang] = useState<Language>(() => {
-    const saved = localStorage.getItem('peekly_lang') as Language;
-    return saved || 'en';
+    return getSafeInitialLanguage();
   });
 
   const handleLanguageChange = (lang: Language) => {
     setCurrentLang(lang);
-    localStorage.setItem('peekly_lang', lang);
+    saveLanguagePreference(lang);
   };
 
   useEffect(() => {
-    document.documentElement.lang = currentLang;
+    try {
+      if (typeof document !== 'undefined' && document.documentElement) {
+        document.documentElement.lang = currentLang;
+      }
+    } catch {
+      // Ignore DOM property update errors in restricted frames
+    }
   }, [currentLang]);
 
   const [activeFeatureId, setActiveFeatureId] = useState<string | null>(() => {
-    const hash = window.location.hash;
-    if (hash.startsWith('#feature/')) {
-      return hash.replace('#feature/', '');
-    }
+    try {
+      const hash = typeof window !== 'undefined' ? window.location.hash : '';
+      if (hash && hash.startsWith('#feature/')) {
+        return hash.replace('#feature/', '');
+      }
+    } catch {}
     return null;
   });
+
   const [isChangelog, setIsChangelog] = useState<boolean>(() => {
-    return window.location.hash === '#changelog';
+    try {
+      return typeof window !== 'undefined' && window.location.hash === '#changelog';
+    } catch {
+      return false;
+    }
   });
 
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash;
-      if (hash.startsWith('#feature/')) {
-        setActiveFeatureId(hash.replace('#feature/', ''));
-        setIsChangelog(false);
-      } else if (hash === '#changelog') {
-        setIsChangelog(true);
-        setActiveFeatureId(null);
-      } else {
-        setActiveFeatureId(null);
-        setIsChangelog(false);
-      }
+      try {
+        const hash = window.location.hash;
+        if (hash.startsWith('#feature/')) {
+          setActiveFeatureId(hash.replace('#feature/', ''));
+          setIsChangelog(false);
+        } else if (hash === '#changelog') {
+          setIsChangelog(true);
+          setActiveFeatureId(null);
+        } else {
+          setActiveFeatureId(null);
+          setIsChangelog(false);
+        }
+      } catch {}
     };
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+
+    try {
+      window.addEventListener('hashchange', handleHashChange);
+    } catch {}
+    return () => {
+      try {
+        window.removeEventListener('hashchange', handleHashChange);
+      } catch {}
+    };
   }, []);
 
   const handleSelectFeature = (id: string) => {
     setIsChangelog(false);
     setActiveFeatureId(id);
-    window.location.hash = `#feature/${id}`;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      window.location.hash = `#feature/${id}`;
+    } catch {}
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch {}
   };
 
   const handleOpenChangelog = () => {
     setActiveFeatureId(null);
     setIsChangelog(true);
-    window.location.hash = '#changelog';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      window.location.hash = '#changelog';
+    } catch {}
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch {}
   };
 
   const handleGoHome = () => {
     setActiveFeatureId(null);
     setIsChangelog(false);
-    if (window.location.hash.startsWith('#feature/') || window.location.hash === '#changelog') {
-      history.pushState(null, '', window.location.pathname);
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      if (window.location.hash.startsWith('#feature/') || window.location.hash === '#changelog') {
+        history.pushState(null, '', window.location.pathname);
+      }
+    } catch {}
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch {}
   };
 
   return (

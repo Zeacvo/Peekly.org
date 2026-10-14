@@ -8,7 +8,7 @@ interface HeroProps {
 }
 
 export const Hero: React.FC<HeroProps> = ({ currentLang }) => {
-  const t = translations[currentLang];
+  const t = translations[currentLang] || translations.en;
 
   return (
     <section className="relative pt-28 sm:pt-40 md:pt-44 pb-24 sm:pb-36 md:pb-40 w-full max-w-6xl mx-auto px-4 sm:px-6 flex flex-col items-center text-center z-10">

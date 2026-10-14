@@ -10,7 +10,7 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ currentLang, onOpenChangelog, onGoHome }) => {
-  const t = translations[currentLang];
+  const t = translations[currentLang] || translations.en;
 
   return (
     <footer className="w-full bg-[#000000] border-t border-white/10 relative z-10 mt-0 py-8 sm:py-10">
