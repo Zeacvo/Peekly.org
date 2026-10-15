@@ -40,8 +40,8 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
   const currentLangObj = SUPPORTED_LANGUAGES.find(l => l.code === currentLang) || SUPPORTED_LANGUAGES[0];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-black/45 border-b border-white/5 transition-all">
-      <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6 h-16 sm:h-20 flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-50 h-16 sm:h-20 min-h-[64px] sm:min-h-[80px] backdrop-blur-md bg-black/45 border-b border-white/5 transition-all">
+      <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6 h-16 sm:h-20 min-h-[64px] sm:min-h-[80px] flex items-center justify-between">
         
         {/* Left: Brand Logo (Eye turns #FF5500 on hover, PEEKLY stays purely white) */}
         <div

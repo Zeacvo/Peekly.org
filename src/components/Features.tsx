@@ -23,7 +23,7 @@ interface FeaturesProps {
 const CardTextures: Record<string, React.FC> = {
   // 001: MAP POOL RADAR CHART (Single centered regular pentagon with 5 rays, subtle fill)
   radar: () => (
-    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" viewBox="0 0 300 180" fill="none">
+    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
       <rect width="300" height="180" fill="#0a0a0a" />
 
       {/* 5 Spokes radiating from center (150, 90) */}
@@ -49,7 +49,7 @@ const CardTextures: Record<string, React.FC> = {
 
   // 002: PLAYER STATS (Authentic FACEIT Profile HUD: avatar, nickname bar, 6 stat value skeletons — zero text/digits)
   stats: () => (
-    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" viewBox="0 0 300 180" fill="none">
+    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
       <rect width="300" height="180" fill="#0a0a0a" />
 
       {/* Main Player Profile Banner Card */}
@@ -101,7 +101,7 @@ const CardTextures: Record<string, React.FC> = {
 
   // 003: AUTO-ACCEPT MATCH (Unified window shell with faint skeleton & prominent horizontal plate with bold checkmark)
   autoAcceptMatch: () => (
-    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" viewBox="0 0 300 180" fill="none">
+    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
       <rect width="300" height="180" fill="#0a0a0a" />
 
       {/* Unified Window Shell */}
@@ -144,7 +144,7 @@ const CardTextures: Record<string, React.FC> = {
 
   // 004: AUTO-ACCEPT PARTY (Minimalist invite: square avatar slot, neutral arrow →, monochrome button with 👥)
   autoAcceptParty: () => (
-    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" viewBox="0 0 300 180" fill="none">
+    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
       <rect width="300" height="180" fill="#0a0a0a" />
 
       {/* Unified Window Shell */}
@@ -194,7 +194,7 @@ const CardTextures: Record<string, React.FC> = {
 
   // 005: ENHANCED MATCH HISTORY (Only 1st row has download button with ↓, subsequent rows are pale placeholders)
   enhancedHistory: () => (
-    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" viewBox="0 0 300 180" fill="none">
+    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
       <rect width="300" height="180" fill="#0a0a0a" />
       
       {/* Top Match Row (Active / Featured) */}
@@ -235,7 +235,7 @@ const CardTextures: Record<string, React.FC> = {
 
   // 006: AUTO-COPY SERVER IP (Unified window shell: prompt, connect IP & copy badge turn #FF5500)
   autoCopyServer: () => (
-    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" viewBox="0 0 300 180" fill="none">
+    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
       <rect width="300" height="180" fill="#0a0a0a" />
 
       {/* Unified Window Shell */}
@@ -275,7 +275,7 @@ const CardTextures: Record<string, React.FC> = {
 
   // 007: LOBBY FOCUS MODE (Muted dimmed rosters opacity-20 on sides, high-contrast white [ ] framing active center blocks)
   focusMode: () => (
-    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" viewBox="0 0 300 180" fill="none">
+    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
       <rect width="300" height="180" fill="#0a0a0a" />
 
       {/* Unified Window Shell */}
@@ -345,7 +345,7 @@ const CardTextures: Record<string, React.FC> = {
 
   // 008: TEAM AVERAGE ELO (FACEIT Matchroom Header HUD: Team A ELO plate + Captain avatar vs Center divider vs Captain avatar + Team B ELO plate — zero text/digits)
   avgEloPill: () => (
-    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" viewBox="0 0 300 180" fill="none">
+    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
       <rect width="300" height="180" fill="#0a0a0a" />
 
       {/* Main Match Header Banner Container */}
@@ -429,7 +429,7 @@ const CardTextures: Record<string, React.FC> = {
 
   // 009: SIDEBAR ELO WIDGET (Minimalist 2-color monochrome skeleton HUD)
   sidebarElo: () => (
-    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" viewBox="0 0 300 180" fill="none">
+    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
       <rect width="300" height="180" fill="#0a0a0a" />
 
       {/* Main Floating Widget Modal (Left / Center) */}
@@ -501,7 +501,7 @@ const CardTextures: Record<string, React.FC> = {
 
   // 010: MAP SELECTOR WIN RATES (Center tile progress bar turns #FF5500)
   mapSelectorStats: () => (
-    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" viewBox="0 0 300 180" fill="none">
+    <svg className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
       <rect width="300" height="180" fill="#0a0a0a" />
       {/* Left Tile */}
       <g transform="translate(25, 35)">

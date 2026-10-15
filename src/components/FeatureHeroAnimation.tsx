@@ -62,6 +62,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
       return (
         <svg 
           className="w-full h-full max-w-xl object-contain" 
+          width="300"
+          height="180"
           viewBox="0 0 300 180" 
           fill="none"
           style={{ transform: 'translateZ(0)', willChange: 'transform' }}
@@ -111,6 +113,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
       return (
         <svg 
           className="w-full h-full max-w-xl object-contain" 
+          width="300"
+          height="180"
           viewBox="0 0 300 180" 
           fill="none"
           style={{ transform: 'translateZ(0)', willChange: 'transform' }}
@@ -178,6 +182,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
       return (
         <svg 
           className="w-full h-full max-w-xl object-contain" 
+          width="300"
+          height="180"
           viewBox="0 0 300 180" 
           fill="none"
           style={{ transform: 'translateZ(0)', willChange: 'transform' }}
@@ -264,6 +270,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
       return (
         <svg 
           className="w-full h-full max-w-xl object-contain" 
+          width="300"
+          height="180"
           viewBox="0 0 300 180" 
           fill="none"
           style={{ transform: 'translateZ(0)', willChange: 'transform' }}
@@ -354,6 +362,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
       return (
         <svg 
           className="w-full h-full max-w-xl object-contain" 
+          width="300"
+          height="180"
           viewBox="0 0 300 180" 
           fill="none"
           style={{ transform: 'translateZ(0)', willChange: 'transform' }}
@@ -417,6 +427,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
       return (
         <svg 
           className="w-full h-full max-w-xl object-contain" 
+          width="300"
+          height="180"
           viewBox="0 0 300 180" 
           fill="none"
           style={{ transform: 'translateZ(0)', willChange: 'transform' }}
@@ -478,6 +490,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
       return (
         <svg 
           className="w-full h-full max-w-xl object-contain" 
+          width="300"
+          height="180"
           viewBox="0 0 300 180" 
           fill="none"
           style={{ transform: 'translateZ(0)', willChange: 'transform' }}
@@ -566,6 +580,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
       return (
         <svg 
           className="w-full h-full max-w-xl object-contain" 
+          width="300"
+          height="180"
           viewBox="0 0 300 180" 
           fill="none"
           style={{ transform: 'translateZ(0)', willChange: 'transform' }}
@@ -657,6 +673,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
       return (
         <svg 
           className="w-full h-full max-w-xl object-contain" 
+          width="300"
+          height="180"
           viewBox="0 0 300 180" 
           fill="none"
           style={{ transform: 'translateZ(0)', willChange: 'transform' }}
@@ -753,6 +771,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
       return (
         <svg 
           className="w-full h-full max-w-xl object-contain" 
+          width="300"
+          height="180"
           viewBox="0 0 300 180" 
           fill="none"
           style={{ transform: 'translateZ(0)', willChange: 'transform' }}
