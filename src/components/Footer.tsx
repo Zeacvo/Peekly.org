@@ -6,10 +6,35 @@ import { PeeklyLogo } from './PeeklyLogo';
 interface FooterProps {
   currentLang: Language;
   onOpenChangelog?: () => void;
+  onOpenPrivacy?: () => void;
   onGoHome?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ currentLang, onOpenChangelog, onGoHome }) => {
+const privacyLabelMap: Record<Language, string> = {
+  en: 'Privacy Policy',
+  da: 'Privatlivspolitik',
+  de: 'Datenschutzerklärung',
+  es: 'Política de privacidad',
+  fr: 'Politique de confidentialité',
+  pl: 'Polityka prywatności',
+  pt: 'Política de privacidade',
+  fi: 'Tietosuojakäytäntö',
+  sv: 'Integritetspolicy',
+  tr: 'Gizlilik Politikası',
+  ru: 'Политика конфиденциальности',
+  uk: 'Політика конфіденційності',
+  ar: 'سياسة الخصوصية',
+  ja: 'プライバシーポリシー',
+  ko: '개인정보 처리방침',
+  zh: '隐私政策',
+};
+
+export const Footer: React.FC<FooterProps> = ({ 
+  currentLang, 
+  onOpenChangelog, 
+  onOpenPrivacy,
+  onGoHome 
+}) => {
   const t = translations[currentLang] || translations.en;
 
   return (
@@ -52,7 +77,24 @@ export const Footer: React.FC<FooterProps> = ({ currentLang, onOpenChangelog, on
             {t.footer.changelog || t.nav.changelog}
           </button>
 
-          {/* Row 2: Chrome Web Store Link */}
+          {/* Row 2: Privacy Policy Link */}
+          <a
+            href="/privacy"
+            onClick={(e) => {
+              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              e.preventDefault();
+              if (onOpenPrivacy) onOpenPrivacy();
+              else {
+                history.pushState(null, '', '/privacy');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }
+            }}
+            className="text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer bg-transparent border-none p-0 w-fit text-left md:text-right focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
+          >
+            {privacyLabelMap[currentLang] || 'Privacy Policy'}
+          </a>
+
+          {/* Row 3: Chrome Web Store Link */}
           <a
             href="https://chromewebstore.google.com/detail/peekly-for-faceit/cmfgneodcjfofdcglbbhcghijgcjcokk"
             target="_blank"
@@ -62,7 +104,7 @@ export const Footer: React.FC<FooterProps> = ({ currentLang, onOpenChangelog, on
             Chrome Web Store
           </a>
 
-          {/* Row 3: Copyright */}
+          {/* Row 4: Copyright */}
           <div className="text-[11px] text-neutral-500 font-sans mt-1 whitespace-nowrap">
             © 2026 Peekly. {t.footer.allRightsReserved || t.footer.rights}
           </div>

@@ -12,6 +12,9 @@ const FeatureDetailPage = lazy(() =>
 const ChangelogPage = lazy(() =>
   import('./components/ChangelogPage').then((m) => ({ default: m.ChangelogPage }))
 );
+const PrivacyPage = lazy(() =>
+  import('./components/PrivacyPage').then((m) => ({ default: m.PrivacyPage }))
+);
 
 export const App: React.FC = () => {
   const [currentLang, setCurrentLang] = useState<Language>(() => {
@@ -51,38 +54,65 @@ export const App: React.FC = () => {
     }
   });
 
+  const [isPrivacy, setIsPrivacy] = useState<boolean>(() => {
+    try {
+      if (typeof window === 'undefined') return false;
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      return path === '/privacy' || path === '/privacy/' || hash === '#privacy';
+    } catch {
+      return false;
+    }
+  });
+
   useEffect(() => {
-    const handleHashChange = () => {
+    const handleLocationChange = () => {
       try {
-        const hash = window.location.hash;
-        if (hash.startsWith('#feature/')) {
-          setActiveFeatureId(hash.replace('#feature/', ''));
+        const path = window.location.pathname.toLowerCase();
+        const hash = window.location.hash.toLowerCase();
+
+        if (path === '/privacy' || path === '/privacy/' || hash === '#privacy') {
+          setIsPrivacy(true);
           setIsChangelog(false);
+          setActiveFeatureId(null);
+        } else if (hash.startsWith('#feature/')) {
+          setActiveFeatureId(window.location.hash.replace('#feature/', ''));
+          setIsChangelog(false);
+          setIsPrivacy(false);
         } else if (hash === '#changelog') {
           setIsChangelog(true);
+          setIsPrivacy(false);
           setActiveFeatureId(null);
         } else {
           setActiveFeatureId(null);
           setIsChangelog(false);
+          setIsPrivacy(false);
         }
       } catch {}
     };
 
     try {
-      window.addEventListener('hashchange', handleHashChange);
+      window.addEventListener('hashchange', handleLocationChange);
+      window.addEventListener('popstate', handleLocationChange);
     } catch {}
     return () => {
       try {
-        window.removeEventListener('hashchange', handleHashChange);
+        window.removeEventListener('hashchange', handleLocationChange);
+        window.removeEventListener('popstate', handleLocationChange);
       } catch {}
     };
   }, []);
 
   const handleSelectFeature = (id: string) => {
+    setIsPrivacy(false);
     setIsChangelog(false);
     setActiveFeatureId(id);
     try {
-      window.location.hash = `#feature/${id}`;
+      if (window.location.pathname === '/privacy' || window.location.pathname === '/privacy/') {
+        history.pushState(null, '', `/#feature/${id}`);
+      } else {
+        window.location.hash = `#feature/${id}`;
+      }
     } catch {}
     try {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -91,9 +121,26 @@ export const App: React.FC = () => {
 
   const handleOpenChangelog = () => {
     setActiveFeatureId(null);
+    setIsPrivacy(false);
     setIsChangelog(true);
     try {
-      window.location.hash = '#changelog';
+      if (window.location.pathname === '/privacy' || window.location.pathname === '/privacy/') {
+        history.pushState(null, '', '/#changelog');
+      } else {
+        window.location.hash = '#changelog';
+      }
+    } catch {}
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch {}
+  };
+
+  const handleOpenPrivacy = () => {
+    setActiveFeatureId(null);
+    setIsChangelog(false);
+    setIsPrivacy(true);
+    try {
+      history.pushState(null, '', '/privacy');
     } catch {}
     try {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -103,9 +150,16 @@ export const App: React.FC = () => {
   const handleGoHome = () => {
     setActiveFeatureId(null);
     setIsChangelog(false);
+    setIsPrivacy(false);
     try {
-      if (window.location.hash.startsWith('#feature/') || window.location.hash === '#changelog') {
-        history.pushState(null, '', window.location.pathname);
+      if (
+        window.location.hash.startsWith('#feature/') ||
+        window.location.hash === '#changelog' ||
+        window.location.hash === '#privacy' ||
+        window.location.pathname === '/privacy' ||
+        window.location.pathname === '/privacy/'
+      ) {
+        history.pushState(null, '', '/');
       }
     } catch {}
     try {
@@ -126,7 +180,12 @@ export const App: React.FC = () => {
       {/* Main Content: Dynamic View Routing with Lazy Suspense */}
       <div className="relative z-10 flex-1 flex flex-col w-full">
         <Suspense fallback={<div className="flex-1 w-full min-h-[calc(100vh-80px)] bg-black" />}>
-          {isChangelog ? (
+          {isPrivacy ? (
+            <PrivacyPage 
+              currentLang={currentLang}
+              onBack={handleGoHome}
+            />
+          ) : isChangelog ? (
             <ChangelogPage 
               currentLang={currentLang}
               onBack={handleGoHome}
@@ -153,6 +212,7 @@ export const App: React.FC = () => {
       <Footer 
         currentLang={currentLang} 
         onOpenChangelog={handleOpenChangelog}
+        onOpenPrivacy={handleOpenPrivacy}
         onGoHome={handleGoHome}
       />
     </div>
@@ -160,4 +220,3 @@ export const App: React.FC = () => {
 };
 
 export default App;
-
