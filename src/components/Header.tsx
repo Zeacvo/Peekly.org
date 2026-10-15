@@ -14,9 +14,38 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, onGoHome, onOpenChangelog }) => {
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+  const [onlineCount, setOnlineCount] = useState<number>(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const t = translations[currentLang] || translations.en;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchOnline = () => {
+      fetch('https://api.peekly.org/api/online')
+        .then((res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then((data: { online?: number }) => {
+          if (isMounted && typeof data?.online === 'number' && !isNaN(data.online)) {
+            setOnlineCount(data.online);
+          }
+        })
+        .catch(() => {
+          // Keep previous value or 0 on network errors to prevent crashing
+        });
+    };
+
+    fetchOnline();
+    const intervalId = setInterval(fetchOnline, 30000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -73,11 +102,13 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
         {/* Right: Borderless Minimalist Navigation + Single CTA Accent */}
         <div className="flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 shrink-0">
           
-          {/* 1. Online: 0 (Flexible: stays visible on tablets and medium screens) */}
+          {/* 1. Online: {onlineCount} (Flexible: stays visible on tablets and medium screens) */}
           <div className="hidden sm:flex items-center gap-1 sm:gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 leading-none whitespace-nowrap select-none shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0 animate-soft-breath"></span>
             <span>{t.nav.statusLabel}</span>
-            <span className="text-white font-mono text-xs md:text-[13px] font-medium leading-none">{t.nav.onlineCount}</span>
+            <span className="text-white font-mono text-xs md:text-[13px] font-medium leading-none">
+              {typeof onlineCount === 'number' && !isNaN(onlineCount) ? onlineCount : 0}
+            </span>
           </div>
 
           {/* 2. Changelog Link */}
