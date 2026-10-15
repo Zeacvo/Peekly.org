@@ -40,8 +40,8 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
   const currentLangObj = SUPPORTED_LANGUAGES.find(l => l.code === currentLang) || SUPPORTED_LANGUAGES[0];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-16 sm:h-20 min-h-[64px] sm:min-h-[80px] backdrop-blur-md bg-black/45 border-b border-white/5 transition-all">
-      <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6 h-16 sm:h-20 min-h-[64px] sm:min-h-[80px] flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md border-b border-white/10 pt-[env(safe-area-inset-top)] transition-all">
+      <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6 h-16 sm:h-20 flex items-center justify-between">
         
         {/* Left: Brand Logo (Eye turns #FF5500 on hover, PEEKLY stays purely white) */}
         <div
@@ -49,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
             if (onGoHome) onGoHome();
             else window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          className="flex items-center gap-2 sm:gap-3 md:gap-3.5 h-12 group cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0"
+          className="flex items-center gap-2.5 h-12 group cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0"
           role="button"
           tabIndex={0}
           onKeyDown={(e) => {
@@ -62,8 +62,8 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
           aria-label="Peekly Home"
         >
           <PeeklyLogo 
-            size={22}
-            className="text-white group-hover:text-[#FF5500] transition-colors duration-150 shrink-0 sm:w-[26px] sm:h-[26px]" 
+            size={28}
+            className="h-7 w-auto sm:h-8 sm:w-auto md:h-9 md:w-auto text-white group-hover:text-[#FF5500] transition-colors duration-150 shrink-0" 
           />
           <span className="font-sans text-xl sm:text-2xl md:text-3xl font-black tracking-wider text-white leading-none select-none">
             PEEKLY
