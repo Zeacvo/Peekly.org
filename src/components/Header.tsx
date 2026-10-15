@@ -41,7 +41,7 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 min-h-[64px] sm:min-h-[80px] bg-black/90 backdrop-blur-md border-b border-white/10 pt-[env(safe-area-inset-top)] transition-all">
-      <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6 h-16 sm:h-20 min-h-[64px] sm:min-h-[80px] flex items-center justify-between">
+      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 h-16 sm:h-20 min-h-[64px] sm:min-h-[80px] flex items-center justify-between">
         
         {/* Left: Brand Logo (Eye turns #FF5500 on hover, PEEKLY stays purely white) */}
         <div
@@ -49,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
             if (onGoHome) onGoHome();
             else window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          className="flex items-center gap-2.5 h-12 group cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0"
+          className="flex items-center gap-2 sm:gap-2.5 h-12 group cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0"
           role="button"
           tabIndex={0}
           onKeyDown={(e) => {
@@ -73,30 +73,30 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
         {/* Right: Borderless Minimalist Navigation + Single CTA Accent */}
         <div className="flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 shrink-0">
           
-          {/* 1. Online: 0 (Flexible: stays visible on tablets and medium screens) */}
+          {/* 1. Online: 0 (Hidden on mobile < sm, visible sm and up) */}
           <div className="hidden sm:flex items-center gap-1 sm:gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 leading-none whitespace-nowrap select-none shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0 animate-soft-breath"></span>
             <span>{t.nav.statusLabel}</span>
             <span className="text-white font-mono text-xs md:text-[13px] font-medium leading-none">{t.nav.onlineCount}</span>
           </div>
 
-          {/* 2. Changelog Link */}
+          {/* 2. Changelog Link (Entire button hidden on mobile < sm, visible sm and up) */}
           <button
             type="button"
             onClick={() => {
               if (onOpenChangelog) onOpenChangelog();
             }}
-            className="group flex items-center gap-1 sm:gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
+            className="hidden sm:inline-flex group items-center gap-1 sm:gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
             aria-label={t.nav.changelog}
           >
             <span className="font-mono text-white flex items-center">
               <span>&gt;</span>
               <span className="inline-block text-white animate-terminal-blink">_</span>
             </span>
-            <span className="hidden sm:inline text-neutral-400 group-hover:text-white transition-colors">{t.nav.changelog}</span>
+            <span className="text-neutral-400 group-hover:text-white transition-colors">{t.nav.changelog}</span>
           </button>
 
-          {/* 3. Language Selector */}
+          {/* 3. Language Selector (Visible on both mobile & desktop) */}
           <div className="relative inline-flex items-center shrink-0" ref={dropdownRef}>
             <button
               type="button"
@@ -112,11 +112,11 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
               <ChevronDown className={`w-3 h-3 shrink-0 text-neutral-500 group-hover:text-white transition-transform duration-150 ${langDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
 
-            {/* Language dropdown menu (Right-aligned, no scroll, clean language names only) */}
+            {/* Language dropdown menu (Right-aligned, clean language names only) */}
             {langDropdownOpen && (
               <div 
                 role="listbox"
-                className="absolute right-0 top-full mt-2 w-max bg-[#0D0D0D] border border-white/15 rounded-none shadow-2xl flex flex-col z-50"
+                className="absolute right-0 top-full mt-2 w-max bg-[#0D0D0D] border border-white/15 rounded-none shadow-2xl flex flex-col z-50 max-h-[80vh] overflow-y-auto"
               >
                 {SUPPORTED_LANGUAGES.map((lang) => {
                   const isSelected = currentLang === lang.code;
@@ -144,7 +144,7 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
             )}
           </div>
 
-          {/* 4. Install Extension CTA Button (Visible on tablets and medium screens with responsive padding & typography) */}
+          {/* 4. Install Extension CTA Button (Hidden on mobile < sm, visible sm and up) */}
           <a
             href="https://chromewebstore.google.com/detail/peekly-for-faceit/cmfgneodcjfofdcglbbhcghijgcjcokk"
             target="_blank"
@@ -160,3 +160,5 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
     </header>
   );
 };
+
+export default Header;
