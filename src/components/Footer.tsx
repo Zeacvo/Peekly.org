@@ -13,7 +13,7 @@ export const Footer: React.FC<FooterProps> = ({ currentLang, onOpenChangelog, on
   const t = translations[currentLang] || translations.en;
 
   return (
-    <footer className="w-full bg-[#000000] border-t border-white/10 relative z-10 mt-0 py-8 sm:py-10">
+    <footer className="w-full bg-[#000000] border-t border-white/10 relative z-10 mt-auto py-8 sm:py-10">
       <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 sm:gap-8 text-xs text-neutral-500">
         
         {/* Left Column: Logo & Legal Disclaimer */}

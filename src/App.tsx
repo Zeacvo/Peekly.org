@@ -114,7 +114,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#000000] text-white selection:bg-[#FF5500] selection:text-black font-sans antialiased relative">
+    <div className="min-h-screen flex flex-col bg-[#000000] text-white selection:bg-[#FF5500] selection:text-black font-sans antialiased relative">
       {/* 1. Fixed Header with separated logo hover, white online dot & terminal changelog */}
       <Header 
         currentLang={currentLang} 
@@ -124,8 +124,8 @@ export const App: React.FC = () => {
       />
 
       {/* Main Content: Dynamic View Routing with Lazy Suspense */}
-      <div className="relative z-10">
-        <Suspense fallback={<div className="min-h-[70vh] bg-black" />}>
+      <div className="relative z-10 flex-1 flex flex-col w-full">
+        <Suspense fallback={<div className="flex-1 w-full min-h-[calc(100vh-80px)] bg-black" />}>
           {isChangelog ? (
             <ChangelogPage 
               currentLang={currentLang}
@@ -138,7 +138,7 @@ export const App: React.FC = () => {
               onBack={handleGoHome}
             />
           ) : (
-            <main>
+            <main className="flex-1 w-full min-h-[calc(100vh-80px)] flex flex-col">
               <Hero currentLang={currentLang} />
               <Features 
                 currentLang={currentLang} 
