@@ -582,7 +582,7 @@ export const Features: React.FC<FeaturesProps> = ({ currentLang, onSelectFeature
                 className="group relative rounded-none flex flex-col h-full overflow-hidden bg-[#0a0a0a] border border-[#1f1f1f] hover:border-white/50 focus-visible:border-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white transition-colors duration-200 cursor-pointer select-none"
               >
                 {/* 1. Interactive Preview (Artwork top) */}
-                <div className="h-44 sm:h-48 w-full relative border-b border-[#1f1f1f] overflow-hidden bg-[#0a0a0a] shrink-0 flex items-center justify-center cursor-pointer select-none">
+                <div className="h-44 sm:h-48 min-h-[176px] sm:min-h-[192px] aspect-[5/3] w-full relative border-b border-[#1f1f1f] overflow-hidden bg-[#0a0a0a] shrink-0 flex items-center justify-center cursor-pointer select-none">
                   <TextureComponent />
                 </div>
 

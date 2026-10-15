@@ -134,7 +134,7 @@ export const FeatureDetailPage: React.FC<FeatureDetailPageProps> = ({
 
       {/* 2. Hero Animation Block (Clean Presentation with Monolithic Dark Canvas - UNTOUCHED) */}
       <div className="w-full bg-[#0d0d0d] border border-white/20 overflow-hidden mb-10 shadow-2xl relative">
-        <div className="h-72 sm:h-96 w-full flex items-center justify-center p-4 bg-[#0d0d0d]">
+        <div className="h-72 sm:h-96 min-h-[300px] w-full flex items-center justify-center p-4 bg-[#0d0d0d]">
           <FeatureHeroAnimation featureId={data.id} />
         </div>
       </div>
