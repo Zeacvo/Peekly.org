@@ -33,14 +33,7 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ currentLang, onBack })
   const t = privacyTranslations[currentLang] || privacyTranslations.en;
   const isRtl = currentLang === 'ar';
 
-  // 1. Scroll to top ONLY ONCE on initial mount (never on language change)
-  useEffect(() => {
-    try {
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    } catch {}
-  }, []);
-
-  // 2. Synchronize title dynamically with language WITHOUT triggering scroll
+  // Synchronize document title dynamically with language without triggering scroll
   useEffect(() => {
     const prevTitle = document.title;
     document.title = `${t.pageTitle} — Peekly for FACEIT`;
@@ -49,15 +42,15 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ currentLang, onBack })
     };
   }, [t.pageTitle]);
 
-  // 3. Intro animation timer (smooth 4.8s kinematic build, then stops completely in static state)
+  // Intro animation timer (smooth 4.5s kinematic build, then freezes permanently in static state)
   useEffect(() => {
-    const TOTAL_DURATION = 4800; // 4.8 seconds total intro
+    const TOTAL_DURATION = 4500; // 4.5 seconds intro
     const start = performance.now();
     let frameId: number;
 
     const tick = (now: number) => {
       const elapsed = Math.min(TOTAL_DURATION, now - start);
-      setElapsedTime(elapsed / 1000); // 0.0 to 4.8
+      setElapsedTime(elapsed / 1000); // 0.0 to 4.5
 
       if (elapsed < TOTAL_DURATION) {
         frameId = requestAnimationFrame(tick);
@@ -70,24 +63,19 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ currentLang, onBack })
 
   const backLabel = backLabelMap[currentLang] || backLabelMap.en;
   const timeVal = elapsedTime;
-  const isFinal = timeVal >= 4.8;
+  const isFinal = timeVal >= 4.5;
 
   // Kinetic kinematics for intro build
-  const ringEase = isFinal ? 1 : 1 - Math.pow(1 - Math.min(1, timeVal / 1.2), 2.5);
+  const ringEase = isFinal ? 1 : 1 - Math.pow(1 - Math.min(1, timeVal / 1.2), 3);
+  const shieldEase = isFinal ? 1 : 1 - Math.pow(1 - Math.max(0, Math.min(1, (timeVal - 0.4) / 1.2)), 2.5);
+  const lockEase = isFinal ? 1 : 1 - Math.pow(1 - Math.max(0, Math.min(1, (timeVal - 1.0) / 1.2)), 2.5);
 
-  const beamProgress = isFinal ? 1 : Math.max(0, Math.min(1, (timeVal - 0.6) / 3.2));
-  const sweepAngle = -Math.PI / 2 + (1 - Math.pow(1 - beamProgress, 2)) * (Math.PI * 2);
-  const sweepX = 200 + Math.cos(sweepAngle) * 115;
-  const sweepY = 130 + Math.sin(sweepAngle) * 115;
-  const isSweeping = !isFinal && timeVal >= 0.6 && timeVal < 3.8;
-  const sweepOpacity = isSweeping ? (1 - Math.pow(beamProgress, 3)) * 0.35 : 0;
+  const pulseRaw = isFinal ? 1 : Math.max(0, Math.min(1, (timeVal - 0.8) / 3.0));
+  const pulseRadius = 25 + pulseRaw * 105;
+  const pulseOpacity = isFinal ? 0 : Math.sin(pulseRaw * Math.PI) * 0.35;
 
-  const pulseRaw = isFinal ? 1 : Math.max(0, Math.min(1, (timeVal - 1.2) / 2.6));
-  const pulseRadius = 25 + pulseRaw * 95;
-  const pulseOpacity = isFinal ? 0 : (1 - pulseRaw) * 0.35;
-
-  const shieldEase = isFinal ? 1 : 1 - Math.pow(1 - Math.max(0, Math.min(1, (timeVal - 1.4) / 2.2)), 2.8);
-  const lockEase = isFinal ? 1 : 1 - Math.pow(1 - Math.max(0, Math.min(1, (timeVal - 2.4) / 1.8)), 2.5);
+  const sweepProgress = isFinal ? 1 : Math.max(0, Math.min(1, (timeVal - 1.2) / 2.6));
+  const sweepBeamOpacity = isFinal ? 0 : Math.sin(sweepProgress * Math.PI) * 0.9;
 
   return (
     <main 
@@ -115,58 +103,92 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ currentLang, onBack })
             fill="none"
             style={{ transform: 'translateZ(0)', willChange: 'transform' }}
           >
+            <defs>
+              <clipPath id="shieldBodyClip">
+                <path d="M 200 90 L 236 104 C 236 142 219 164 200 176 C 181 164 164 142 164 104 Z" />
+              </clipPath>
+              <linearGradient id="hudBeamGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#ffffff" stopOpacity="0" />
+                <stop offset="35%" stopColor="#ffffff" stopOpacity="0.08" />
+                <stop offset="50%" stopColor="#ffffff" stopOpacity="0.45" />
+                <stop offset="65%" stopColor="#ffffff" stopOpacity="0.08" />
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+
             {/* Subtle Crosshairs */}
-            <line x1="75" y1="130" x2="325" y2="130" stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="3 4" opacity={ringEase} />
+            <line x1="60" y1="130" x2="340" y2="130" stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="3 4" opacity={ringEase} />
             <line x1="200" y1="15" x2="200" y2="245" stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="3 4" opacity={ringEase} />
 
             {/* Concentric Circular Perimeter Rings */}
-            <circle cx="200" cy="130" r={30 * ringEase} stroke="rgba(255,255,255,0.14)" strokeWidth="1" strokeDasharray="2 3" fill="none" />
-            <circle cx="200" cy="130" r={55 * ringEase} stroke="rgba(255,255,255,0.18)" strokeWidth="1" fill="none" />
-            <circle cx="200" cy="130" r={85 * ringEase} stroke="rgba(255,255,255,0.12)" strokeWidth="1" strokeDasharray="4 4" fill="none" />
-            <circle cx="200" cy="130" r={115 * ringEase} stroke="rgba(255,255,255,0.08)" strokeWidth="1" fill="none" />
+            <circle cx="200" cy="130" r={32 * ringEase} stroke="rgba(255,255,255,0.12)" strokeWidth="1" strokeDasharray="2 3" fill="none" />
+            <circle cx="200" cy="130" r={62 * ringEase} stroke="rgba(255,255,255,0.16)" strokeWidth="1" fill="none" />
+            <circle cx="200" cy="130" r={94 * ringEase} stroke="rgba(255,255,255,0.10)" strokeWidth="1" strokeDasharray="4 4" fill="none" />
+            <circle cx="200" cy="130" r={124 * ringEase} stroke="rgba(255,255,255,0.06)" strokeWidth="1" fill="none" />
 
-            {/* Intro Pulsing Perimeter Wave (Fades to 0 after intro) */}
+            {/* Corner HUD Framing Brackets */}
+            <path d="M 152 82 H 144 V 90" stroke="rgba(255,255,255,0.25)" strokeWidth="1.2" fill="none" opacity={ringEase} />
+            <path d="M 248 82 H 256 V 90" stroke="rgba(255,255,255,0.25)" strokeWidth="1.2" fill="none" opacity={ringEase} />
+            <path d="M 152 178 H 144 V 170" stroke="rgba(255,255,255,0.25)" strokeWidth="1.2" fill="none" opacity={ringEase} />
+            <path d="M 248 178 H 256 V 170" stroke="rgba(255,255,255,0.25)" strokeWidth="1.2" fill="none" opacity={ringEase} />
+
+            {/* Intro Sonar Radar Wave */}
             {pulseOpacity > 0.01 && (
-              <circle cx="200" cy="130" r={pulseRadius} stroke="#ffffff" strokeWidth="1" fill="none" opacity={pulseOpacity} />
+              <circle cx="200" cy="130" r={pulseRadius} stroke="#ffffff" strokeWidth="1.2" fill="none" opacity={pulseOpacity} />
             )}
 
-            {/* Single Sweeping Scanner Beam (Stops completely after intro) */}
-            {isSweeping && (
-              <line x1="200" y1="130" x2={sweepX} y2={sweepY} stroke="rgba(255,255,255,0.25)" strokeWidth="1.2" opacity={sweepOpacity} />
-            )}
-
-            {/* Central Security Shield (Pure White Outline, No Text) */}
+            {/* Central Solid Monochrome Shield */}
             {shieldEase > 0 && (
-              <path
-                d="M 200 96 L 226 106 C 226 134 215 152 200 164 C 185 152 174 134 174 106 Z"
-                fill="rgba(255, 255, 255, 0.04)"
-                stroke="#ffffff"
-                strokeWidth="1.5"
-                strokeOpacity={0.85 * shieldEase}
-                strokeLinejoin="round"
-              />
-            )}
-
-            {/* Central Lock Graphic inside Shield */}
-            {lockEase > 0 && (
-              <g opacity={lockEase}>
+              <g opacity={shieldEase}>
+                {/* 1. Solid Shield Backing (#121214) */}
                 <path
-                  d="M 194.5 128 V 122 C 194.5 119 197 116.5 200 116.5 C 203 116.5 205.5 119 205.5 122 V 128"
-                  stroke="#ffffff"
+                  d="M 200 90 L 236 104 C 236 142 219 164 200 176 C 181 164 164 142 164 104 Z"
+                  fill="#121214"
+                  stroke="rgba(255, 255, 255, 0.25)"
                   strokeWidth="1.5"
-                  fill="none"
-                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
-                <rect x="191" y="128" width="18" height="14" rx="2" fill="rgba(255, 255, 255, 0.12)" stroke="#ffffff" strokeWidth="1.4" />
-                <circle cx="200" cy="133.5" r="1.3" fill="#ffffff" />
-                <line x1="200" y1="134.8" x2="200" y2="137.8" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" />
+
+                {/* 2. Sweeping HUD light band across shield face (active during intro, freezes/disappears after) */}
+                {!isFinal && sweepProgress > 0 && sweepBeamOpacity > 0.01 && (
+                  <g clipPath="url(#shieldBodyClip)">
+                    <rect
+                      x={110 + sweepProgress * 180}
+                      y={40}
+                      width="50"
+                      height="200"
+                      fill="url(#hudBeamGradient)"
+                      transform="rotate(30 200 130)"
+                      opacity={sweepBeamOpacity}
+                    />
+                  </g>
+                )}
+
+                {/* 3. Solid White Lock Graphic */}
+                {lockEase > 0 && (
+                  <g opacity={lockEase}>
+                    {/* Shackle */}
+                    <path
+                      d="M 193 125 V 120 C 193 116.1 196.1 113 200 113 C 203.9 113 207 116.1 207 120 V 125"
+                      stroke="#ffffff"
+                      strokeWidth="2"
+                      fill="none"
+                      strokeLinecap="round"
+                    />
+                    {/* Solid White Body */}
+                    <rect x="189" y="125" width="22" height="17" rx="2" fill="#ffffff" />
+                    {/* Dark graphite keyhole cutout */}
+                    <circle cx="200" cy="131.5" r="1.8" fill="#121214" />
+                    <polygon points="199,131.5 201,131.5 201.5,137.5 198.5,137.5" fill="#121214" />
+                  </g>
+                )}
               </g>
             )}
           </svg>
         </div>
       </div>
 
-      {/* 3. Text Content — ровно 100% ширины контейнера без смещения сетки */}
+      {/* 3. Text Content — 100% ширины контейнера без смещения сетки */}
       <div className="w-full max-w-none px-0 mx-0 flex flex-col items-start text-left cursor-default select-text mb-0">
 
         {/* H1 Heading */}
@@ -179,14 +201,13 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ currentLang, onBack })
           {t.subtitle}
         </p>
 
-        {/* Metadata (Clean monochrome: only Project & Effective Date) */}
+        {/* Metadata (Clean monochrome: two independent badges, no dividing bullet) */}
         <div className="w-full max-w-none flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-zinc-400 font-mono mb-12 select-text">
-          <span className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-1 rounded-none">
+          <span className="inline-flex items-center gap-1.5 bg-zinc-950 border border-white/10 px-2.5 py-1 rounded-none">
             <span className="text-zinc-500 font-sans">{t.projectLabel}</span>
             <span className="text-white font-medium">{t.projectName}</span>
           </span>
-          <span className="text-zinc-600 hidden sm:inline">&bull;</span>
-          <span className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-1 rounded-none">
+          <span className="inline-flex items-center gap-1.5 bg-zinc-950 border border-white/10 px-2.5 py-1 rounded-none">
             <span className="text-zinc-500 font-sans">{t.effectiveDateLabel}</span>
             <span className="text-white font-medium">{t.effectiveDateValue}</span>
           </span>
@@ -220,13 +241,14 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ currentLang, onBack })
             <div className="space-y-3.5 font-sans text-sm sm:text-base font-normal text-zinc-400 leading-relaxed text-justify cursor-text select-text">
               <p>{t.sections.s2.intro}</p>
               <p>{t.sections.s2.subIntro}</p>
-              <ul className="list-disc list-outside ml-4 space-y-2.5 text-zinc-400">
+              <div className="space-y-4 my-2">
                 {t.sections.s2.bullets.map((b, idx) => (
-                  <li key={idx}>
-                    <strong className="text-white font-medium">{b.label}:</strong> {b.text}
-                  </li>
+                  <div key={idx} className="space-y-1">
+                    <span className="text-white font-medium block">{b.label}</span>
+                    <p className="text-zinc-400 text-sm sm:text-base leading-relaxed">{b.text}</p>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           </div>
 
@@ -240,13 +262,14 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ currentLang, onBack })
             </h2>
             <div className="space-y-3.5 font-sans text-sm sm:text-base font-normal text-zinc-400 leading-relaxed text-justify cursor-text select-text">
               <p>{t.sections.s3.intro}</p>
-              <ul className="list-disc list-outside ml-4 space-y-2.5 text-zinc-400">
+              <div className="space-y-4 my-2">
                 {t.sections.s3.bullets.map((b, idx) => (
-                  <li key={idx}>
-                    <strong className="text-white font-medium">{b.label}:</strong> {b.text}
-                  </li>
+                  <div key={idx} className="space-y-1">
+                    <span className="text-white font-medium block">{b.label}</span>
+                    <p className="text-zinc-400 text-sm sm:text-base leading-relaxed">{b.text}</p>
+                  </div>
                 ))}
-              </ul>
+              </div>
 
               {/* Monochrome Architecture Table (rounded-none, border-white/10) */}
               <div className="my-6 border border-white/10 rounded-none overflow-hidden bg-[#0d0d0d] shadow-xl text-left">
@@ -294,13 +317,14 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ currentLang, onBack })
             </h2>
             <div className="space-y-3.5 font-sans text-sm sm:text-base font-normal text-zinc-400 leading-relaxed text-justify cursor-text select-text">
               <p>{t.sections.s4.intro}</p>
-              <ul className="list-disc list-outside ml-4 space-y-2.5 text-zinc-400">
+              <div className="space-y-4 my-2">
                 {t.sections.s4.bullets.map((b, idx) => (
-                  <li key={idx}>
-                    <strong className="text-white font-medium">{b.label}:</strong> {b.text}
-                  </li>
+                  <div key={idx} className="space-y-1">
+                    <span className="text-white font-medium block">{b.label}</span>
+                    <p className="text-zinc-400 text-sm sm:text-base leading-relaxed">{b.text}</p>
+                  </div>
                 ))}
-              </ul>
+              </div>
               <p>{t.sections.s4.storageNote}</p>
             </div>
           </div>
@@ -340,13 +364,14 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ currentLang, onBack })
             </h2>
             <div className="space-y-3.5 font-sans text-sm sm:text-base font-normal text-zinc-400 leading-relaxed text-justify cursor-text select-text">
               <p>{t.sections.s6.intro}</p>
-              <ul className="list-disc list-outside ml-4 space-y-2.5 text-zinc-400">
+              <div className="space-y-4 my-2">
                 {t.sections.s6.bullets.map((b, idx) => (
-                  <li key={idx}>
-                    <strong className="text-white font-medium">{b.label}:</strong> {b.text}
-                  </li>
+                  <div key={idx} className="space-y-1">
+                    <span className="text-white font-medium block">{b.label}</span>
+                    <p className="text-zinc-400 text-sm sm:text-base leading-relaxed">{b.text}</p>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           </div>
 
