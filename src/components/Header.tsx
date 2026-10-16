@@ -100,89 +100,90 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
         </div>
 
         {/* Right: Borderless Minimalist Navigation + Single CTA Accent */}
-        <div className="flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 shrink-0">
+        <div className="flex items-center gap-4 sm:gap-5 md:gap-6 lg:gap-8 shrink-0">
           
-          {/* 1. Online: {onlineCount} (Flexible: stays visible on tablets and medium screens) */}
-          <div className="hidden sm:inline-flex items-center gap-1 sm:gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 leading-none whitespace-nowrap select-none shrink-0 min-w-[90px]">
-            <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0 animate-soft-breath"></span>
-            <span>{t.nav.statusLabel}</span>
-            <span className="text-white font-mono text-xs md:text-[13px] font-medium leading-none min-w-[14px] inline-block text-left">
-              {typeof onlineCount === 'number' && !isNaN(onlineCount) ? onlineCount : 0}
-            </span>
-          </div>
+          {/* Inner Navigation Group with Unified Spacing */}
+          <div className="flex items-center gap-4 sm:gap-5 md:gap-6 shrink-0">
+            {/* 1. Online: {onlineCount} */}
+            <div className="hidden sm:inline-flex items-center gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 leading-none whitespace-nowrap select-none shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0 animate-soft-breath"></span>
+              <span>{t.nav.statusLabel}</span>
+              <span className="text-white font-mono text-xs md:text-[13px] font-medium leading-none min-w-[14px] inline-block text-left">
+                {typeof onlineCount === 'number' && !isNaN(onlineCount) ? onlineCount : 0}
+              </span>
+            </div>
 
-          {/* 2. Changelog Link */}
-          <button
-            type="button"
-            onClick={() => {
-              if (onOpenChangelog) onOpenChangelog();
-            }}
-            className="group flex items-center gap-1 sm:gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
-            aria-label={t.nav.changelog}
-          >
-            <span className="font-mono text-white flex items-center">
-              <span>&gt;</span>
-              <span className="inline-block text-white animate-terminal-blink">_</span>
-            </span>
-            <span className="hidden sm:inline text-neutral-400 group-hover:text-white transition-colors">{t.nav.changelog}</span>
-          </button>
-
-          {/* 3. Language Selector */}
-          <div className="relative inline-flex items-center shrink-0 min-w-[110px]" ref={dropdownRef}>
+            {/* 2. Changelog Link */}
             <button
               type="button"
-              onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-              className="group flex items-center justify-between sm:justify-start gap-1 sm:gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 py-1 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95 w-full"
-              aria-label="Select language"
-              aria-expanded={langDropdownOpen}
-              aria-haspopup="listbox"
+              onClick={() => {
+                if (onOpenChangelog) onOpenChangelog();
+              }}
+              className="group inline-flex items-center gap-1 sm:gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
+              aria-label={t.nav.changelog}
             >
-              <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+              <span className="font-mono text-white flex items-center">
+                <span>&gt;</span>
+                <span className="inline-block text-white animate-terminal-blink">_</span>
+              </span>
+              <span className="hidden sm:inline text-neutral-400 group-hover:text-white transition-colors">{t.nav.changelog}</span>
+            </button>
+
+            {/* 3. Language Selector */}
+            <div className="relative inline-flex items-center shrink-0" ref={dropdownRef}>
+              <button
+                type="button"
+                onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+                className="group inline-flex items-center gap-1 sm:gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
+                aria-label="Select language"
+                aria-expanded={langDropdownOpen}
+                aria-haspopup="listbox"
+              >
                 <LanguageIcon className="w-3.5 h-3.5 text-neutral-400 group-hover:text-white transition-colors shrink-0" />
                 <span className="sm:hidden font-mono uppercase font-medium">{currentLangObj.code}</span>
                 <span className="hidden sm:inline">{currentLangObj.name}</span>
-              </div>
-              <ChevronDown className={`w-3 h-3 shrink-0 text-neutral-500 group-hover:text-white transition-transform duration-150 ${langDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
+                <ChevronDown className={`w-3 h-3 shrink-0 text-neutral-500 group-hover:text-white transition-transform duration-150 ${langDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
 
-            {/* Language dropdown menu (Right-aligned, no scroll, clean language names only) */}
-            {langDropdownOpen && (
-              <div 
-                role="listbox"
-                className="absolute right-0 top-full mt-2 w-max bg-[#0D0D0D] border border-white/15 rounded-none shadow-2xl flex flex-col z-50"
-              >
-                {SUPPORTED_LANGUAGES.map((lang) => {
-                  const isSelected = currentLang === lang.code;
-                  return (
-                    <button
-                      key={lang.code}
-                      role="option"
-                      aria-selected={isSelected}
-                      type="button"
-                      onClick={() => {
-                        onLanguageChange(lang.code);
-                        setLangDropdownOpen(false);
-                      }}
-                      className={`w-full text-left px-3.5 py-2 font-sans text-xs md:text-[13px] leading-none whitespace-nowrap rounded-none transition-colors duration-150 border-0 cursor-pointer ${
-                        isSelected
-                          ? 'bg-white/[0.12] text-white font-medium'
-                          : 'bg-transparent text-neutral-400 font-normal hover:bg-white/[0.08] hover:text-white'
-                      }`}
-                    >
-                      {lang.name}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+              {/* Language dropdown menu (Right-aligned, no scroll, clean language names only) */}
+              {langDropdownOpen && (
+                <div 
+                  role="listbox"
+                  className="absolute right-0 top-full mt-2 w-max bg-[#0D0D0D] border border-white/15 rounded-none shadow-2xl flex flex-col z-50"
+                >
+                  {SUPPORTED_LANGUAGES.map((lang) => {
+                    const isSelected = currentLang === lang.code;
+                    return (
+                      <button
+                        key={lang.code}
+                        role="option"
+                        aria-selected={isSelected}
+                        type="button"
+                        onClick={() => {
+                          onLanguageChange(lang.code);
+                          setLangDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-3.5 py-2 font-sans text-xs md:text-[13px] leading-none whitespace-nowrap rounded-none transition-colors duration-150 border-0 cursor-pointer ${
+                          isSelected
+                            ? 'bg-white/[0.12] text-white font-medium'
+                            : 'bg-transparent text-neutral-400 font-normal hover:bg-white/[0.08] hover:text-white'
+                        }`}
+                      >
+                        {lang.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* 4. Install Extension CTA Button (Visible on tablets and medium screens with responsive padding & typography) */}
+          {/* 4. Install Extension CTA Button (Clean alignment without arbitrary margin offsets) */}
           <a
             href="https://chromewebstore.google.com/detail/peekly-for-faceit/cmfgneodcjfofdcglbbhcghijgcjcokk"
             target="_blank"
             rel="noreferrer"
-            className="hidden sm:inline-flex items-center justify-center text-center h-8 sm:h-9 px-2.5 sm:px-3 md:px-4 lg:px-5 rounded-none btn-header-install font-sans font-bold text-[10px] sm:text-[11px] md:text-xs tracking-wider uppercase cursor-pointer shadow-lg active:scale-95 ml-0.5 sm:ml-1 md:ml-2 shrink-0 focus-visible:ring-1 focus-visible:ring-white"
+            className="hidden sm:inline-flex items-center justify-center text-center h-8 sm:h-9 px-3 sm:px-3.5 md:px-4 lg:px-5 rounded-none btn-header-install font-sans font-bold text-[10px] sm:text-[11px] md:text-xs tracking-wider uppercase cursor-pointer shadow-lg active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white"
           >
             <span>{t.nav.install.toUpperCase()}</span>
           </a>
