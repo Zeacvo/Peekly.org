@@ -42,15 +42,15 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ currentLang, onBack })
     };
   }, [t.pageTitle]);
 
-  // Intro animation timer (smooth 4.5s kinematic build, then freezes permanently in static state)
+  // Intro animation timer (smooth 3.2s kinematic sequence, then freezes permanently in static state)
   useEffect(() => {
-    const TOTAL_DURATION = 4500; // 4.5 seconds intro
+    const TOTAL_DURATION = 3200; // 3.2 seconds intro
     const start = performance.now();
     let frameId: number;
 
     const tick = (now: number) => {
       const elapsed = Math.min(TOTAL_DURATION, now - start);
-      setElapsedTime(elapsed / 1000); // 0.0 to 4.5
+      setElapsedTime(elapsed / 1000); // 0.0 to 3.2
 
       if (elapsed < TOTAL_DURATION) {
         frameId = requestAnimationFrame(tick);
@@ -62,23 +62,44 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ currentLang, onBack })
   }, []);
 
   const backLabel = backLabelMap[currentLang] || backLabelMap.en;
-  const timeVal = elapsedTime;
-  const isFinal = timeVal >= 4.5;
+  const isFinal = elapsedTime >= 3.2;
+  const animTime = elapsedTime;
 
-  // Kinetic kinematics for intro build
-  const ringEase = isFinal ? 1 : 1 - Math.pow(1 - Math.min(1, timeVal / 1.2), 3);
-  const shieldEase = isFinal ? 1 : 1 - Math.pow(1 - Math.max(0, Math.min(1, (timeVal - 0.4) / 1.2)), 2.5);
-  const lockEase = isFinal ? 1 : 1 - Math.pow(1 - Math.max(0, Math.min(1, (timeVal - 1.0) / 1.2)), 2.5);
+  // Staggered easing curves matching Feature Cards 01-10 design code
+  // Stage 1: Container scale & opacity (0.0 -> 0.4s)
+  const containerProgress = isFinal ? 1 : Math.min(1, animTime / 0.4);
+  const containerEase = isFinal ? 1 : 1 - Math.pow(1 - containerProgress, 3);
+  const containerScale = 0.98 + 0.02 * containerEase;
 
-  const pulseRaw = isFinal ? 1 : Math.max(0, Math.min(1, (timeVal - 0.8) / 3.0));
-  const pulseRadius = 25 + pulseRaw * 105;
-  const pulseOpacity = isFinal ? 0 : Math.sin(pulseRaw * Math.PI) * 0.35;
+  // Stage 2: Browser window & client elements (0.2 -> 0.8s)
+  const block1Progress = isFinal ? 1 : Math.max(0, Math.min(1, (animTime - 0.2) / 0.6));
+  const block1Ease = isFinal ? 1 : 1 - Math.pow(1 - block1Progress, 3);
+  const block1TranslateY = (1 - block1Ease) * 8;
 
-  const sweepProgress = isFinal ? 1 : Math.max(0, Math.min(1, (timeVal - 1.2) / 2.6));
-  const sweepBeamOpacity = isFinal ? 0 : Math.sin(sweepProgress * Math.PI) * 0.9;
+  // Stage 3: Local data pipeline stream (0.6 -> 1.2s)
+  const flow1Progress = isFinal ? 1 : Math.max(0, Math.min(1, (animTime - 0.6) / 0.6));
+  const flow1Ease = isFinal ? 1 : 1 - Math.pow(1 - flow1Progress, 3);
+
+  // Stage 4: Local Sandbox with [ ] brackets & memory matrix (0.9 -> 1.6s)
+  const block2Progress = isFinal ? 1 : Math.max(0, Math.min(1, (animTime - 0.9) / 0.7));
+  const block2Ease = isFinal ? 1 : 1 - Math.pow(1 - block2Progress, 3);
+  const block2TranslateY = (1 - block2Ease) * 8;
+
+  // Stage 5: Outgoing transmission blockade with white X strike (1.5 -> 2.2s)
+  const blockStrikeProgress = isFinal ? 1 : Math.max(0, Math.min(1, (animTime - 1.5) / 0.7));
+  const blockStrikeEase = isFinal ? 1 : 1 - Math.pow(1 - blockStrikeProgress, 3);
+  const strikeScale = isFinal ? 1 : (blockStrikeProgress > 0 ? 0.6 + 0.4 * blockStrikeEase : 0);
+
+  // Stage 6: External server block muted appearance (1.8 -> 2.5s)
+  const block3Progress = isFinal ? 1 : Math.max(0, Math.min(1, (animTime - 1.8) / 0.7));
+  const block3Ease = isFinal ? 1 : 1 - Math.pow(1 - block3Progress, 3);
+
+  // Stage 7: Contrast indicators illumination (2.2 -> 2.9s)
+  const accentProgress = isFinal ? 1 : Math.max(0, Math.min(1, (animTime - 2.2) / 0.7));
+  const accentEase = isFinal ? 1 : 1 - Math.pow(1 - accentProgress, 2);
 
   return (
-    <main 
+    <div 
       dir={isRtl ? 'rtl' : 'ltr'}
       className="pt-[calc(5rem+env(safe-area-inset-top,0px))] sm:pt-24 pb-16 w-full max-w-6xl mx-auto px-4 sm:px-6 flex flex-col items-stretch z-10 animate-apple-reveal font-sans"
     >
@@ -94,98 +115,252 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ currentLang, onBack })
         </button>
       </div>
 
-      {/* 2. Top Card: Pure Monochrome Geometric Vector Infographic (1:1 with Features & Changelog) */}
-      <div className="w-full bg-[#0d0d0d] border border-white/20 rounded-none overflow-hidden mb-10 shadow-2xl relative" style={{ contain: 'layout' }}>
-        <div className="h-72 sm:h-96 min-h-[288px] sm:min-h-[384px] w-full flex items-center justify-center p-4 bg-[#0d0d0d]">
+      {/* 2. Top Card: Authentic 1:1 Feature Cards Wireframe Infographic (Client -> Sandbox [ ] -> Blocked ✕ External) */}
+      <div className="w-full bg-[#0a0a0a] border border-[#262626] rounded-none overflow-hidden mb-10 shadow-2xl relative" style={{ contain: 'layout' }}>
+        <div className="h-72 sm:h-96 min-h-[288px] sm:min-h-[384px] w-full flex items-center justify-center p-3 sm:p-6 bg-[#0a0a0a]">
           <svg 
             role="img"
-            aria-label="Peekly Privacy and Zero Telemetry Security Architecture"
-            className="w-full h-full max-w-lg object-contain select-none pointer-events-none" 
-            viewBox="0 0 400 260" 
+            aria-label="Peekly Client-Side Sandbox and Zero-Telemetry Architecture Diagram"
+            className="w-full h-full max-w-3xl object-contain select-none pointer-events-none" 
+            viewBox="0 0 540 220" 
             fill="none"
             style={{ transform: 'translateZ(0)', willChange: 'transform' }}
           >
-            <defs>
-              <clipPath id="shieldBodyClip">
-                <path d="M 200 90 L 236 104 C 236 142 219 164 200 176 C 181 164 164 142 164 104 Z" />
-              </clipPath>
-              <linearGradient id="hudBeamGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#ffffff" stopOpacity="0" />
-                <stop offset="35%" stopColor="#ffffff" stopOpacity="0.08" />
-                <stop offset="50%" stopColor="#ffffff" stopOpacity="0.45" />
-                <stop offset="65%" stopColor="#ffffff" stopOpacity="0.08" />
-                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-              </linearGradient>
-            </defs>
+            <rect width="540" height="220" fill="#0a0a0a" />
 
-            {/* Subtle Crosshairs */}
-            <line x1="60" y1="130" x2="340" y2="130" stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="3 4" opacity={ringEase} />
-            <line x1="200" y1="15" x2="200" y2="245" stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="3 4" opacity={ringEase} />
+            {/* Overall Animated Container (opacity: 0 -> 1, scale: 0.98 -> 1) */}
+            <g 
+              opacity={containerEase} 
+              transform={`scale(${containerScale})`}
+              style={{ transformOrigin: '270px 110px' }}
+            >
+              {/* Subtle Architectural Horizontal Axis Guides */}
+              <line x1="20" y1="20" x2="520" y2="20" stroke="rgba(255,255,255,0.04)" strokeDasharray="2 4" />
+              <line x1="20" y1="200" x2="520" y2="200" stroke="rgba(255,255,255,0.04)" strokeDasharray="2 4" />
 
-            {/* Concentric Circular Perimeter Rings */}
-            <circle cx="200" cy="130" r={32 * ringEase} stroke="rgba(255,255,255,0.12)" strokeWidth="1" strokeDasharray="2 3" fill="none" />
-            <circle cx="200" cy="130" r={62 * ringEase} stroke="rgba(255,255,255,0.16)" strokeWidth="1" fill="none" />
-            <circle cx="200" cy="130" r={94 * ringEase} stroke="rgba(255,255,255,0.10)" strokeWidth="1" strokeDasharray="4 4" fill="none" />
-            <circle cx="200" cy="130" r={124 * ringEase} stroke="rgba(255,255,255,0.06)" strokeWidth="1" fill="none" />
+              {/* ======================================================== */}
+              {/* 1. CLIENT BLOCK (Browser / Extension)                    */}
+              {/* ======================================================== */}
+              <g 
+                opacity={block1Ease} 
+                transform={`translate(0, ${block1TranslateY})`}
+              >
+                {/* Window Shell Frame */}
+                <rect x="24" y="32" width="144" height="156" fill="#0d0d0d" stroke="rgba(255,255,255,0.14)" strokeWidth="1" />
+                
+                {/* Window Header Line */}
+                <line x1="24" y1="56" x2="168" y2="56" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+                
+                {/* 3 Window Dots (● ● ● r=3, identical to cards 04-06) */}
+                <circle cx="36" cy="44" r="3" fill="#555555" />
+                <circle cx="46" cy="44" r="3" fill="#555555" />
+                <circle cx="56" cy="44" r="3" fill="#555555" />
 
-            {/* Corner HUD Framing Brackets */}
-            <path d="M 152 82 H 144 V 90" stroke="rgba(255,255,255,0.25)" strokeWidth="1.2" fill="none" opacity={ringEase} />
-            <path d="M 248 82 H 256 V 90" stroke="rgba(255,255,255,0.25)" strokeWidth="1.2" fill="none" opacity={ringEase} />
-            <path d="M 152 178 H 144 V 170" stroke="rgba(255,255,255,0.25)" strokeWidth="1.2" fill="none" opacity={ringEase} />
-            <path d="M 248 178 H 256 V 170" stroke="rgba(255,255,255,0.25)" strokeWidth="1.2" fill="none" opacity={ringEase} />
+                {/* Mini Window Tab Skeleton */}
+                <rect x="68" y="41" width="46" height="6" fill="#222222" />
 
-            {/* Intro Sonar Radar Wave */}
-            {pulseOpacity > 0.01 && (
-              <circle cx="200" cy="130" r={pulseRadius} stroke="#ffffff" strokeWidth="1.2" fill="none" opacity={pulseOpacity} />
-            )}
+                {/* Mini Extension Active Indicator Badge */}
+                <rect x="144" y="41" width="14" height="6" fill="#ffffff" opacity={accentEase} />
 
-            {/* Central Solid Monochrome Shield */}
-            {shieldEase > 0 && (
-              <g opacity={shieldEase}>
-                {/* 1. Solid Shield Backing (#121214) */}
-                <path
-                  d="M 200 90 L 236 104 C 236 142 219 164 200 176 C 181 164 164 142 164 104 Z"
-                  fill="#121214"
-                  stroke="rgba(255, 255, 255, 0.25)"
-                  strokeWidth="1.5"
-                  strokeLinejoin="round"
-                />
+                {/* Profile Card Inside Browser */}
+                {/* Avatar Slot with Silhouette (Authentic 1:1 match to Card 02 Stats Overlay) */}
+                <g transform="translate(36, 68)">
+                  <rect width="28" height="28" fill="#141414" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+                  <circle cx="14" cy="11" r="4" fill="#777777" />
+                  <path d="M 7 23 C 7 17 10 16 14 16 C 18 16 21 17 21 23 Z" fill="#777777" />
+                </g>
 
-                {/* 2. Sweeping HUD light band across shield face (active during intro, freezes/disappears after) */}
-                {!isFinal && sweepProgress > 0 && sweepBeamOpacity > 0.01 && (
-                  <g clipPath="url(#shieldBodyClip)">
-                    <rect
-                      x={110 + sweepProgress * 180}
-                      y={40}
-                      width="50"
-                      height="200"
-                      fill="url(#hudBeamGradient)"
-                      transform="rotate(30 200 130)"
-                      opacity={sweepBeamOpacity}
-                    />
-                  </g>
-                )}
+                {/* Nickname & Subtitle Skeletons */}
+                <rect x="72" y="72" width="82" height="7" fill="#ffffff" />
+                <rect x="72" y="85" width="50" height="5" fill="#4a4a4a" />
 
-                {/* 3. Solid White Lock Graphic */}
-                {lockEase > 0 && (
-                  <g opacity={lockEase}>
-                    {/* Shackle */}
-                    <path
-                      d="M 193 125 V 120 C 193 116.1 196.1 113 200 113 C 203.9 113 207 116.1 207 120 V 125"
-                      stroke="#ffffff"
-                      strokeWidth="2"
-                      fill="none"
-                      strokeLinecap="round"
-                    />
-                    {/* Solid White Body */}
-                    <rect x="189" y="125" width="22" height="17" rx="2" fill="#ffffff" />
-                    {/* Dark graphite keyhole cutout */}
-                    <circle cx="200" cy="131.5" r="1.8" fill="#121214" />
-                    <polygon points="199,131.5 201,131.5 201.5,137.5 198.5,137.5" fill="#121214" />
-                  </g>
+                {/* Divider */}
+                <line x1="36" y1="104" x2="156" y2="104" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+
+                {/* 3 Match Stats Rows */}
+                <g transform="translate(36, 112)">
+                  {/* Row 1 */}
+                  <rect x="0" y="0" width="22" height="6" fill="#ffffff" />
+                  <rect x="28" y="0" width="48" height="6" fill="#444444" />
+                  <rect x="82" y="0" width="38" height="6" fill="#2a2a2a" />
+
+                  {/* Row 2 */}
+                  <rect x="0" y="12" width="22" height="6" fill="#666666" />
+                  <rect x="28" y="12" width="40" height="6" fill="#333333" />
+                  <rect x="82" y="12" width="38" height="6" fill="#222222" />
+
+                  {/* Row 3 */}
+                  <rect x="0" y="24" width="22" height="6" fill="#444444" />
+                  <rect x="28" y="24" width="54" height="6" fill="#2a2a2a" />
+                  <rect x="82" y="24" width="38" height="6" fill="#1c1c1c" />
+                </g>
+
+                {/* Bottom Extraction Plate (Arrows directly into local storage) */}
+                <rect x="36" y="152" width="120" height="24" fill="#141414" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
+                <path d="M 44 167 L 48 164 L 44 161" stroke="#ffffff" strokeWidth="1.3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                <rect x="54" y="161" width="88" height="6" fill="#ffffff" />
+              </g>
+
+              {/* ======================================================== */}
+              {/* PIPELINE 1 -> 2 (Client to Local Sandbox Flow)          */}
+              {/* ======================================================== */}
+              <g opacity={flow1Ease}>
+                {/* Upper circuit wire */}
+                <line x1="168" y1="78" x2="198" y2="78" stroke="#333333" strokeWidth="1" strokeDasharray="3 3" />
+                <polygon points="197,75 203,78 197,81" fill="#333333" />
+
+                {/* Main Solid Data Pipeline */}
+                <line x1="168" y1="110" x2="200" y2="110" stroke="#ffffff" strokeWidth="1.5" />
+                <polygon points="199,106 206,110 199,114" fill="#ffffff" />
+
+                {/* Lower circuit wire */}
+                <line x1="168" y1="164" x2="198" y2="164" stroke="#333333" strokeWidth="1" strokeDasharray="3 3" />
+                <polygon points="197,161 203,164 197,167" fill="#333333" />
+
+                {/* Moving data packet during intro */}
+                {!isFinal && flow1Progress > 0 && (
+                  <circle cx={168 + flow1Progress * 32} cy="110" r="3" fill="#ffffff" />
                 )}
               </g>
-            )}
+
+              {/* ======================================================== */}
+              {/* 2. ISOLATION BLOCK (Local Sandbox in Reticle Brackets)   */}
+              {/* ======================================================== */}
+              <g 
+                opacity={block2Ease} 
+                transform={`translate(0, ${block2TranslateY})`}
+              >
+                {/* High-Contrast White Reticle Framing Brackets [ ] (Card 05 Lobby Focus Mode) */}
+                <path 
+                  d="M 218 36 L 206 36 L 206 184 L 218 184" 
+                  stroke="#ffffff" 
+                  strokeWidth="2.5" 
+                  fill="none" 
+                  strokeLinecap="square" 
+                  strokeLinejoin="miter" 
+                />
+                <path 
+                  d="M 322 36 L 334 36 L 334 184 L 322 184" 
+                  stroke="#ffffff" 
+                  strokeWidth="2.5" 
+                  fill="none" 
+                  strokeLinecap="square" 
+                  strokeLinejoin="miter" 
+                />
+
+                {/* Sandbox Enclosure Body */}
+                <rect x="212" y="42" width="116" height="136" fill="#0d0d0d" stroke="rgba(255,255,255,0.18)" strokeWidth="1" />
+
+                {/* Sandbox Header Status Tag */}
+                <rect x="222" y="52" width="62" height="7" fill="#ffffff" />
+                <rect x="296" y="52" width="22" height="7" fill="#242424" />
+                <circle cx="312" cy="55.5" r="2" fill="#ffffff" opacity={accentEase} />
+
+                {/* Divider */}
+                <line x1="222" y1="67" x2="318" y2="67" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+
+                {/* Internal Circulating Memory Matrix (A <-> B loop, 100% inside sandbox) */}
+                {/* Unit A */}
+                <rect x="222" y="74" width="40" height="26" fill="#141414" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+                <rect x="228" y="80" width="28" height="5" fill="#888888" />
+                <rect x="228" y="89" width="18" height="4" fill="#444444" />
+
+                {/* Unit B */}
+                <rect x="278" y="74" width="40" height="26" fill="#141414" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+                <rect x="284" y="80" width="28" height="5" fill="#ffffff" />
+                <rect x="284" y="89" width="20" height="4" fill="#666666" />
+
+                {/* Bi-directional Closed-Loop Arrows */}
+                {/* Forward A -> B */}
+                <line x1="264" y1="83" x2="274" y2="83" stroke="#ffffff" strokeWidth="1.2" />
+                <polygon points="272,81 276,83 272,85" fill="#ffffff" />
+                {/* Return B -> A */}
+                <line x1="266" y1="91" x2="276" y2="91" stroke="#888888" strokeWidth="1.2" />
+                <polygon points="268,89 264,91 268,93" fill="#888888" />
+
+                {/* Local Client Processing Pipeline Rows */}
+                <rect x="222" y="108" width="96" height="14" fill="#121212" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+                <rect x="228" y="113" width="50" height="4" fill="#ffffff" />
+                <rect x="286" y="113" width="26" height="4" fill="#555555" />
+
+                <rect x="222" y="126" width="96" height="14" fill="#121212" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+                <rect x="228" y="131" width="38" height="4" fill="#888888" />
+                <rect x="274" y="131" width="38" height="4" fill="#333333" />
+
+                {/* Bottom Client-Side Seal Plate (Solid High-Contrast White, Zero Telemetry) */}
+                <rect x="222" y="148" width="96" height="20" fill="#ffffff" />
+                <rect x="230" y="156" width="56" height="4" fill="#000000" />
+                <rect x="292" y="154" width="18" height="8" fill="#000000" />
+              </g>
+
+              {/* ======================================================== */}
+              {/* 3. BLOCKED OUTGOING GATEWAY (Firewall Plug & Strike X)   */}
+              {/* ======================================================== */}
+              <g opacity={blockStrikeEase}>
+                {/* Attempted Outgoing Data Trace (Broken / Blocked) */}
+                <line x1="334" y1="110" x2="356" y2="110" stroke="#666666" strokeWidth="1.5" strokeDasharray="3 3" />
+                <line x1="368" y1="110" x2="384" y2="110" stroke="#333333" strokeWidth="1" strokeDasharray="2 3" />
+                <polygon points="383,107 388,110 383,113" fill="#333333" />
+
+                {/* Upper status blocked tag */}
+                <rect x="348" y="70" width="28" height="10" fill="#181818" stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
+                <rect x="352" y="74" width="20" height="2" fill="#ffffff" />
+
+                {/* Solid Monolithic Lockout Plug */}
+                <rect x="359" y="86" width="6" height="48" fill="#ffffff" />
+
+                {/* Heavy 90° Strike Cross ✕ (100% Client-Side Blockade) */}
+                <g 
+                  transform={`scale(${strikeScale})`} 
+                  style={{ transformOrigin: '362px 110px' }}
+                >
+                  <line x1="352" y1="100" x2="372" y2="120" stroke="#ffffff" strokeWidth="3.2" strokeLinecap="square" />
+                  <line x1="352" y1="120" x2="372" y2="100" stroke="#ffffff" strokeWidth="3.2" strokeLinecap="square" />
+                </g>
+
+                {/* Lower security lock pin */}
+                <rect x="357" y="138" width="10" height="10" fill="#1a1a1a" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+                <circle cx="362" cy="143" r="2" fill="#ffffff" />
+              </g>
+
+              {/* ======================================================== */}
+              {/* 4. REMOTE SERVERS BLOCK (Muted / Zero Telemetry / Dark)  */}
+              {/* ======================================================== */}
+              <g opacity={0.28 * block3Ease}>
+                {/* Dashed Shell for Inactive External Cloud/Server */}
+                <rect x="390" y="32" width="126" height="156" fill="#070707" stroke="#333333" strokeWidth="1" strokeDasharray="4 4" />
+                
+                {/* External Server Header */}
+                <line x1="390" y1="56" x2="516" y2="56" stroke="#222222" strokeWidth="1" />
+                <rect x="402" y="42" width="50" height="6" fill="#222222" />
+                <circle cx="504" cy="45" r="2.5" fill="#222222" />
+
+                {/* 3 Empty Inactive Server Rack Slots (0 Bytes Received) */}
+                <g transform="translate(402, 66)">
+                  {/* Slot 1 */}
+                  <rect x="0" y="0" width="102" height="22" fill="#0a0a0a" stroke="#1f1f1f" strokeWidth="1" />
+                  <circle cx="10" cy="11" r="2.5" fill="#282828" />
+                  <rect x="20" y="9" width="46" height="4" fill="#222222" />
+                  <rect x="74" y="9" width="20" height="4" fill="#1a1a1a" />
+
+                  {/* Slot 2 */}
+                  <rect x="0" y="28" width="102" height="22" fill="#0a0a0a" stroke="#1f1f1f" strokeWidth="1" />
+                  <circle cx="10" cy="39" r="2.5" fill="#282828" />
+                  <rect x="20" y="37" width="38" height="4" fill="#222222" />
+                  <rect x="68" y="37" width="26" height="4" fill="#1a1a1a" />
+
+                  {/* Slot 3 */}
+                  <rect x="0" y="56" width="102" height="22" fill="#0a0a0a" stroke="#1f1f1f" strokeWidth="1" />
+                  <circle cx="10" cy="67" r="2.5" fill="#282828" />
+                  <rect x="20" y="65" width="52" height="4" fill="#222222" />
+                  <rect x="80" y="65" width="14" height="4" fill="#1a1a1a" />
+                </g>
+
+                {/* Bottom Zero-Byte Status Bar */}
+                <rect x="402" y="152" width="102" height="18" fill="#0c0c0c" stroke="#1a1a1a" strokeWidth="1" />
+                <rect x="426" y="159" width="54" height="4" fill="#1a1a1a" />
+              </g>
+            </g>
           </svg>
         </div>
       </div>
@@ -425,7 +600,7 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ currentLang, onBack })
 
       </div>
 
-    </main>
+    </div>
   );
 };
 
