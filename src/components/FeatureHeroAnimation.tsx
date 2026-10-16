@@ -61,6 +61,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
 
       return (
         <svg 
+          role="img"
+          aria-label="Feature animation illustration"
           className="w-full h-full max-w-xl object-contain" 
           width="300"
           height="180"
@@ -112,6 +114,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
 
       return (
         <svg 
+          role="img"
+          aria-label="Feature animation illustration"
           className="w-full h-full max-w-xl object-contain" 
           width="300"
           height="180"
@@ -181,6 +185,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
 
       return (
         <svg 
+          role="img"
+          aria-label="Feature animation illustration"
           className="w-full h-full max-w-xl object-contain" 
           width="300"
           height="180"
@@ -269,6 +275,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
 
       return (
         <svg 
+          role="img"
+          aria-label="Feature animation illustration"
           className="w-full h-full max-w-xl object-contain" 
           width="300"
           height="180"
@@ -361,6 +369,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
 
       return (
         <svg 
+          role="img"
+          aria-label="Feature animation illustration"
           className="w-full h-full max-w-xl object-contain" 
           width="300"
           height="180"
@@ -426,6 +436,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
 
       return (
         <svg 
+          role="img"
+          aria-label="Feature animation illustration"
           className="w-full h-full max-w-xl object-contain" 
           width="300"
           height="180"
@@ -489,6 +501,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
 
       return (
         <svg 
+          role="img"
+          aria-label="Feature animation illustration"
           className="w-full h-full max-w-xl object-contain" 
           width="300"
           height="180"
@@ -579,6 +593,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
 
       return (
         <svg 
+          role="img"
+          aria-label="Feature animation illustration"
           className="w-full h-full max-w-xl object-contain" 
           width="300"
           height="180"
@@ -672,6 +688,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
 
       return (
         <svg 
+          role="img"
+          aria-label="Feature animation illustration"
           className="w-full h-full max-w-xl object-contain" 
           width="300"
           height="180"
@@ -770,6 +788,8 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
 
       return (
         <svg 
+          role="img"
+          aria-label="Feature animation illustration"
           className="w-full h-full max-w-xl object-contain" 
           width="300"
           height="180"

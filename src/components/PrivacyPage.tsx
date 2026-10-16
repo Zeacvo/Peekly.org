@@ -98,6 +98,8 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ currentLang, onBack })
       <div className="w-full bg-[#0d0d0d] border border-white/20 rounded-none overflow-hidden mb-10 shadow-2xl relative">
         <div className="h-72 sm:h-96 min-h-[300px] w-full flex items-center justify-center p-4 bg-[#0d0d0d]">
           <svg 
+            role="img"
+            aria-label="Peekly Privacy and Zero Telemetry Security Architecture"
             className="w-full h-full max-w-lg object-contain select-none pointer-events-none" 
             viewBox="0 0 400 260" 
             fill="none"

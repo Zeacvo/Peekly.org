@@ -13,6 +13,8 @@ interface PeeklyLogoProps {
 export const PeeklyLogo: React.FC<PeeklyLogoProps> = ({ className = '', size = 32 }) => {
   return (
     <svg 
+      role="img"
+      aria-label="Peekly Logo"
       width={Math.round(size * 1.57)} 
       height={size} 
       viewBox="6 22 88 56" 

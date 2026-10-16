@@ -48,7 +48,10 @@ export const App: React.FC = () => {
 
   const [isChangelog, setIsChangelog] = useState<boolean>(() => {
     try {
-      return typeof window !== 'undefined' && window.location.hash === '#changelog';
+      if (typeof window === 'undefined') return false;
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      return path === '/changelog' || path === '/changelog/' || hash === '#changelog';
     } catch {
       return false;
     }
@@ -75,14 +78,14 @@ export const App: React.FC = () => {
           setIsPrivacy(true);
           setIsChangelog(false);
           setActiveFeatureId(null);
+        } else if (path === '/changelog' || path === '/changelog/' || hash === '#changelog') {
+          setIsChangelog(true);
+          setIsPrivacy(false);
+          setActiveFeatureId(null);
         } else if (hash.startsWith('#feature/')) {
           setActiveFeatureId(window.location.hash.replace('#feature/', ''));
           setIsChangelog(false);
           setIsPrivacy(false);
-        } else if (hash === '#changelog') {
-          setIsChangelog(true);
-          setIsPrivacy(false);
-          setActiveFeatureId(null);
         } else {
           setActiveFeatureId(null);
           setIsChangelog(false);
@@ -108,7 +111,8 @@ export const App: React.FC = () => {
     setIsChangelog(false);
     setActiveFeatureId(id);
     try {
-      if (window.location.pathname === '/privacy' || window.location.pathname === '/privacy/') {
+      const path = window.location.pathname.toLowerCase();
+      if (path === '/privacy' || path === '/privacy/' || path === '/changelog' || path === '/changelog/') {
         history.pushState(null, '', `/#feature/${id}`);
       } else {
         window.location.hash = `#feature/${id}`;
@@ -124,11 +128,7 @@ export const App: React.FC = () => {
     setIsPrivacy(false);
     setIsChangelog(true);
     try {
-      if (window.location.pathname === '/privacy' || window.location.pathname === '/privacy/') {
-        history.pushState(null, '', '/#changelog');
-      } else {
-        window.location.hash = '#changelog';
-      }
+      history.pushState(null, '', '/changelog');
     } catch {}
     try {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -152,12 +152,15 @@ export const App: React.FC = () => {
     setIsChangelog(false);
     setIsPrivacy(false);
     try {
+      const path = window.location.pathname.toLowerCase();
       if (
         window.location.hash.startsWith('#feature/') ||
         window.location.hash === '#changelog' ||
         window.location.hash === '#privacy' ||
-        window.location.pathname === '/privacy' ||
-        window.location.pathname === '/privacy/'
+        path === '/privacy' ||
+        path === '/privacy/' ||
+        path === '/changelog' ||
+        path === '/changelog/'
       ) {
         history.pushState(null, '', '/');
       }

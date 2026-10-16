@@ -158,6 +158,15 @@ export const ChangelogPage: React.FC<ChangelogPageProps> = ({ currentLang, onBac
   }, []);
 
   useEffect(() => {
+    const prevTitle = document.title;
+    const titleText = currentLang === 'ru' ? 'История версий' : 'Changelog';
+    document.title = `${titleText} — Peekly for FACEIT`;
+    return () => {
+      document.title = prevTitle;
+    };
+  }, [currentLang]);
+
+  useEffect(() => {
     const TOTAL_DURATION = 3500; // 3.5 seconds smooth deployment
     const start = performance.now();
     let frameId: number;
@@ -236,6 +245,8 @@ export const ChangelogPage: React.FC<ChangelogPageProps> = ({ currentLang, onBac
       <div className="w-full bg-[#0d0d0d] border border-white/20 overflow-hidden mb-10 shadow-2xl relative">
         <div className="h-72 sm:h-96 w-full flex items-center justify-center p-4 bg-[#0d0d0d]">
           <svg 
+            role="img"
+            aria-label="Peekly Changelog Module Architecture Diagram"
             className="w-full h-full max-w-xl object-contain" 
             viewBox="0 0 440 260" 
             fill="none"
