@@ -42,10 +42,10 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
 ];
 
 export function getSafeInitialLanguage(): Language {
-  // 1. Safe localStorage read
+  // 1. Check for previously saved user preference in localStorage
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
-      const saved = localStorage.getItem('peekly_lang');
+      const saved = localStorage.getItem('peekly_language') || localStorage.getItem('peekly_lang');
       if (saved && SUPPORTED_LANGUAGES.some((l) => l.code === saved)) {
         return saved as Language;
       }
@@ -54,29 +54,38 @@ export function getSafeInitialLanguage(): Language {
     // Storage access may be blocked in iOS Safari Private mode or Telegram WebView
   }
 
-  // 2. Safe navigator.language read with basic code extraction (e.g. 'ru-RU' -> 'ru')
+  // 2. Safe browser language auto-detection for first-time visitors
   try {
-    if (typeof navigator !== 'undefined' && navigator.language) {
-      const baseCode = navigator.language.split('-')[0].toLowerCase();
-      if (SUPPORTED_LANGUAGES.some((l) => l.code === baseCode)) {
-        return baseCode as Language;
+    if (typeof navigator !== 'undefined') {
+      const browserLang = (navigator.languages && navigator.languages[0]) || navigator.language || '';
+      if (browserLang.toLowerCase().trim().startsWith('ru')) {
+        return 'ru';
       }
     }
   } catch {
-    // navigator might fail or be restricted
+    // navigator might fail or be restricted in sandboxes
   }
 
-  // 3. Guaranteed ironclad fallback
+  // 3. Guaranteed fallback to English for all other cases
   return 'en';
 }
 
 export function saveLanguagePreference(lang: Language): void {
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem('peekly_language', lang);
       localStorage.setItem('peekly_lang', lang);
     }
   } catch {
     // Ignore storage write restrictions in sandboxed WebViews
+  }
+
+  try {
+    if (typeof document !== 'undefined' && document.documentElement) {
+      document.documentElement.lang = lang;
+    }
+  } catch {
+    // Ignore DOM property update errors in restricted frames
   }
 }
 
