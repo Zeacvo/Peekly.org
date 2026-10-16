@@ -30,6 +30,7 @@ export const App: React.FC = () => {
     try {
       if (typeof document !== 'undefined' && document.documentElement) {
         document.documentElement.lang = currentLang;
+        document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
       }
     } catch {
       // Ignore DOM property update errors in restricted frames

@@ -41,12 +41,31 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
   { code: 'zh', name: '中文', flag: '🇨🇳' },
 ];
 
+export function matchLanguageFromCandidates(candidates: readonly string[]): Language {
+  for (const rawCandidate of candidates) {
+    if (!rawCandidate || typeof rawCandidate !== 'string') continue;
+    const normalized = rawCandidate.toLowerCase().trim();
+    const prefix = normalized.split(/[-_]/)[0];
+
+    const matched = SUPPORTED_LANGUAGES.find(
+      (l) => l.code === normalized || l.code === prefix
+    );
+    if (matched) {
+      return matched.code;
+    }
+  }
+  return 'en';
+}
+
 export function getSafeInitialLanguage(): Language {
-  // 1. Check for previously saved user preference in localStorage
+  // 1. Check for previously saved user preference in localStorage (Priority #1)
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
-      const saved = localStorage.getItem('peekly_language') || localStorage.getItem('peekly_lang');
+      const saved = window.localStorage.getItem('peekly_language') || window.localStorage.getItem('peekly_lang');
       if (saved && SUPPORTED_LANGUAGES.some((l) => l.code === saved)) {
+        if (typeof document !== 'undefined' && document.documentElement) {
+          document.documentElement.dir = saved === 'ar' ? 'rtl' : 'ltr';
+        }
         return saved as Language;
       }
     }
@@ -54,14 +73,18 @@ export function getSafeInitialLanguage(): Language {
     // Storage access may be blocked in iOS Safari Private mode or Telegram WebView
   }
 
-  // 2. Safe browser language auto-detection for first-time visitors
+  // 2. Smart browser language auto-detection for first-time visitors
   try {
-    if (typeof navigator !== 'undefined') {
-      const browserLang = (navigator.languages && navigator.languages[0]) || navigator.language || '';
-      if (browserLang.toLowerCase().trim().startsWith('ru')) {
-        return 'ru';
-      }
+    const candidates =
+      (typeof navigator !== 'undefined' &&
+        (navigator.languages?.length ? navigator.languages : [navigator.language])) ||
+      [];
+
+    const detected = matchLanguageFromCandidates(candidates as readonly string[]);
+    if (typeof document !== 'undefined' && document.documentElement) {
+      document.documentElement.dir = detected === 'ar' ? 'rtl' : 'ltr';
     }
+    return detected;
   } catch {
     // navigator might fail or be restricted in sandboxes
   }
@@ -73,8 +96,8 @@ export function getSafeInitialLanguage(): Language {
 export function saveLanguagePreference(lang: Language): void {
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
-      localStorage.setItem('peekly_language', lang);
-      localStorage.setItem('peekly_lang', lang);
+      window.localStorage.setItem('peekly_language', lang);
+      window.localStorage.setItem('peekly_lang', lang);
     }
   } catch {
     // Ignore storage write restrictions in sandboxed WebViews
@@ -83,6 +106,7 @@ export function saveLanguagePreference(lang: Language): void {
   try {
     if (typeof document !== 'undefined' && document.documentElement) {
       document.documentElement.lang = lang;
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     }
   } catch {
     // Ignore DOM property update errors in restricted frames
