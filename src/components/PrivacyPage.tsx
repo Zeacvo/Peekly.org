@@ -95,8 +95,8 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ currentLang, onBack })
       </div>
 
       {/* 2. Top Card: Pure Monochrome Geometric Vector Infographic (1:1 with Features & Changelog) */}
-      <div className="w-full bg-[#0d0d0d] border border-white/20 rounded-none overflow-hidden mb-10 shadow-2xl relative">
-        <div className="h-72 sm:h-96 min-h-[300px] w-full flex items-center justify-center p-4 bg-[#0d0d0d]">
+      <div className="w-full bg-[#0d0d0d] border border-white/20 rounded-none overflow-hidden mb-10 shadow-2xl relative" style={{ contain: 'layout' }}>
+        <div className="h-72 sm:h-96 min-h-[288px] sm:min-h-[384px] w-full flex items-center justify-center p-4 bg-[#0d0d0d]">
           <svg 
             role="img"
             aria-label="Peekly Privacy and Zero Telemetry Security Architecture"

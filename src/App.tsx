@@ -182,8 +182,8 @@ export const App: React.FC = () => {
       />
 
       {/* Main Content: Dynamic View Routing with Lazy Suspense */}
-      <div className="relative z-10 flex-1 flex flex-col w-full">
-        <Suspense fallback={<div className="flex-1 w-full min-h-[calc(100vh-80px)] bg-black" />}>
+      <main className="min-h-screen flex-1 flex flex-col w-full relative z-10">
+        <Suspense fallback={<div className="min-h-screen flex-1 flex flex-col w-full bg-black" />}>
           {isPrivacy ? (
             <PrivacyPage 
               currentLang={currentLang}
@@ -201,16 +201,16 @@ export const App: React.FC = () => {
               onBack={handleGoHome}
             />
           ) : (
-            <main className="flex-1 w-full min-h-[calc(100vh-80px)] flex flex-col">
+            <div className="flex-1 w-full flex flex-col">
               <Hero currentLang={currentLang} />
               <Features 
                 currentLang={currentLang} 
                 onSelectFeature={handleSelectFeature}
               />
-            </main>
+            </div>
           )}
         </Suspense>
-      </div>
+      </main>
 
       {/* Footer */}
       <Footer 

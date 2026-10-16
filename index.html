@@ -18,12 +18,21 @@
         min-height: 100%;
         overflow-x: hidden;
       }
+      @font-face {
+        font-family: 'Inter Fallback';
+        src: local('Arial');
+        ascent-override: 90%;
+        descent-override: 22%;
+        line-gap-override: 0%;
+        size-adjust: 107%;
+      }
     </style>
 
     <!-- Font Preconnect, Preload & Stylesheet with display=swap for instant LCP and zero CLS -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preload" href="https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa0ZL7SUc.woff2" as="font" type="font/woff2" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
     <!-- Canonical URL -->
@@ -69,13 +78,18 @@
             <span style="font-family: 'Inter', -apple-system, sans-serif; font-size: 20px; font-weight: 900; letter-spacing: 0.05em; color: #ffffff; line-height: 1;">PEEKLY</span>
           </div>
           <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="min-width: 90px; display: none;" class="hidden sm:inline-flex items-center gap-1">
+              <span style="font-family: 'Inter', sans-serif; font-size: 13px; color: #a3a3a3;">Online: 0</span>
+            </div>
             <span style="font-family: 'Inter', monospace; font-size: 13px; color: #a3a3a3;">&gt;_ Changelog</span>
-            <span style="font-family: 'Inter', sans-serif; font-size: 13px; color: #a3a3a3;">English</span>
+            <div style="min-width: 110px; display: inline-flex; align-items: center;">
+              <span style="font-family: 'Inter', sans-serif; font-size: 13px; color: #a3a3a3;">English</span>
+            </div>
           </div>
         </div>
       </header>
 
-      <main class="flex-1 w-full min-h-[calc(100vh-80px)] flex flex-col" style="flex: 1; width: 100%; min-height: calc(100vh - 80px); display: flex; flex-direction: column;">
+      <main class="min-h-screen flex-1 flex flex-col w-full relative z-10" style="flex: 1; width: 100%; min-height: 100vh; display: flex; flex-direction: column;">
         <section class="relative pt-[calc(7rem+env(safe-area-inset-top,0px))] sm:pt-40 md:pt-44 pb-24 sm:pb-36 md:pb-40 min-h-[calc(100vh-4rem)] sm:min-h-[calc(100vh-5rem)] min-h-[620px] w-full max-w-6xl mx-auto px-4 sm:px-6 flex flex-col items-center justify-center text-center z-10" style="position: relative; width: 100%; max-width: 72rem; margin: 0 auto; padding: calc(7rem + env(safe-area-inset-top, 0px)) 1.5rem 6rem; min-height: 620px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
           <h1 class="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white max-w-4xl leading-[1.08] mb-5 drop-shadow-[0_8px_32px_rgba(0,0,0,0.95)] break-words" style="font-family: 'Inter', -apple-system, sans-serif; font-weight: 700; color: #ffffff; max-width: 56rem; line-height: 1.08; margin: 0 auto 1.25rem; font-size: clamp(2rem, 5vw, 4.5rem); letter-spacing: -0.025em; text-shadow: 0 8px 32px rgba(0, 0, 0, 0.95);">
             DOMINATE THE LOBBY
@@ -93,6 +107,13 @@
           </div>
         </section>
       </main>
+
+      <footer class="w-full bg-[#000000] border-t border-white/10 relative z-10 mt-auto py-8 sm:py-10" style="width: 100%; border-top: 1px solid rgba(255, 255, 255, 0.1); background-color: #000000; margin-top: auto; padding: 2rem 1rem;">
+        <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between" style="width: 100%; max-width: 72rem; margin: 0 auto; padding: 0 1rem; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-family: 'Inter', sans-serif; font-size: 11px; color: #737373;">Peekly &copy; 2026</span>
+          <span style="font-family: 'Inter', sans-serif; font-size: 11px; color: #737373;">Privacy Policy</span>
+        </div>
+      </footer>
     </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

@@ -103,10 +103,10 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
         <div className="flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 shrink-0">
           
           {/* 1. Online: {onlineCount} (Flexible: stays visible on tablets and medium screens) */}
-          <div className="hidden sm:flex items-center gap-1 sm:gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 leading-none whitespace-nowrap select-none shrink-0">
+          <div className="hidden sm:inline-flex items-center gap-1 sm:gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 leading-none whitespace-nowrap select-none shrink-0 min-w-[90px]">
             <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0 animate-soft-breath"></span>
             <span>{t.nav.statusLabel}</span>
-            <span className="text-white font-mono text-xs md:text-[13px] font-medium leading-none">
+            <span className="text-white font-mono text-xs md:text-[13px] font-medium leading-none min-w-[14px] inline-block text-left">
               {typeof onlineCount === 'number' && !isNaN(onlineCount) ? onlineCount : 0}
             </span>
           </div>
@@ -128,18 +128,20 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
           </button>
 
           {/* 3. Language Selector */}
-          <div className="relative inline-flex items-center shrink-0" ref={dropdownRef}>
+          <div className="relative inline-flex items-center shrink-0 min-w-[110px]" ref={dropdownRef}>
             <button
               type="button"
               onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-              className="group flex items-center gap-1 sm:gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 py-1 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
+              className="group flex items-center justify-between sm:justify-start gap-1 sm:gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 py-1 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95 w-full"
               aria-label="Select language"
               aria-expanded={langDropdownOpen}
               aria-haspopup="listbox"
             >
-              <LanguageIcon className="w-3.5 h-3.5 text-neutral-400 group-hover:text-white transition-colors shrink-0" />
-              <span className="sm:hidden font-mono uppercase font-medium">{currentLangObj.code}</span>
-              <span className="hidden sm:inline">{currentLangObj.name}</span>
+              <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                <LanguageIcon className="w-3.5 h-3.5 text-neutral-400 group-hover:text-white transition-colors shrink-0" />
+                <span className="sm:hidden font-mono uppercase font-medium">{currentLangObj.code}</span>
+                <span className="hidden sm:inline">{currentLangObj.name}</span>
+              </div>
               <ChevronDown className={`w-3 h-3 shrink-0 text-neutral-500 group-hover:text-white transition-transform duration-150 ${langDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
 

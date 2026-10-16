@@ -242,8 +242,8 @@ export const ChangelogPage: React.FC<ChangelogPageProps> = ({ currentLang, onBac
       </div>
 
       {/* 2. Hero Animation Block (Exact Replica of Window Shell from Cards 04 & 05) */}
-      <div className="w-full bg-[#0d0d0d] border border-white/20 overflow-hidden mb-10 shadow-2xl relative">
-        <div className="h-72 sm:h-96 w-full flex items-center justify-center p-4 bg-[#0d0d0d]">
+      <div className="w-full bg-[#0d0d0d] border border-white/20 overflow-hidden mb-10 shadow-2xl relative" style={{ contain: 'layout' }}>
+        <div className="h-72 sm:h-96 min-h-[288px] sm:min-h-[384px] w-full flex items-center justify-center p-4 bg-[#0d0d0d]">
           <svg 
             role="img"
             aria-label="Peekly Changelog Module Architecture Diagram"
