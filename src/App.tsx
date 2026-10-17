@@ -173,7 +173,7 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#000000] text-white selection:bg-[#FF5500] selection:text-black font-sans antialiased relative">
-      {/* 1. Fixed Header with separated logo hover, white online dot & terminal changelog */}
+      {/* 1. Fixed Header with logo, terminal changelog & language selector */}
       <Header 
         currentLang={currentLang} 
         onLanguageChange={handleLanguageChange}
