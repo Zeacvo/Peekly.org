@@ -4,7 +4,7 @@ import { LanguageIcon } from './LanguageIcon';
 import { PeeklyLogo } from './PeeklyLogo';
 import { translations, SUPPORTED_LANGUAGES } from '../translations';
 import type { Language } from '../translations';
-import { getInstallUrl } from '../utils/installUrl';
+import { BROWSERS } from '../constants/browsers';
 
 interface HeaderProps {
   currentLang: Language;
@@ -15,7 +15,9 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, onGoHome, onOpenChangelog }) => {
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+  const [installDropdownOpen, setInstallDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const installDropdownRef = useRef<HTMLDivElement>(null);
 
   const t = translations[currentLang] || translations.en;
 
@@ -24,10 +26,14 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setLangDropdownOpen(false);
       }
+      if (installDropdownRef.current && !installDropdownRef.current.contains(e.target as Node)) {
+        setInstallDropdownOpen(false);
+      }
     };
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setLangDropdownOpen(false);
+        setInstallDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -138,15 +144,45 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
             )}
           </div>
 
-          {/* 4. Install Extension CTA Button (Accent margin before button: 24px gap + 8px ml = 32px) */}
-          <a
-            href={getInstallUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center justify-center text-center h-8 sm:h-9 px-3 sm:px-3.5 md:px-4 lg:px-5 rounded-none btn-header-install font-sans font-bold text-[10px] sm:text-[11px] md:text-xs tracking-wider uppercase cursor-pointer shadow-lg active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white ml-2"
-          >
-            <span>{t.nav.install.toUpperCase()}</span>
-          </a>
+          {/* 4. Install Extension CTA Button & Dropdown (Accent margin before button: 24px gap + 8px ml = 32px) */}
+          <div className="relative inline-flex items-center shrink-0 ml-2" ref={installDropdownRef}>
+            <button
+              type="button"
+              onClick={() => setInstallDropdownOpen(!installDropdownOpen)}
+              aria-expanded={installDropdownOpen}
+              aria-haspopup="menu"
+              aria-label="Install extension options"
+              className="hidden sm:inline-flex items-center justify-center text-center h-8 sm:h-9 px-3 sm:px-3.5 md:px-4 lg:px-5 rounded-none btn-header-install font-sans font-bold text-[10px] sm:text-[11px] md:text-xs tracking-wider uppercase cursor-pointer shadow-lg active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white"
+            >
+              <span>{t.nav.install.toUpperCase()}</span>
+            </button>
+
+            {/* Browser Install Dropdown Menu */}
+            {installDropdownOpen && (
+              <div
+                role="menu"
+                aria-label="Supported Browsers"
+                className="absolute right-0 top-full mt-2 w-56 sm:w-60 bg-[#141416] border border-[#26282c] rounded-md shadow-2xl shadow-black/80 flex flex-col py-1.5 z-50 animate-apple-reveal"
+              >
+                {BROWSERS.map((browser) => (
+                  <a
+                    key={browser.id}
+                    href={browser.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    role="menuitem"
+                    onClick={() => setInstallDropdownOpen(false)}
+                    className="group flex items-center gap-3 px-3.5 py-2.5 text-neutral-400 hover:text-white hover:bg-[#1f2024] transition-colors duration-150 cursor-pointer no-underline text-xs sm:text-[13px] font-medium"
+                  >
+                    <span className="text-neutral-400 group-hover:text-[#FF5500] transition-colors shrink-0">
+                      {browser.icon('w-5 h-5 shrink-0 fill-current')}
+                    </span>
+                    <span className="truncate">{browser.name}</span>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
 
         </div>
 
