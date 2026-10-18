@@ -162,7 +162,7 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
               <div
                 role="menu"
                 aria-label="Supported Browsers"
-                className="absolute right-0 top-full mt-2 w-48 sm:w-52 bg-[#111215] border border-[#2a2b30] rounded-[2px] shadow-2xl shadow-black/80 flex flex-col py-1 z-50"
+                className="absolute right-0 top-full mt-2 w-52 sm:w-56 bg-[#0D0D0D] border border-white/15 rounded-none shadow-2xl flex flex-col py-1 z-50"
               >
                 {BROWSERS.map((browser) => (
                   <a
@@ -172,10 +172,10 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
                     rel="noopener noreferrer"
                     role="menuitem"
                     onClick={() => setInstallDropdownOpen(false)}
-                    className="group flex items-center gap-3 px-3.5 py-2.5 text-white font-bold text-[13px] tracking-wide border-l-2 border-transparent hover:border-[#ff5500] hover:bg-[#1c1d22] transition-colors duration-100 cursor-pointer no-underline select-none"
+                    className="group flex items-center gap-3 px-3.5 py-2.5 text-white font-bold text-[13px] tracking-wide bg-transparent hover:bg-white/[0.08] transition-colors duration-100 cursor-pointer no-underline select-none rounded-none"
                   >
-                    <span className="text-white group-hover:text-[#ff5500] transition-colors duration-100 shrink-0 flex items-center justify-center">
-                      {browser.icon('w-5 h-5 shrink-0 fill-current')}
+                    <span className="text-white group-hover:text-[#FF5500] transition-colors duration-100 shrink-0 flex items-center justify-center">
+                      {browser.icon('w-[22px] h-[22px] shrink-0 fill-current')}
                     </span>
                     <span className="truncate">{browser.name}</span>
                   </a>
