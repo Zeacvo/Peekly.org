@@ -4,6 +4,7 @@ import { LanguageIcon } from './LanguageIcon';
 import { PeeklyLogo } from './PeeklyLogo';
 import { translations, SUPPORTED_LANGUAGES } from '../translations';
 import type { Language } from '../translations';
+import { getInstallUrl } from '../utils/installUrl';
 
 interface HeaderProps {
   currentLang: Language;
@@ -139,9 +140,9 @@ export const Header: React.FC<HeaderProps> = ({ currentLang, onLanguageChange, o
 
           {/* 4. Install Extension CTA Button (Accent margin before button: 24px gap + 8px ml = 32px) */}
           <a
-            href="https://chromewebstore.google.com/detail/peekly-for-faceit/cmfgneodcjfofdcglbbhcghijgcjcokk"
+            href={getInstallUrl()}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="hidden sm:inline-flex items-center justify-center text-center h-8 sm:h-9 px-3 sm:px-3.5 md:px-4 lg:px-5 rounded-none btn-header-install font-sans font-bold text-[10px] sm:text-[11px] md:text-xs tracking-wider uppercase cursor-pointer shadow-lg active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white ml-2"
           >
             <span>{t.nav.install.toUpperCase()}</span>
