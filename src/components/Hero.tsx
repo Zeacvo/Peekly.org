@@ -1,7 +1,7 @@
 import React from 'react';
 import { translations } from '../translations';
 import type { Language } from '../translations';
-import { ChromeLogo } from './ChromeLogo';
+import { HeroCtaButtons } from './HeroCtaButtons';
 
 interface HeroProps {
   currentLang: Language;
@@ -23,20 +23,10 @@ export const Hero: React.FC<HeroProps> = ({ currentLang }) => {
         {t.hero.subtitle}
       </p>
 
-      {/* 3. Massive Prominent CTA Action Button */}
-      <div className="flex flex-col items-center w-full sm:w-auto">
-        <a
-          href="https://chromewebstore.google.com/detail/peekly-for-faceit/cmfgneodcjfofdcglbbhcghijgcjcokk"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-3 sm:gap-3.5 px-5 sm:px-7 py-3 sm:py-3.5 bg-white text-black font-sans text-xs md:text-sm font-bold tracking-wider uppercase rounded-none border border-white hover:bg-[#FF5500] hover:text-black hover:border-white transition-colors duration-150 btn-chrome-action cursor-pointer shadow-2xl active:scale-95 w-full sm:w-auto max-w-xs sm:max-w-none"
-        >
-          {/* Large Google Chrome Vector Icon */}
-          <ChromeLogo className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 shrink-0 fill-current" />
-          <span>{t.hero.cta.toUpperCase()}</span>
-        </a>
-      </div>
+      {/* 3. Multi-Browser CTA Buttons Dock */}
+      <HeroCtaButtons />
 
     </section>
   );
 };
+
