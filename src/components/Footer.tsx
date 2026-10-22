@@ -65,40 +65,38 @@ export const Footer: React.FC<FooterProps> = ({
         </div>
 
         {/* Right Column: Navigation Links & Copyright */}
-        <div className="flex flex-col items-start md:items-end text-left md:text-right gap-3">
-          <div className="flex items-center gap-5 text-xs">
-            {/* Localized Changelog Link */}
-            <button
-              type="button"
-              onClick={() => {
-                if (onOpenChangelog) onOpenChangelog();
-                else window.location.hash = '#changelog';
-              }}
-              className="text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer bg-transparent border-none p-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
-            >
-              {t.footer.changelog || t.nav.changelog}
-            </button>
+        <div className="flex flex-col items-start md:items-end text-left md:text-right gap-1.5 text-[12px]">
+          {/* Row 1: Localized Changelog Link */}
+          <button
+            type="button"
+            onClick={() => {
+              if (onOpenChangelog) onOpenChangelog();
+              else window.location.hash = '#changelog';
+            }}
+            className="text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer bg-transparent border-none p-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
+          >
+            {t.footer.changelog || t.nav.changelog}
+          </button>
 
-            {/* Privacy Policy Link */}
-            <a
-              href="/privacy"
-              onClick={(e) => {
-                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-                e.preventDefault();
-                if (onOpenPrivacy) onOpenPrivacy();
-                else {
-                  history.pushState(null, '', '/privacy');
-                  window.dispatchEvent(new PopStateEvent('popstate'));
-                }
-              }}
-              className="text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer bg-transparent border-none p-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
-            >
-              {privacyLabelMap[currentLang] || 'Privacy Policy'}
-            </a>
-          </div>
+          {/* Row 2: Privacy Policy Link */}
+          <a
+            href="/privacy"
+            onClick={(e) => {
+              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              e.preventDefault();
+              if (onOpenPrivacy) onOpenPrivacy();
+              else {
+                history.pushState(null, '', '/privacy');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }
+            }}
+            className="text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer bg-transparent border-none p-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
+          >
+            {privacyLabelMap[currentLang] || 'Privacy Policy'}
+          </a>
 
-          {/* Copyright */}
-          <p className="text-[11px] text-neutral-500 font-sans whitespace-nowrap m-0">
+          {/* Row 3: Copyright */}
+          <p className="text-[11px] text-neutral-500 font-sans whitespace-nowrap m-0 mt-1">
             © 2026 Peekly. {t.footer.allRightsReserved || t.footer.rights}
           </p>
         </div>
