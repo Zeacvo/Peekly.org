@@ -34,6 +34,7 @@ export async function onRequest(): Promise<Response> {
     client_id: 'd58837f4-984d-41a5-bd76-615ef5156660',
     response_type: 'code',
     redirect_uri: 'https://peekly.org/api/auth/faceit/callback',
+    redirect_popup: 'true',
     scope: 'openid profile email membership chat.messages.read chat.messages.write chat.rooms.read',
     code_challenge: challenge,
     code_challenge_method: 'S256',
