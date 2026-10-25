@@ -6,7 +6,7 @@
 
 export const FACEIT_OAUTH_CONFIG = {
   clientId: 'd58837f4-984d-41a5-bd76-615ef5156660',
-  clientSecret: 'Q1bKg65i8H5P50iQvBUJRdn1nms5JqB6qBIjOSGg',
+  clientSecret: 'Q1bKg6518H5P50iQvBUJRdn1nms5JqB6qBIjOsGg',
   redirectUri: 'https://peekly.org/api/auth/faceit/callback',
   tokenEndpoint: 'https://api.faceit.com/auth/v1/oauth/token',
   userEndpoint: 'https://api.faceit.com/auth/v1/resources/user',
@@ -170,6 +170,7 @@ interface EventContext {
 export async function onRequest(context: EventContext): Promise<Response> {
   const url = new URL(context.request.url);
   const code = url.searchParams.get('code');
+  const state = url.searchParams.get('state') || '';
 
   if (!code) {
     return new Response(generateErrorHtml('Missing required authorization code parameter.', 400), {
@@ -181,20 +182,37 @@ export async function onRequest(context: EventContext): Promise<Response> {
     });
   }
 
+  // Extract PKCE verifier from state (stateless fallback) or cookie
+  let verifier = '';
+  if (state.startsWith('v_')) {
+    verifier = state.substring(2);
+  } else {
+    const cookieHeader = context.request.headers.get('Cookie') || '';
+    const match = cookieHeader.match(/faceit_verifier=([^;]+)/);
+    if (match) {
+      verifier = match[1];
+    }
+  }
+
   try {
     // 1. Exchange authorization code for access token
     const basicAuth = btoa(`${FACEIT_OAUTH_CONFIG.clientId}:${FACEIT_OAUTH_CONFIG.clientSecret}`);
+    const tokenParams: Record<string, string> = {
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: FACEIT_OAUTH_CONFIG.redirectUri,
+    };
+    if (verifier) {
+      tokenParams.code_verifier = verifier;
+    }
+
     const tokenRes = await fetch(FACEIT_OAUTH_CONFIG.tokenEndpoint, {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${basicAuth}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        code,
-        redirect_uri: FACEIT_OAUTH_CONFIG.redirectUri,
-      }).toString(),
+      body: new URLSearchParams(tokenParams).toString(),
     });
 
     if (!tokenRes.ok) {
