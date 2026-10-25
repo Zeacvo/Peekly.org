@@ -165,7 +165,7 @@ export function generateErrorHtml(message: string, status = 400, title = 'AUTHOR
   <title>${status}: ${statusTitleText} — Peekly</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Play:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Play:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -199,55 +199,19 @@ export function generateErrorHtml(message: string, status = 400, title = 'AUTHOR
       max-width: 680px;
     }
     .watermark-container {
-      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 24px;
     }
     .watermark-number {
-      font-size: clamp(120px, 20vw, 180px);
+      font-size: clamp(80px, 15vw, 140px);
       font-weight: 800;
       line-height: 1;
-      letter-spacing: -0.05em;
-      color: #141518;
+      letter-spacing: -0.04em;
+      color: #ffffff;
+      text-shadow: 0 8px 32px rgba(0, 0, 0, 0.95);
       user-select: none;
-    }
-    .radar-center {
-      position: absolute;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 76px;
-      height: 76px;
-    }
-    .radar-ping {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      border: 1px solid rgba(255, 85, 0, 0.4);
-      animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
-    }
-    .radar-circle {
-      position: absolute;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 85, 0, 0.15) 0%, transparent 70%);
-      border: 1px solid rgba(255, 85, 0, 0.3);
-    }
-    .crosshair-icon {
-      position: relative;
-      width: 32px;
-      height: 32px;
-      color: #ff5500;
-    }
-    @keyframes ping {
-      75%, 100% {
-        transform: scale(1.8);
-        opacity: 0;
-      }
     }
     .status-badge {
       display: inline-flex;
@@ -300,11 +264,14 @@ export function generateErrorHtml(message: string, status = 400, title = 'AUTHOR
       text-decoration: none;
       padding: 12px 24px;
       border-radius: 4px;
+      border: 1px solid #ffffff;
       transition: all 0.2s ease;
+      cursor: pointer;
     }
     .home-btn:hover {
       background: #ff5500;
-      color: #ffffff;
+      color: #000000;
+      border-color: #ffffff;
       box-shadow: 0 0 16px rgba(255, 85, 0, 0.4);
     }
   </style>
@@ -314,14 +281,6 @@ export function generateErrorHtml(message: string, status = 400, title = 'AUTHOR
   <div class="container">
     <div class="watermark-container">
       <div class="watermark-number">${status}</div>
-      <div class="radar-center">
-        <div class="radar-ping"></div>
-        <div class="radar-circle"></div>
-        <svg class="crosshair-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="9" />
-          <path d="M12 3v4M12 17v4M3 12h4M17 12h4" />
-        </svg>
-      </div>
     </div>
     
     <div class="status-badge">
