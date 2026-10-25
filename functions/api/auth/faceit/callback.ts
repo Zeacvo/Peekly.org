@@ -362,7 +362,23 @@ function parseJwt(token: string): any {
 export async function onRequest(context: EventContext): Promise<Response> {
   const url = new URL(context.request.url);
   const code = url.searchParams.get('code');
-  const state = url.searchParams.get('state') || '';
+  const stateVerifier = url.searchParams.get('state');
+
+  // If FACEIT redirected with an error (e.g. user cancelled or access_denied)
+  const oauthError = url.searchParams.get('error');
+  const oauthErrorDescription = url.searchParams.get('error_description');
+  if (oauthError) {
+    return new Response(
+      generateErrorHtml(oauthErrorDescription || oauthError, 400, 'AUTHORIZATION ERROR'),
+      {
+        status: 400,
+        headers: {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-store, max-age=0',
+        },
+      }
+    );
+  }
 
   if (!code) {
     return new Response(generateErrorHtml('Missing required authorization code parameter.', 400), {
@@ -374,10 +390,10 @@ export async function onRequest(context: EventContext): Promise<Response> {
     });
   }
 
-  // Extract PKCE verifier from state (stateless fallback) or cookie
+  // Extract PKCE verifier from state parameter (or cookie fallback)
   let verifier = '';
-  if (state.startsWith('v_')) {
-    verifier = state.substring(2);
+  if (stateVerifier) {
+    verifier = stateVerifier.startsWith('v_') ? stateVerifier.substring(2) : stateVerifier;
   } else {
     const cookieHeader = context.request.headers.get('Cookie') || '';
     const match = cookieHeader.match(/faceit_verifier=([^;]+)/);
@@ -389,13 +405,15 @@ export async function onRequest(context: EventContext): Promise<Response> {
   try {
     // 1. Exchange authorization code for access token
     const basicAuth = btoa(`${FACEIT_OAUTH_CONFIG.clientId}:${FACEIT_OAUTH_CONFIG.clientSecret}`);
-    const tokenParams: Record<string, string> = {
+    const tokenParams = new URLSearchParams({
       grant_type: 'authorization_code',
-      code,
+      code: String(code),
       redirect_uri: FACEIT_OAUTH_CONFIG.redirectUri,
-    };
+    });
+
+    // If client provided verifier via state or cookie, pass code_verifier to FACEIT
     if (verifier) {
-      tokenParams.code_verifier = verifier;
+      tokenParams.append('code_verifier', verifier);
     }
 
     const tokenRes = await fetch(FACEIT_OAUTH_CONFIG.tokenEndpoint, {
@@ -404,13 +422,23 @@ export async function onRequest(context: EventContext): Promise<Response> {
         'Authorization': `Basic ${basicAuth}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams(tokenParams).toString(),
+      body: tokenParams,
     });
 
     if (!tokenRes.ok) {
       const errText = await tokenRes.text();
+      let errDescription = errText;
+      try {
+        const parsed = JSON.parse(errText);
+        if (parsed.error_description) {
+          errDescription = parsed.error_description;
+        } else if (parsed.error) {
+          errDescription = parsed.error;
+        }
+      } catch {}
+
       return new Response(
-        generateErrorHtml(`FACEIT token exchange failed (${tokenRes.status}): ${errText}`, 400),
+        generateErrorHtml(errDescription, 400, 'AUTHORIZATION ERROR'),
         {
           status: 400,
           headers: { 'Content-Type': 'text/html; charset=utf-8' },
