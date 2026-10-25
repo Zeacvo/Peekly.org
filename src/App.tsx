@@ -18,6 +18,42 @@ const PrivacyPage = lazy(() =>
 const TermsPage = lazy(() =>
   import('./components/TermsPage').then((m) => ({ default: m.TermsPage }))
 );
+const NotFoundPage = lazy(() =>
+  import('./components/NotFoundPage').then((m) => ({ default: m.NotFoundPage }))
+);
+
+const checkRoutes = () => {
+  try {
+    if (typeof window === 'undefined') {
+      return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false };
+    }
+    const rawPath = window.location.pathname.toLowerCase();
+    const path = rawPath.replace(/\/$/, '') || '/';
+    const hash = window.location.hash.toLowerCase();
+
+    if (path === '/terms' || path === '/terms.html' || hash === '#terms') {
+      return { isTerms: true, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false };
+    }
+    if (path === '/privacy' || hash === '#privacy') {
+      return { isTerms: false, isPrivacy: true, isChangelog: false, featureId: null, isNotFound: false };
+    }
+    if (path === '/changelog' || hash === '#changelog') {
+      return { isTerms: false, isPrivacy: false, isChangelog: true, featureId: null, isNotFound: false };
+    }
+    if (window.location.hash.startsWith('#feature/')) {
+      const id = window.location.hash.replace('#feature/', '');
+      return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: id, isNotFound: false };
+    }
+    if (path === '/') {
+      return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false };
+    }
+
+    // Any other path is treated as 404 Not Found
+    return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: true };
+  } catch {
+    return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false };
+  }
+};
 
 export const App: React.FC = () => {
   const [currentLang, setCurrentLang] = useState<Language>(() => {
@@ -40,82 +76,20 @@ export const App: React.FC = () => {
     }
   }, [currentLang]);
 
-  const [activeFeatureId, setActiveFeatureId] = useState<string | null>(() => {
-    try {
-      const hash = typeof window !== 'undefined' ? window.location.hash : '';
-      if (hash && hash.startsWith('#feature/')) {
-        return hash.replace('#feature/', '');
-      }
-    } catch {}
-    return null;
-  });
-
-  const [isChangelog, setIsChangelog] = useState<boolean>(() => {
-    try {
-      if (typeof window === 'undefined') return false;
-      const path = window.location.pathname.toLowerCase();
-      const hash = window.location.hash.toLowerCase();
-      return path === '/changelog' || path === '/changelog/' || hash === '#changelog';
-    } catch {
-      return false;
-    }
-  });
-
-  const [isPrivacy, setIsPrivacy] = useState<boolean>(() => {
-    try {
-      if (typeof window === 'undefined') return false;
-      const path = window.location.pathname.toLowerCase();
-      const hash = window.location.hash.toLowerCase();
-      return path === '/privacy' || path === '/privacy/' || hash === '#privacy';
-    } catch {
-      return false;
-    }
-  });
-
-  const [isTerms, setIsTerms] = useState<boolean>(() => {
-    try {
-      if (typeof window === 'undefined') return false;
-      const path = window.location.pathname.toLowerCase();
-      const hash = window.location.hash.toLowerCase();
-      return path === '/terms' || path === '/terms/' || path === '/terms.html' || hash === '#terms';
-    } catch {
-      return false;
-    }
-  });
+  const [activeFeatureId, setActiveFeatureId] = useState<string | null>(() => checkRoutes().featureId);
+  const [isChangelog, setIsChangelog] = useState<boolean>(() => checkRoutes().isChangelog);
+  const [isPrivacy, setIsPrivacy] = useState<boolean>(() => checkRoutes().isPrivacy);
+  const [isTerms, setIsTerms] = useState<boolean>(() => checkRoutes().isTerms);
+  const [isNotFound, setIsNotFound] = useState<boolean>(() => checkRoutes().isNotFound);
 
   useEffect(() => {
     const handleLocationChange = () => {
-      try {
-        const path = window.location.pathname.toLowerCase();
-        const hash = window.location.hash.toLowerCase();
-
-        if (path === '/terms' || path === '/terms/' || path === '/terms.html' || hash === '#terms') {
-          setIsTerms(true);
-          setIsPrivacy(false);
-          setIsChangelog(false);
-          setActiveFeatureId(null);
-        } else if (path === '/privacy' || path === '/privacy/' || hash === '#privacy') {
-          setIsTerms(false);
-          setIsPrivacy(true);
-          setIsChangelog(false);
-          setActiveFeatureId(null);
-        } else if (path === '/changelog' || path === '/changelog/' || hash === '#changelog') {
-          setIsTerms(false);
-          setIsChangelog(true);
-          setIsPrivacy(false);
-          setActiveFeatureId(null);
-        } else if (hash.startsWith('#feature/')) {
-          setActiveFeatureId(window.location.hash.replace('#feature/', ''));
-          setIsTerms(false);
-          setIsChangelog(false);
-          setIsPrivacy(false);
-        } else {
-          setActiveFeatureId(null);
-          setIsTerms(false);
-          setIsChangelog(false);
-          setIsPrivacy(false);
-        }
-      } catch {}
+      const routes = checkRoutes();
+      setIsTerms(routes.isTerms);
+      setIsPrivacy(routes.isPrivacy);
+      setIsChangelog(routes.isChangelog);
+      setActiveFeatureId(routes.featureId);
+      setIsNotFound(routes.isNotFound);
     };
 
     try {
@@ -131,6 +105,7 @@ export const App: React.FC = () => {
   }, []);
 
   const handleSelectFeature = (id: string) => {
+    setIsNotFound(false);
     setIsTerms(false);
     setIsPrivacy(false);
     setIsChangelog(false);
@@ -144,7 +119,8 @@ export const App: React.FC = () => {
         path === '/terms/' || 
         path === '/terms.html' || 
         path === '/changelog' || 
-        path === '/changelog/'
+        path === '/changelog/' ||
+        isNotFound
       ) {
         history.pushState(null, '', `/#feature/${id}`);
       } else {
@@ -158,6 +134,7 @@ export const App: React.FC = () => {
 
   const handleOpenChangelog = () => {
     setActiveFeatureId(null);
+    setIsNotFound(false);
     setIsTerms(false);
     setIsPrivacy(false);
     setIsChangelog(true);
@@ -171,6 +148,7 @@ export const App: React.FC = () => {
 
   const handleOpenPrivacy = () => {
     setActiveFeatureId(null);
+    setIsNotFound(false);
     setIsTerms(false);
     setIsChangelog(false);
     setIsPrivacy(true);
@@ -184,6 +162,7 @@ export const App: React.FC = () => {
 
   const handleOpenTerms = () => {
     setActiveFeatureId(null);
+    setIsNotFound(false);
     setIsChangelog(false);
     setIsPrivacy(false);
     setIsTerms(true);
@@ -197,26 +176,12 @@ export const App: React.FC = () => {
 
   const handleGoHome = () => {
     setActiveFeatureId(null);
+    setIsNotFound(false);
     setIsChangelog(false);
     setIsPrivacy(false);
     setIsTerms(false);
     try {
-      const path = window.location.pathname.toLowerCase();
-      if (
-        window.location.hash.startsWith('#feature/') ||
-        window.location.hash === '#changelog' ||
-        window.location.hash === '#privacy' ||
-        window.location.hash === '#terms' ||
-        path === '/privacy' ||
-        path === '/privacy/' ||
-        path === '/terms' ||
-        path === '/terms/' ||
-        path === '/terms.html' ||
-        path === '/changelog' ||
-        path === '/changelog/'
-      ) {
-        history.pushState(null, '', '/');
-      }
+      history.pushState(null, '', '/');
     } catch {}
     try {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -236,7 +201,9 @@ export const App: React.FC = () => {
       {/* Main Content: Dynamic View Routing with Lazy Suspense */}
       <main className="min-h-screen flex-1 flex flex-col w-full relative z-10">
         <Suspense fallback={<div className="min-h-screen flex-1 flex flex-col w-full bg-black" />}>
-          {isTerms ? (
+          {isNotFound ? (
+            <NotFoundPage onBack={handleGoHome} />
+          ) : isTerms ? (
             <TermsPage 
               currentLang={currentLang}
               onBack={handleGoHome}

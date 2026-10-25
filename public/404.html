@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404: Tactical Signal Lost — Peekly for FACEIT</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        background: #000000;
+        color: #ffffff;
+        font-family: 'Inter', -apple-system, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        text-align: center;
+      }
+      .container {
+        max-width: 540px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .watermark-box {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 24px;
+        user-select: none;
+      }
+      .num-404 {
+        font-size: 130px;
+        font-weight: 900;
+        color: #141518;
+        letter-spacing: -0.06em;
+        line-height: 1;
+        filter: drop-shadow(0 0 35px rgba(255, 85, 0, 0.08));
+      }
+      .reticle-hub {
+        position: absolute;
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: #0a0a0c;
+        border: 1px solid #ff5500;
+        box-shadow: 0 0 25px rgba(255, 85, 0, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .ping-ring {
+        position: absolute;
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 85, 0, 0.4);
+        animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+      }
+      @keyframes ping {
+        75%, 100% { transform: scale(1.6); opacity: 0; }
+      }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 12px;
+        background: #0a0a0c;
+        border: 1px solid #262626;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        margin-bottom: 16px;
+      }
+      .dot { width: 6px; height: 6px; border-radius: 50%; background: #ff5500; }
+      h1 {
+        font-size: 26px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+      }
+      p {
+        color: #8b8e96;
+        font-size: 14px;
+        line-height: 1.6;
+        margin-bottom: 32px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 28px;
+        background: #ffffff;
+        color: #000000;
+        font-weight: 800;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        text-decoration: none;
+        border: 1px solid #ffffff;
+        transition: background-color 0.15s, color 0.15s;
+        cursor: pointer;
+      }
+      .btn:hover {
+        background: #ff5500;
+        color: #000000;
+        border-color: #ffffff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="watermark-box">
+        <div class="num-404">404</div>
+        <div class="ping-ring"></div>
+        <div class="reticle-hub">
+          <svg width="40" height="26" viewBox="6 22 88 56" fill="none">
+            <path d="M 8 50 C 24 30, 36 24, 50 24 C 64 24, 76 30, 92 50 C 76 70, 64 76, 50 76 C 36 76, 24 70, 8 50 Z M 50 29 A 21 21 0 1 0 50 71 A 21 21 0 1 0 50 29 Z" fill="#ff5500" fill-rule="evenodd"/>
+            <circle cx="50" cy="50" r="13.5" fill="none" stroke="#ff5500" stroke-width="3.2"/>
+            <circle cx="50" cy="50" r="4.5" fill="#ff5500"/>
+            <rect x="48.25" y="32" width="3.5" height="11.5" rx="0.5" fill="#ff5500"/>
+            <rect x="48.25" y="56.5" width="3.5" height="11.5" rx="0.5" fill="#ff5500"/>
+            <rect x="32" y="48.25" width="11.5" height="3.5" rx="0.5" fill="#ff5500"/>
+            <rect x="56.5" y="48.25" width="11.5" height="3.5" rx="0.5" fill="#ff5500"/>
+          </svg>
+        </div>
+      </div>
+      <div class="tag">
+        <span class="dot"></span>
+        <span style="color:#ff5500;font-weight:bold;">STATUS:</span>
+        <span style="color:#fff;">SECTOR_NOT_FOUND</span>
+      </div>
+      <h1>TACTICAL SIGNAL LOST</h1>
+      <p>The requested coordinate does not exist in the active FACEIT map pool or has been relocated.</p>
+      <a href="/" class="btn">&lt; RETURN TO BASE</a>
+    </div>
+  </body>
+</html>
