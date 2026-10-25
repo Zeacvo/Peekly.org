@@ -480,36 +480,6 @@ export function generateErrorHtml(message: string, status = 400, _title = 'AUTHO
     <p class="error-desc">${safeMessage}</p>
     <a href="/" class="home-btn">&lt; GO TO HOME PAGE</a>
   </main>
-
-  <!-- Footer matching site -->
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <div class="footer-left">
-        <a href="/" class="footer-logo">
-          <svg width="20" height="13" viewBox="6 22 88 56" fill="none">
-            <path d="M 8 50 C 24 30, 36 24, 50 24 C 64 24, 76 30, 92 50 C 76 70, 64 76, 50 76 C 36 76, 24 70, 8 50 Z M 50 29 A 21 21 0 1 0 50 71 A 21 21 0 1 0 50 29 Z" fill="currentColor" fill-rule="evenodd"/>
-            <circle cx="50" cy="50" r="13.5" fill="none" stroke="currentColor" stroke-width="3.2"/>
-            <circle cx="50" cy="50" r="4.5" fill="currentColor"/>
-            <rect x="48.25" y="32" width="3.5" height="11.5" rx="0.5" fill="currentColor"/>
-            <rect x="48.25" y="56.5" width="3.5" height="11.5" rx="0.5" fill="currentColor"/>
-            <rect x="32" y="48.25" width="11.5" height="3.5" rx="0.5" fill="currentColor"/>
-            <rect x="56.5" y="48.25" width="11.5" height="3.5" rx="0.5" fill="currentColor"/>
-          </svg>
-          <span>PEEKLY</span>
-        </a>
-        <p class="footer-disclaimer">
-          Peekly is developed independently, and is not officially endorsed by or affiliated with FACEIT or Valve Corporation.
-        </p>
-      </div>
-
-      <div class="footer-right">
-        <a href="/terms" class="footer-link">Terms of Service</a>
-        <a href="/#changelog" class="footer-link">Changelog</a>
-        <a href="/privacy" class="footer-link">Privacy Policy</a>
-        <p class="footer-copy">© 2026 Peekly. All rights reserved.</p>
-      </div>
-    </div>
-  </footer>
 </body>
 </html>`;
 }
@@ -544,26 +514,17 @@ export async function onRequest(context: EventContext): Promise<Response> {
   const oauthError = url.searchParams.get('error');
   const oauthErrorDescription = url.searchParams.get('error_description');
   if (oauthError) {
-    return new Response(
-      generateErrorHtml(oauthErrorDescription || oauthError, 400, 'AUTHORIZATION ERROR'),
-      {
-        status: 400,
-        headers: {
-          'Content-Type': 'text/html; charset=utf-8',
-          'Cache-Control': 'no-store, max-age=0',
-        },
-      }
-    );
+    const errorUrl = new URL('/auth/error', context.request.url);
+    errorUrl.searchParams.set('status', '400');
+    errorUrl.searchParams.set('message', oauthErrorDescription || oauthError);
+    return Response.redirect(errorUrl.toString(), 302);
   }
 
   if (!code) {
-    return new Response(generateErrorHtml('Missing required authorization code parameter.', 400), {
-      status: 400,
-      headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'no-store, max-age=0',
-      },
-    });
+    const errorUrl = new URL('/auth/error', context.request.url);
+    errorUrl.searchParams.set('status', '400');
+    errorUrl.searchParams.set('message', 'Missing required authorization code parameter.');
+    return Response.redirect(errorUrl.toString(), 302);
   }
 
   // Extract PKCE verifier from state parameter (or cookie fallback)
@@ -613,13 +574,10 @@ export async function onRequest(context: EventContext): Promise<Response> {
         }
       } catch {}
 
-      return new Response(
-        generateErrorHtml(errDescription, 400, 'AUTHORIZATION ERROR'),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'text/html; charset=utf-8' },
-        }
-      );
+      const errorUrl = new URL('/auth/error', context.request.url);
+      errorUrl.searchParams.set('status', '400');
+      errorUrl.searchParams.set('message', errDescription);
+      return Response.redirect(errorUrl.toString(), 302);
     }
 
     const tokenData = (await tokenRes.json()) as { access_token?: string; id_token?: string };
@@ -674,13 +632,10 @@ export async function onRequest(context: EventContext): Promise<Response> {
     }
 
     if (!nickname) {
-      return new Response(
-        generateErrorHtml(`Could not determine FACEIT user nickname: ${JSON.stringify(tokenData)}`, 400),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'text/html; charset=utf-8' },
-        }
-      );
+      const errorUrl = new URL('/auth/error', context.request.url);
+      errorUrl.searchParams.set('status', '400');
+      errorUrl.searchParams.set('message', 'Could not determine FACEIT user nickname.');
+      return Response.redirect(errorUrl.toString(), 302);
     }
 
     // 4. Competitive CS2 stats
@@ -729,10 +684,10 @@ export async function onRequest(context: EventContext): Promise<Response> {
 
     return Response.redirect(successUrl.toString(), 302);
   } catch (err) {
-    const message = err instanceof Error ? (err.stack || err.message) : String(err);
-    return new Response(generateErrorHtml(`Internal Error: ${message}`, 400), {
-      status: 400,
-      headers: { 'Content-Type': 'text/html; charset=utf-8' },
-    });
+    const message = err instanceof Error ? err.message : String(err);
+    const errorUrl = new URL('/auth/error', context.request.url);
+    errorUrl.searchParams.set('status', '500');
+    errorUrl.searchParams.set('message', message);
+    return Response.redirect(errorUrl.toString(), 302);
   }
 }

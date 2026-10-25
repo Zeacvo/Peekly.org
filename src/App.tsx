@@ -21,40 +21,56 @@ const TermsPage = lazy(() =>
 const NotFoundPage = lazy(() =>
   import('./components/NotFoundPage').then((m) => ({ default: m.NotFoundPage }))
 );
+const AuthErrorPage = lazy(() =>
+  import('./components/AuthErrorPage').then((m) => ({ default: m.AuthErrorPage }))
+);
 
 const checkRoutes = () => {
   try {
     if (typeof window === 'undefined') {
-      return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false };
+      return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
     const rawPath = window.location.pathname.toLowerCase();
     const path = rawPath.replace(/\/$/, '') || '/';
     const hash = window.location.hash.toLowerCase();
 
+    if (path === '/auth/error') {
+      const searchParams = new URLSearchParams(window.location.search);
+      return {
+        isTerms: false,
+        isPrivacy: false,
+        isChangelog: false,
+        featureId: null,
+        isNotFound: false,
+        isAuthError: true,
+        authErrorStatus: searchParams.get('status') || '400',
+        authErrorMessage: searchParams.get('message') || 'Missing required authorization code parameter.',
+      };
+    }
     if (path === '/terms' || path === '/terms.html' || hash === '#terms') {
-      return { isTerms: true, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false };
+      return { isTerms: true, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
     if (path === '/privacy' || hash === '#privacy') {
-      return { isTerms: false, isPrivacy: true, isChangelog: false, featureId: null, isNotFound: false };
+      return { isTerms: false, isPrivacy: true, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
     if (path === '/changelog' || hash === '#changelog') {
-      return { isTerms: false, isPrivacy: false, isChangelog: true, featureId: null, isNotFound: false };
+      return { isTerms: false, isPrivacy: false, isChangelog: true, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
     if (window.location.hash.startsWith('#feature/')) {
       const id = window.location.hash.replace('#feature/', '');
-      return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: id, isNotFound: false };
+      return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: id, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
     if (path === '/auth/extension-success') {
-      return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false };
+      return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
     if (path === '/') {
-      return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false };
+      return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
 
     // Any other path is treated as 404 Not Found
-    return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: true };
+    return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: true, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
   } catch {
-    return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false };
+    return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
   }
 };
 
@@ -84,6 +100,9 @@ export const App: React.FC = () => {
   const [isPrivacy, setIsPrivacy] = useState<boolean>(() => checkRoutes().isPrivacy);
   const [isTerms, setIsTerms] = useState<boolean>(() => checkRoutes().isTerms);
   const [isNotFound, setIsNotFound] = useState<boolean>(() => checkRoutes().isNotFound);
+  const [isAuthError, setIsAuthError] = useState<boolean>(() => checkRoutes().isAuthError);
+  const [authErrorStatus, setAuthErrorStatus] = useState<string>(() => checkRoutes().authErrorStatus);
+  const [authErrorMessage, setAuthErrorMessage] = useState<string>(() => checkRoutes().authErrorMessage);
 
   useEffect(() => {
     const handleLocationChange = () => {
@@ -93,6 +112,9 @@ export const App: React.FC = () => {
       setIsChangelog(routes.isChangelog);
       setActiveFeatureId(routes.featureId);
       setIsNotFound(routes.isNotFound);
+      setIsAuthError(routes.isAuthError);
+      setAuthErrorStatus(routes.authErrorStatus);
+      setAuthErrorMessage(routes.authErrorMessage);
     };
 
     try {
@@ -109,6 +131,7 @@ export const App: React.FC = () => {
 
   const handleSelectFeature = (id: string) => {
     setIsNotFound(false);
+    setIsAuthError(false);
     setIsTerms(false);
     setIsPrivacy(false);
     setIsChangelog(false);
@@ -123,7 +146,8 @@ export const App: React.FC = () => {
         path === '/terms.html' || 
         path === '/changelog' || 
         path === '/changelog/' ||
-        isNotFound
+        isNotFound ||
+        isAuthError
       ) {
         history.pushState(null, '', `/#feature/${id}`);
       } else {
@@ -138,6 +162,7 @@ export const App: React.FC = () => {
   const handleOpenChangelog = () => {
     setActiveFeatureId(null);
     setIsNotFound(false);
+    setIsAuthError(false);
     setIsTerms(false);
     setIsPrivacy(false);
     setIsChangelog(true);
@@ -152,6 +177,7 @@ export const App: React.FC = () => {
   const handleOpenPrivacy = () => {
     setActiveFeatureId(null);
     setIsNotFound(false);
+    setIsAuthError(false);
     setIsTerms(false);
     setIsChangelog(false);
     setIsPrivacy(true);
@@ -166,6 +192,7 @@ export const App: React.FC = () => {
   const handleOpenTerms = () => {
     setActiveFeatureId(null);
     setIsNotFound(false);
+    setIsAuthError(false);
     setIsChangelog(false);
     setIsPrivacy(false);
     setIsTerms(true);
@@ -180,6 +207,7 @@ export const App: React.FC = () => {
   const handleGoHome = () => {
     setActiveFeatureId(null);
     setIsNotFound(false);
+    setIsAuthError(false);
     setIsChangelog(false);
     setIsPrivacy(false);
     setIsTerms(false);
@@ -204,7 +232,14 @@ export const App: React.FC = () => {
       {/* Main Content: Dynamic View Routing with Lazy Suspense */}
       <main className="min-h-screen flex-1 flex flex-col w-full relative z-10">
         <Suspense fallback={<div className="min-h-screen flex-1 flex flex-col w-full bg-black" />}>
-          {isNotFound ? (
+          {isAuthError ? (
+            <AuthErrorPage
+              status={authErrorStatus}
+              errorMessage={authErrorMessage}
+              currentLang={currentLang}
+              onBack={handleGoHome}
+            />
+          ) : isNotFound ? (
             <NotFoundPage 
               currentLang={currentLang}
               onBack={handleGoHome}
@@ -242,14 +277,16 @@ export const App: React.FC = () => {
         </Suspense>
       </main>
 
-      {/* Footer */}
-      <Footer 
-        currentLang={currentLang} 
-        onOpenChangelog={handleOpenChangelog}
-        onOpenPrivacy={handleOpenPrivacy}
-        onOpenTerms={handleOpenTerms}
-        onGoHome={handleGoHome}
-      />
+      {/* Footer (hidden on 404 and auth error for clean minimalist layout) */}
+      {!isNotFound && !isAuthError && (
+        <Footer 
+          currentLang={currentLang} 
+          onOpenChangelog={handleOpenChangelog}
+          onOpenPrivacy={handleOpenPrivacy}
+          onOpenTerms={handleOpenTerms}
+          onGoHome={handleGoHome}
+        />
+      )}
     </div>
   );
 };
