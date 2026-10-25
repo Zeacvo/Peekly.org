@@ -1,9 +1,25 @@
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import fs from 'node:fs';
+import path from 'node:path';
 import { onRequest as onCallbackRequest, generateErrorHtml } from './functions/api/auth/faceit/callback.ts';
 import { onRequest as onLoginRequest } from './functions/api/auth/faceit/login.ts';
 import { onRequest as onSuccessRequest } from './functions/auth/extension-success.ts';
+
+function spa404Plugin(): Plugin {
+  return {
+    name: 'spa-404-fallback',
+    closeBundle() {
+      const distDir = path.resolve(import.meta.dirname, 'dist');
+      const indexPath = path.join(distDir, 'index.html');
+      const notFoundPath = path.join(distDir, '404.html');
+      if (fs.existsSync(indexPath)) {
+        fs.copyFileSync(indexPath, notFoundPath);
+      }
+    },
+  };
+}
 
 function faceitOAuthDevPlugin(): Plugin {
   return {
@@ -68,5 +84,6 @@ export default defineConfig({
     react(),
     tailwindcss(),
     faceitOAuthDevPlugin(),
+    spa404Plugin(),
   ],
 });
