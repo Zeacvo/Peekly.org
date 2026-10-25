@@ -7,8 +7,28 @@ interface FooterProps {
   currentLang: Language;
   onOpenChangelog?: () => void;
   onOpenPrivacy?: () => void;
+  onOpenTerms?: () => void;
   onGoHome?: () => void;
 }
+
+const termsLabelMap: Record<Language, string> = {
+  en: 'Terms of Service',
+  da: 'Servicevilkår',
+  de: 'Nutzungsbedingungen',
+  es: 'Términos de servicio',
+  fr: "Conditions d'utilisation",
+  pl: 'Warunki korzystania',
+  pt: 'Termos de serviço',
+  fi: 'Käyttöehdot',
+  sv: 'Användarvillkor',
+  tr: 'Kullanım Şartları',
+  ru: 'Условия использования',
+  uk: 'Умови використання',
+  ar: 'شروط الخدمة',
+  ja: '利用規約',
+  ko: '이용약관',
+  zh: '服务条款',
+};
 
 const privacyLabelMap: Record<Language, string> = {
   en: 'Privacy Policy',
@@ -33,6 +53,7 @@ export const Footer: React.FC<FooterProps> = ({
   currentLang, 
   onOpenChangelog, 
   onOpenPrivacy,
+  onOpenTerms,
   onGoHome 
 }) => {
   const t = translations[currentLang] || translations.en;
@@ -66,7 +87,24 @@ export const Footer: React.FC<FooterProps> = ({
 
         {/* Right Column: Navigation Links & Copyright */}
         <div className="flex flex-col items-start md:items-end text-left md:text-right gap-1.5 text-[12px]">
-          {/* Row 1: Localized Changelog Link */}
+          {/* Row 1: Terms of Service Link (strictly above Changelog) */}
+          <a
+            href="/terms"
+            onClick={(e) => {
+              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              e.preventDefault();
+              if (onOpenTerms) onOpenTerms();
+              else {
+                history.pushState(null, '', '/terms');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }
+            }}
+            className="text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer bg-transparent border-none p-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
+          >
+            {termsLabelMap[currentLang] || 'Terms of Service'}
+          </a>
+
+          {/* Row 2: Localized Changelog Link */}
           <button
             type="button"
             onClick={() => {
@@ -78,7 +116,7 @@ export const Footer: React.FC<FooterProps> = ({
             {t.footer.changelog || t.nav.changelog}
           </button>
 
-          {/* Row 2: Privacy Policy Link */}
+          {/* Row 3: Privacy Policy Link */}
           <a
             href="/privacy"
             onClick={(e) => {
@@ -95,7 +133,7 @@ export const Footer: React.FC<FooterProps> = ({
             {privacyLabelMap[currentLang] || 'Privacy Policy'}
           </a>
 
-          {/* Row 3: Copyright */}
+          {/* Row 4: Copyright */}
           <p className="text-[11px] text-neutral-500 font-sans whitespace-nowrap m-0 mt-1">
             © 2026 Peekly. {t.footer.allRightsReserved || t.footer.rights}
           </p>

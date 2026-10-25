@@ -15,6 +15,9 @@ const ChangelogPage = lazy(() =>
 const PrivacyPage = lazy(() =>
   import('./components/PrivacyPage').then((m) => ({ default: m.PrivacyPage }))
 );
+const TermsPage = lazy(() =>
+  import('./components/TermsPage').then((m) => ({ default: m.TermsPage }))
+);
 
 export const App: React.FC = () => {
   const [currentLang, setCurrentLang] = useState<Language>(() => {
@@ -69,26 +72,46 @@ export const App: React.FC = () => {
     }
   });
 
+  const [isTerms, setIsTerms] = useState<boolean>(() => {
+    try {
+      if (typeof window === 'undefined') return false;
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      return path === '/terms' || path === '/terms/' || path === '/terms.html' || hash === '#terms';
+    } catch {
+      return false;
+    }
+  });
+
   useEffect(() => {
     const handleLocationChange = () => {
       try {
         const path = window.location.pathname.toLowerCase();
         const hash = window.location.hash.toLowerCase();
 
-        if (path === '/privacy' || path === '/privacy/' || hash === '#privacy') {
+        if (path === '/terms' || path === '/terms/' || path === '/terms.html' || hash === '#terms') {
+          setIsTerms(true);
+          setIsPrivacy(false);
+          setIsChangelog(false);
+          setActiveFeatureId(null);
+        } else if (path === '/privacy' || path === '/privacy/' || hash === '#privacy') {
+          setIsTerms(false);
           setIsPrivacy(true);
           setIsChangelog(false);
           setActiveFeatureId(null);
         } else if (path === '/changelog' || path === '/changelog/' || hash === '#changelog') {
+          setIsTerms(false);
           setIsChangelog(true);
           setIsPrivacy(false);
           setActiveFeatureId(null);
         } else if (hash.startsWith('#feature/')) {
           setActiveFeatureId(window.location.hash.replace('#feature/', ''));
+          setIsTerms(false);
           setIsChangelog(false);
           setIsPrivacy(false);
         } else {
           setActiveFeatureId(null);
+          setIsTerms(false);
           setIsChangelog(false);
           setIsPrivacy(false);
         }
@@ -108,12 +131,21 @@ export const App: React.FC = () => {
   }, []);
 
   const handleSelectFeature = (id: string) => {
+    setIsTerms(false);
     setIsPrivacy(false);
     setIsChangelog(false);
     setActiveFeatureId(id);
     try {
       const path = window.location.pathname.toLowerCase();
-      if (path === '/privacy' || path === '/privacy/' || path === '/changelog' || path === '/changelog/') {
+      if (
+        path === '/privacy' || 
+        path === '/privacy/' || 
+        path === '/terms' || 
+        path === '/terms/' || 
+        path === '/terms.html' || 
+        path === '/changelog' || 
+        path === '/changelog/'
+      ) {
         history.pushState(null, '', `/#feature/${id}`);
       } else {
         window.location.hash = `#feature/${id}`;
@@ -126,6 +158,7 @@ export const App: React.FC = () => {
 
   const handleOpenChangelog = () => {
     setActiveFeatureId(null);
+    setIsTerms(false);
     setIsPrivacy(false);
     setIsChangelog(true);
     try {
@@ -138,6 +171,7 @@ export const App: React.FC = () => {
 
   const handleOpenPrivacy = () => {
     setActiveFeatureId(null);
+    setIsTerms(false);
     setIsChangelog(false);
     setIsPrivacy(true);
     try {
@@ -148,18 +182,36 @@ export const App: React.FC = () => {
     } catch {}
   };
 
+  const handleOpenTerms = () => {
+    setActiveFeatureId(null);
+    setIsChangelog(false);
+    setIsPrivacy(false);
+    setIsTerms(true);
+    try {
+      history.pushState(null, '', '/terms');
+    } catch {}
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch {}
+  };
+
   const handleGoHome = () => {
     setActiveFeatureId(null);
     setIsChangelog(false);
     setIsPrivacy(false);
+    setIsTerms(false);
     try {
       const path = window.location.pathname.toLowerCase();
       if (
         window.location.hash.startsWith('#feature/') ||
         window.location.hash === '#changelog' ||
         window.location.hash === '#privacy' ||
+        window.location.hash === '#terms' ||
         path === '/privacy' ||
         path === '/privacy/' ||
+        path === '/terms' ||
+        path === '/terms/' ||
+        path === '/terms.html' ||
         path === '/changelog' ||
         path === '/changelog/'
       ) {
@@ -184,7 +236,12 @@ export const App: React.FC = () => {
       {/* Main Content: Dynamic View Routing with Lazy Suspense */}
       <main className="min-h-screen flex-1 flex flex-col w-full relative z-10">
         <Suspense fallback={<div className="min-h-screen flex-1 flex flex-col w-full bg-black" />}>
-          {isPrivacy ? (
+          {isTerms ? (
+            <TermsPage 
+              currentLang={currentLang}
+              onBack={handleGoHome}
+            />
+          ) : isPrivacy ? (
             <PrivacyPage 
               currentLang={currentLang}
               onBack={handleGoHome}
@@ -217,6 +274,7 @@ export const App: React.FC = () => {
         currentLang={currentLang} 
         onOpenChangelog={handleOpenChangelog}
         onOpenPrivacy={handleOpenPrivacy}
+        onOpenTerms={handleOpenTerms}
         onGoHome={handleGoHome}
       />
     </div>
