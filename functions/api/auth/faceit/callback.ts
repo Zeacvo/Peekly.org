@@ -107,18 +107,35 @@ export function generateSuccessHtml(profile: FaceitProfilePayload): string {
     </div>
     <script>
       const payload = ${payloadJson};
-      // 1. Отправка через postMessage (если открыто как popup)
-      if (window.opener) {
-        try {
+      // 1. Отправка через postMessage (если открыто как popup или фрейм)
+      try {
+        if (window.opener) {
           window.opener.postMessage({ type: 'PEEKLY_AUTH_SUCCESS', profile: payload }, '*');
-        } catch (e) {}
-      }
-      window.postMessage({ type: 'PEEKLY_AUTH_SUCCESS', profile: payload }, '*');
+        }
+      } catch (e) {}
+      try {
+        window.postMessage({ type: 'PEEKLY_AUTH_SUCCESS', profile: payload }, '*');
+      } catch (e) {}
+
       // 2. Запись во временный localStorage для кросс-вкладочного слушателя расширения
       try {
         localStorage.setItem('peekly_auth_token', JSON.stringify({ profile: payload, ts: Date.now() }));
       } catch (e) {}
-      setTimeout(() => window.close(), 1200);
+
+      // 3. Прямая отправка в расширение Chrome (через externally_connectable)
+      try {
+        if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+          chrome.runtime.sendMessage('ohkbcdegfepkjgljolmmonkpncjhoaek', {
+            type: 'PEEKLY_AUTH_SUCCESS',
+            profile: payload,
+          }, () => {});
+        }
+      } catch (e) {}
+
+      // 4. Автоматическое закрытие вкладки
+      setTimeout(() => {
+        try { window.close(); } catch (e) {}
+      }, 1000);
     </script>
   </body>
 </html>`;
@@ -273,13 +290,11 @@ export async function onRequest(context: EventContext): Promise<Response> {
       membership,
     };
 
-    return new Response(generateSuccessHtml(profile), {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'no-store, max-age=0',
-      },
-    });
+    // Redirect user to the extension completion page with profile payload
+    const successUrl = new URL('/auth/extension-success', context.request.url);
+    successUrl.searchParams.set('data', JSON.stringify(profile));
+
+    return Response.redirect(successUrl.toString(), 302);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return new Response(generateErrorHtml(`Internal Server Error: ${message}`, 500), {

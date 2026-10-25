@@ -44,6 +44,9 @@ const checkRoutes = () => {
       const id = window.location.hash.replace('#feature/', '');
       return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: id, isNotFound: false };
     }
+    if (path === '/auth/extension-success') {
+      return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false };
+    }
     if (path === '/') {
       return { isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false };
     }
