@@ -3,6 +3,7 @@ import { ChevronLeft } from 'lucide-react';
 import type { Language } from '../translations';
 import { translations } from '../translations';
 import { ChromeLogo } from './ChromeLogo';
+import { termsTranslations } from '../data/termsTranslations';
 
 interface TermsPageProps {
   currentLang: Language;
@@ -31,17 +32,18 @@ const backLabelMap: Record<Language, string> = {
 export const TermsPage: React.FC<TermsPageProps> = ({ currentLang, onBack }) => {
   const [elapsedTime, setElapsedTime] = useState<number>(0);
 
+  const t = termsTranslations[currentLang] || termsTranslations.en;
   const isRtl = currentLang === 'ar';
   const ctaLabel = (translations[currentLang] || translations.en).hero.cta.toUpperCase();
 
   // Synchronize document title
   useEffect(() => {
     const prevTitle = document.title;
-    document.title = 'Terms of Service — Peekly for FACEIT';
+    document.title = `${t.title} — Peekly for FACEIT`;
     return () => {
       document.title = prevTitle;
     };
-  }, []);
+  }, [t.title]);
 
   // Intro animation timer (smooth 3.2s kinematic sequence, then freezes permanently in static state)
   useEffect(() => {
@@ -91,6 +93,47 @@ export const TermsPage: React.FC<TermsPageProps> = ({ currentLang, onBack }) => 
 
   const accentProgress = isFinal ? 1 : Math.max(0, Math.min(1, (animTime - 2.2) / 0.7));
   const accentEase = isFinal ? 1 : 1 - Math.pow(1 - accentProgress, 2);
+
+  const renderBadge = (badgeText: string) => {
+    const colonIndex = badgeText.indexOf(':') !== -1 ? badgeText.indexOf(':') : badgeText.indexOf('：');
+    if (colonIndex !== -1) {
+      const label = badgeText.slice(0, colonIndex + 1);
+      const value = badgeText.slice(colonIndex + 1).trim();
+      return (
+        <span className="inline-flex items-center gap-1.5 bg-[#0A0A0A] border border-neutral-800 px-2.5 py-1 rounded-none">
+          <span className="text-neutral-500 font-sans">{label}</span>
+          <strong className="text-white font-medium">{value}</strong>
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1.5 bg-[#0A0A0A] border border-neutral-800 px-2.5 py-1 rounded-none text-neutral-300">
+        {badgeText}
+      </span>
+    );
+  };
+
+  const renderSectionTitle = (fullTitle: string) => {
+    const dashIndex = fullTitle.indexOf(' — ');
+    if (dashIndex !== -1) {
+      const main = fullTitle.slice(0, dashIndex);
+      const sub = fullTitle.slice(dashIndex + 3);
+      return (
+        <h2 className="w-full max-w-none font-sans text-sm md:text-[15px] font-bold tracking-tight text-white cursor-text select-text leading-snug">
+          <span>{main}</span>
+          <span className="text-neutral-500 font-normal mx-2 select-none">—</span>
+          <span className="font-sans text-sm md:text-[15px] font-normal text-neutral-400">
+            {sub}
+          </span>
+        </h2>
+      );
+    }
+    return (
+      <h2 className="w-full max-w-none font-sans text-sm md:text-[15px] font-bold tracking-tight text-white cursor-text select-text leading-snug">
+        <span>{fullTitle}</span>
+      </h2>
+    );
+  };
 
   return (
     <div 
@@ -297,24 +340,18 @@ export const TermsPage: React.FC<TermsPageProps> = ({ currentLang, onBack }) => 
       <div className="w-full max-w-none px-0 mx-0 flex flex-col items-start text-left cursor-default select-text mb-0">
         {/* H1 Heading */}
         <h1 className="w-full max-w-none text-3xl md:text-4xl font-bold tracking-tight text-white mb-2 cursor-text select-text font-sans">
-          Terms of Service
+          {t.title}
         </h1>
 
         {/* Subtitle */}
         <p className="w-full max-w-none font-sans text-sm md:text-[15px] font-normal text-neutral-400 leading-relaxed text-justify mb-8 cursor-text select-text">
-          Official terms of service, acceptable use policy, and legal disclaimers for Peekly for FACEIT.
+          {t.subtitle}
         </p>
 
         {/* Metadata Badges */}
         <div className="w-full max-w-none flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-neutral-400 font-mono mb-10 select-text">
-          <span className="inline-flex items-center gap-1.5 bg-[#0A0A0A] border border-neutral-800 px-2.5 py-1 rounded-none">
-            <span className="text-neutral-500 font-sans">Project:</span>
-            <strong className="text-white font-medium">Peekly for FACEIT</strong>
-          </span>
-          <span className="inline-flex items-center gap-1.5 bg-[#0A0A0A] border border-neutral-800 px-2.5 py-1 rounded-none">
-            <span className="text-neutral-500 font-sans">Effective Date:</span>
-            <strong className="text-white font-medium">October 2026</strong>
-          </span>
+          {renderBadge(t.badgeProject)}
+          {renderBadge(t.badgeDate)}
         </div>
 
         {/* Sections 01–06 with Linear Header */}
@@ -323,20 +360,12 @@ export const TermsPage: React.FC<TermsPageProps> = ({ currentLang, onBack }) => 
           <div className="w-full max-w-none">
             <div className="w-full max-w-none flex items-baseline gap-2.5 sm:gap-3 mb-2.5 cursor-text select-text">
               <span className="font-mono text-sm md:text-[15px] font-bold text-neutral-500 select-none shrink-0 w-6 sm:w-7">
-                01
+                {t.sec1_num}
               </span>
-              <h2 className="w-full max-w-none font-sans text-sm md:text-[15px] font-bold tracking-tight text-white cursor-text select-text leading-snug">
-                <span>Acceptance of Terms</span>
-                <span className="text-neutral-500 font-normal mx-2 select-none">—</span>
-                <span className="font-sans text-sm md:text-[15px] font-normal text-neutral-400">
-                  Agreement and single-purpose mandate
-                </span>
-              </h2>
+              {renderSectionTitle(t.sec1_title)}
             </div>
             <div className={`space-y-2.5 font-sans text-sm md:text-[15px] font-normal text-neutral-400 leading-relaxed text-justify cursor-text select-text ${isRtl ? 'pr-8 sm:pr-10' : 'pl-8 sm:pl-10'}`}>
-              <p>
-                By downloading, installing, or using the Peekly for FACEIT browser extension or accessing peekly.org (&quot;the Service&quot;), you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you must discontinue use and uninstall the extension immediately.
-              </p>
+              <p>{t.sec1_body}</p>
             </div>
           </div>
 
@@ -344,20 +373,12 @@ export const TermsPage: React.FC<TermsPageProps> = ({ currentLang, onBack }) => 
           <div className="w-full max-w-none">
             <div className="w-full max-w-none flex items-baseline gap-2.5 sm:gap-3 mb-2.5 cursor-text select-text">
               <span className="font-mono text-sm md:text-[15px] font-bold text-neutral-500 select-none shrink-0 w-6 sm:w-7">
-                02
+                {t.sec2_num}
               </span>
-              <h2 className="w-full max-w-none font-sans text-sm md:text-[15px] font-bold tracking-tight text-white cursor-text select-text leading-snug">
-                <span>Independence &amp; Non-Affiliation</span>
-                <span className="text-neutral-500 font-normal mx-2 select-none">—</span>
-                <span className="font-sans text-sm md:text-[15px] font-normal text-neutral-400">
-                  Trademark and third-party notice
-                </span>
-              </h2>
+              {renderSectionTitle(t.sec2_title)}
             </div>
             <div className={`space-y-2.5 font-sans text-sm md:text-[15px] font-normal text-neutral-400 leading-relaxed text-justify cursor-text select-text ${isRtl ? 'pr-8 sm:pr-10' : 'pl-8 sm:pl-10'}`}>
-              <p>
-                Peekly is an independently developed community software project. Peekly is not endorsed by, directly affiliated with, maintained, authorized, or sponsored by FACEIT Ltd, Valve Corporation, Counter-Strike, or Steam. All product, company, and brand names, logos, and registered trademarks are the property of their respective owners.
-              </p>
+              <p>{t.sec2_body}</p>
             </div>
           </div>
 
@@ -365,43 +386,35 @@ export const TermsPage: React.FC<TermsPageProps> = ({ currentLang, onBack }) => 
           <div className="w-full max-w-none">
             <div className="w-full max-w-none flex items-baseline gap-2.5 sm:gap-3 mb-2.5 cursor-text select-text">
               <span className="font-mono text-sm md:text-[15px] font-bold text-neutral-500 select-none shrink-0 w-6 sm:w-7">
-                03
+                {t.sec3_num}
               </span>
-              <h2 className="w-full max-w-none font-sans text-sm md:text-[15px] font-bold tracking-tight text-white cursor-text select-text leading-snug">
-                <span>Permitted Use &amp; Fair Play</span>
-                <span className="text-neutral-500 font-normal mx-2 select-none">—</span>
-                <span className="font-sans text-sm md:text-[15px] font-normal text-neutral-400">
-                  Client-side competitive intelligence
-                </span>
-              </h2>
+              {renderSectionTitle(t.sec3_title)}
             </div>
             <div className={`space-y-2.5 font-sans text-sm md:text-[15px] font-normal text-neutral-400 leading-relaxed text-justify cursor-text select-text ${isRtl ? 'pr-8 sm:pr-10' : 'pl-8 sm:pl-10'}`}>
-              <p>
-                Peekly operates strictly in accordance with fair play standards and public data accessibility:
-              </p>
+              <p>{t.sec3_lead}</p>
               <div className="space-y-3 my-2">
                 <div className="space-y-1">
-                  <span className="font-medium text-white block text-sm md:text-[15px]">
-                    Client-Side Execution:
-                  </span>
+                  <strong className="font-medium text-white block text-sm md:text-[15px]">
+                    {t.sec3_p1_title}
+                  </strong>
                   <p className="text-neutral-400 text-sm md:text-[15px] leading-relaxed mb-0">
-                    All statistical calculations (ELO swings, K/D, ADR, win rates) run locally in your browser using publicly accessible APIs.
+                    {t.sec3_p1_desc}
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <span className="font-medium text-white block text-sm md:text-[15px]">
-                    No Game Modification:
-                  </span>
+                  <strong className="font-medium text-white block text-sm md:text-[15px]">
+                    {t.sec3_p2_title}
+                  </strong>
                   <p className="text-neutral-400 text-sm md:text-[15px] leading-relaxed mb-0">
-                    Peekly does not hook into, alter, memory-inject, or modify the Counter-Strike 2 game client or game files.
+                    {t.sec3_p2_desc}
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <span className="font-medium text-white block text-sm md:text-[15px]">
-                    No Exploitation:
-                  </span>
+                  <strong className="font-medium text-white block text-sm md:text-[15px]">
+                    {t.sec3_p3_title}
+                  </strong>
                   <p className="text-neutral-400 text-sm md:text-[15px] leading-relaxed mb-0">
-                    Users must not attempt to reverse engineer, bypass security rate limits, or exploit the Service or third-party platforms.
+                    {t.sec3_p3_desc}
                   </p>
                 </div>
               </div>
@@ -412,16 +425,12 @@ export const TermsPage: React.FC<TermsPageProps> = ({ currentLang, onBack }) => 
           <div className="w-full max-w-none">
             <div className="w-full max-w-none flex items-baseline gap-2.5 sm:gap-3 mb-2.5 cursor-text select-text">
               <span className="font-mono text-sm md:text-[15px] font-bold text-neutral-500 select-none shrink-0 w-6 sm:w-7">
-                04
+                {t.sec4_num}
               </span>
-              <h2 className="w-full max-w-none font-sans text-sm md:text-[15px] font-bold tracking-tight text-white cursor-text select-text leading-snug">
-                <span>Intellectual Property &amp; User License</span>
-              </h2>
+              {renderSectionTitle(t.sec4_title)}
             </div>
             <div className={`space-y-2.5 font-sans text-sm md:text-[15px] font-normal text-neutral-400 leading-relaxed text-justify cursor-text select-text ${isRtl ? 'pr-8 sm:pr-10' : 'pl-8 sm:pl-10'}`}>
-              <p>
-                Peekly grants you a personal, non-exclusive, non-transferable, revocable license to use the browser extension for personal, non-commercial analytical purposes. You may not sell, redistribute, or license the software without explicit written consent from the developer.
-              </p>
+              <p>{t.sec4_body}</p>
             </div>
           </div>
 
@@ -429,20 +438,12 @@ export const TermsPage: React.FC<TermsPageProps> = ({ currentLang, onBack }) => 
           <div className="w-full max-w-none">
             <div className="w-full max-w-none flex items-baseline gap-2.5 sm:gap-3 mb-2.5 cursor-text select-text">
               <span className="font-mono text-sm md:text-[15px] font-bold text-neutral-500 select-none shrink-0 w-6 sm:w-7">
-                05
+                {t.sec5_num}
               </span>
-              <h2 className="w-full max-w-none font-sans text-sm md:text-[15px] font-bold tracking-tight text-white cursor-text select-text leading-snug">
-                <span>Disclaimer of Warranties</span>
-                <span className="text-neutral-500 font-normal mx-2 select-none">—</span>
-                <span className="font-sans text-sm md:text-[15px] font-normal text-neutral-400">
-                  &quot;As-Is&quot; provision
-                </span>
-              </h2>
+              {renderSectionTitle(t.sec5_title)}
             </div>
             <div className={`space-y-2.5 font-sans text-sm md:text-[15px] font-normal text-neutral-400 leading-relaxed text-justify cursor-text select-text ${isRtl ? 'pr-8 sm:pr-10' : 'pl-8 sm:pl-10'}`}>
-              <p>
-                The Service and extension are provided on an &quot;AS IS&quot; and &quot;AS AVAILABLE&quot; basis without warranties of any kind, whether express or implied. We do not guarantee uninterrupted access, error-free calculations, or continuous compatibility in the event of third-party API or website structure changes by FACEIT.
-              </p>
+              <p>{t.sec5_body}</p>
             </div>
           </div>
 
@@ -450,16 +451,12 @@ export const TermsPage: React.FC<TermsPageProps> = ({ currentLang, onBack }) => 
           <div className="w-full max-w-none">
             <div className="w-full max-w-none flex items-baseline gap-2.5 sm:gap-3 mb-2.5 cursor-text select-text">
               <span className="font-mono text-sm md:text-[15px] font-bold text-neutral-500 select-none shrink-0 w-6 sm:w-7">
-                06
+                {t.sec6_num}
               </span>
-              <h2 className="w-full max-w-none font-sans text-sm md:text-[15px] font-bold tracking-tight text-white cursor-text select-text leading-snug">
-                <span>Limitation of Liability &amp; Termination</span>
-              </h2>
+              {renderSectionTitle(t.sec6_title)}
             </div>
             <div className={`space-y-2.5 font-sans text-sm md:text-[15px] font-normal text-neutral-400 leading-relaxed text-justify cursor-text select-text ${isRtl ? 'pr-8 sm:pr-10' : 'pl-8 sm:pl-10'}`}>
-              <p>
-                In no event shall Peekly or its developers be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the extension or platform downtime. We reserve the right to suspend or terminate access to features or updates at our sole discretion without prior notice.
-              </p>
+              <p>{t.sec6_body}</p>
             </div>
           </div>
         </div>
