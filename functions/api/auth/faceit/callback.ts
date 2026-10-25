@@ -141,158 +141,375 @@ export function generateSuccessHtml(profile: FaceitProfilePayload): string {
 </html>`;
 }
 
-export function generateErrorHtml(message: string, status = 400, title = 'AUTHORIZATION ERROR'): string {
-  const safeMessage = message
+export function generateErrorHtml(message: string, status = 400, _title = 'AUTHORIZATION ERROR'): string {
+  const displayMessage = message || 'Authorization failed or request was cancelled.';
+  const safeMessage = displayMessage
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 
-  const statusBadge = status === 400
-    ? 'STATUS: BAD_REQUEST'
-    : status === 500
-    ? 'STATUS: SERVER_ERROR'
-    : `STATUS: ERROR_${status}`;
-
-  const statusTitleText = status === 400 ? 'Bad Request' : status === 500 ? 'Internal Server Error' : 'Error';
-
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${status}: ${statusTitleText} — Peekly</title>
+  <title>${status} — Peekly for FACEIT</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Play:wght@400;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
+    html, body {
       background-color: #000000;
       color: #ffffff;
-      font-family: 'Play', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       min-height: 100vh;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      position: relative;
-    }
-    .background-grid {
-      position: absolute;
-      inset: 0;
-      background-image: 
-        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-    }
-    .container {
-      position: relative;
-      z-index: 10;
-      display: flex;
       flex-direction: column;
-      align-items: center;
-      text-align: center;
-      padding: 0 20px;
-      max-width: 680px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
-    .watermark-container {
+    a { color: inherit; text-decoration: none; }
+    
+    /* Site Header */
+    .site-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      height: 64px;
+      background-color: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    @media (min-width: 640px) {
+      .site-header { height: 80px; }
+    }
+    .header-inner {
+      width: 100%;
+      max-width: 1152px;
+      margin: 0 auto;
+      padding: 0 16px;
+      height: 100%;
       display: flex;
       align-items: center;
-      justify-content: center;
-      margin-bottom: 24px;
+      justify-content: space-between;
     }
-    .watermark-number {
-      font-size: clamp(80px, 15vw, 140px);
-      font-weight: 800;
-      line-height: 1;
-      letter-spacing: -0.04em;
+    @media (min-width: 640px) {
+      .header-inner { padding: 0 24px; }
+    }
+    .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .brand-logo {
       color: #ffffff;
-      text-shadow: 0 8px 32px rgba(0, 0, 0, 0.95);
+      transition: color 0.15s ease;
+      height: 28px;
+      width: auto;
+    }
+    @media (min-width: 640px) {
+      .brand-logo { height: 32px; }
+    }
+    .brand-link:hover .brand-logo {
+      color: #ff5500;
+    }
+    .brand-name {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      color: #ffffff;
+      line-height: 1;
       user-select: none;
     }
-    .status-badge {
+    @media (min-width: 640px) {
+      .brand-name { font-size: 24px; }
+    }
+    @media (min-width: 768px) {
+      .brand-name { font-size: 28px; }
+    }
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .nav-changelog {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: #0f1013;
-      border: 1px solid #1f2127;
-      padding: 5px 12px;
-      border-radius: 4px;
+      font-size: 13px;
+      color: #a3a3a3;
+      transition: color 0.15s ease;
+      cursor: pointer;
+    }
+    .nav-changelog:hover { color: #ffffff; }
+    .changelog-cursor {
+      color: #ffffff;
+      font-family: monospace;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    .nav-lang {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #a3a3a3;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.15s ease;
+    }
+    .nav-lang:hover { color: #ffffff; }
+    .btn-header-install {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      height: 36px;
+      padding: 0 16px;
+      background: #ffffff;
+      color: #000000;
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: #8b8e96;
-      margin-bottom: 16px;
+      transition: background-color 0.15s ease, color 0.15s ease;
+      cursor: pointer;
+      margin-left: 8px;
     }
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
+    @media (min-width: 640px) {
+      .btn-header-install { display: inline-flex; }
+    }
+    .btn-header-install:hover {
       background: #ff5500;
-      box-shadow: 0 0 8px #ff5500;
+      color: #000000;
     }
-    .title {
-      font-size: clamp(24px, 4vw, 32px);
-      font-weight: 800;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      margin-bottom: 12px;
+
+    /* Main Central Section */
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 16px 64px;
+      max-width: 1024px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .error-number {
+      font-family: inherit;
+      font-weight: 900;
+      font-size: clamp(80px, 14vw, 140px);
       color: #ffffff;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      text-align: center;
+      margin: 0 0 24px 0;
+      user-select: none;
+      filter: drop-shadow(0 8px 32px rgba(0, 0, 0, 0.95));
     }
-    .subtitle {
-      font-size: 14px;
+    .error-desc {
+      font-size: 15px;
       color: #8b8e96;
       line-height: 1.6;
-      margin-bottom: 32px;
-      max-width: 480px;
-      word-break: break-word;
+      max-width: 440px;
+      margin: 0 auto 32px;
+      text-align: center;
     }
     .home-btn {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      justify-content: center;
+      padding: 14px 32px;
       background: #ffffff;
       color: #000000;
       font-size: 13px;
       font-weight: 700;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      text-decoration: none;
-      padding: 12px 24px;
-      border-radius: 4px;
       border: 1px solid #ffffff;
-      transition: all 0.2s ease;
+      transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
       cursor: pointer;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
     }
     .home-btn:hover {
       background: #ff5500;
       color: #000000;
       border-color: #ffffff;
-      box-shadow: 0 0 16px rgba(255, 85, 0, 0.4);
+    }
+
+    /* Site Footer */
+    .site-footer {
+      width: 100%;
+      background-color: #000000;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 32px 0 40px;
+      margin-top: auto;
+    }
+    .footer-inner {
+      width: 100%;
+      max-width: 1152px;
+      margin: 0 auto;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    @media (min-width: 768px) {
+      .footer-inner {
+        flex-direction: row;
+        align-items: flex-end;
+        padding: 0 24px;
+      }
+    }
+    .footer-left {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      max-width: 440px;
+      gap: 12px;
+      text-align: left;
+    }
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .footer-logo svg {
+      color: #a3a3a3;
+      transition: color 0.15s ease;
+    }
+    .footer-logo:hover svg {
+      color: #ff5500;
+    }
+    .footer-disclaimer {
+      font-size: 11px;
+      color: #737373;
+      line-height: 1.6;
+      margin: 0;
+    }
+    .footer-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      font-size: 12px;
+    }
+    @media (min-width: 768px) {
+      .footer-right {
+        align-items: flex-end;
+        text-align: right;
+      }
+    }
+    .footer-link {
+      color: #a3a3a3;
+      font-size: 12px;
+      transition: color 0.15s ease;
+    }
+    .footer-link:hover {
+      color: #ffffff;
+    }
+    .footer-copy {
+      font-size: 11px;
+      color: #737373;
+      margin-top: 4px;
+      white-space: nowrap;
     }
   </style>
 </head>
 <body>
-  <div class="background-grid"></div>
-  <div class="container">
-    <div class="watermark-container">
-      <div class="watermark-number">${status}</div>
-    </div>
-    
-    <div class="status-badge">
-      <span class="status-dot"></span>
-      ${statusBadge}
-    </div>
+  <!-- Header matching site -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="/" class="brand-link" aria-label="Peekly Home">
+        <svg width="44" height="28" viewBox="6 22 88 56" fill="none" class="brand-logo">
+          <path d="M 8 50 C 24 30, 36 24, 50 24 C 64 24, 76 30, 92 50 C 76 70, 64 76, 50 76 C 36 76, 24 70, 8 50 Z M 50 29 A 21 21 0 1 0 50 71 A 21 21 0 1 0 50 29 Z" fill="currentColor" fill-rule="evenodd"/>
+          <circle cx="50" cy="50" r="13.5" fill="none" stroke="currentColor" stroke-width="3.2"/>
+          <circle cx="50" cy="50" r="4.5" fill="currentColor"/>
+          <rect x="48.25" y="32" width="3.5" height="11.5" rx="0.5" fill="currentColor"/>
+          <rect x="48.25" y="56.5" width="3.5" height="11.5" rx="0.5" fill="currentColor"/>
+          <rect x="32" y="48.25" width="11.5" height="3.5" rx="0.5" fill="currentColor"/>
+          <rect x="56.5" y="48.25" width="11.5" height="3.5" rx="0.5" fill="currentColor"/>
+        </svg>
+        <span class="brand-name">PEEKLY</span>
+      </a>
 
-    <h1 class="title">${title}</h1>
-    <p class="subtitle">${safeMessage}</p>
+      <div class="header-nav">
+        <a href="/#changelog" class="nav-changelog">
+          <span style="color:#ffffff;font-family:monospace;">&gt;<span class="changelog-cursor">_</span></span>
+          <span style="display:inline;">Changelog</span>
+        </a>
 
-    <a href="/" class="home-btn">&lt; Go to home page</a>
-  </div>
+        <div class="nav-lang">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;">
+            <rect x="0" y="0" width="8" height="8" fill="#e5e5e5" />
+            <rect x="5.5" y="5.5" width="8" height="8" fill="#141414" stroke="rgba(255,255,255,0.25)" stroke-width="1" />
+            <text x="4" y="6.5" font-size="6" font-family="'Inter',sans-serif" font-weight="bold" fill="#000" text-anchor="middle">文</text>
+            <text x="9.5" y="12" font-size="6" font-family="'Inter',sans-serif" font-weight="bold" fill="#a3a3a3" text-anchor="middle">A</text>
+          </svg>
+          <span>English</span>
+          <svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="#737373" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 1L5 5L9 1" />
+          </svg>
+        </div>
+
+        <a href="https://chromewebstore.google.com/detail/peekly-for-faceit/cmfgneodcjfofdcglbbhcghijgcjcokk" target="_blank" rel="noopener noreferrer" class="btn-header-install">
+          INSTALL EXTENSION
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Central Error Block matching 404 exactly -->
+  <main class="main-wrapper">
+    <h1 class="error-number">${status}</h1>
+    <p class="error-desc">${safeMessage}</p>
+    <a href="/" class="home-btn">&lt; GO TO HOME PAGE</a>
+  </main>
+
+  <!-- Footer matching site -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <a href="/" class="footer-logo">
+          <svg width="20" height="13" viewBox="6 22 88 56" fill="none">
+            <path d="M 8 50 C 24 30, 36 24, 50 24 C 64 24, 76 30, 92 50 C 76 70, 64 76, 50 76 C 36 76, 24 70, 8 50 Z M 50 29 A 21 21 0 1 0 50 71 A 21 21 0 1 0 50 29 Z" fill="currentColor" fill-rule="evenodd"/>
+            <circle cx="50" cy="50" r="13.5" fill="none" stroke="currentColor" stroke-width="3.2"/>
+            <circle cx="50" cy="50" r="4.5" fill="currentColor"/>
+            <rect x="48.25" y="32" width="3.5" height="11.5" rx="0.5" fill="currentColor"/>
+            <rect x="48.25" y="56.5" width="3.5" height="11.5" rx="0.5" fill="currentColor"/>
+            <rect x="32" y="48.25" width="11.5" height="3.5" rx="0.5" fill="currentColor"/>
+            <rect x="56.5" y="48.25" width="11.5" height="3.5" rx="0.5" fill="currentColor"/>
+          </svg>
+          <span>PEEKLY</span>
+        </a>
+        <p class="footer-disclaimer">
+          Peekly is developed independently, and is not officially endorsed by or affiliated with FACEIT or Valve Corporation.
+        </p>
+      </div>
+
+      <div class="footer-right">
+        <a href="/terms" class="footer-link">Terms of Service</a>
+        <a href="/#changelog" class="footer-link">Changelog</a>
+        <a href="/privacy" class="footer-link">Privacy Policy</a>
+        <p class="footer-copy">© 2026 Peekly. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>`;
 }
