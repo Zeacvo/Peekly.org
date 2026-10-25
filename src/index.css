@@ -9,6 +9,11 @@
   color-scheme: dark;
 }
 
+html {
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
+}
+
 html, body, #root {
   margin: 0;
   padding: 0;

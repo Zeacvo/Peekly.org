@@ -230,20 +230,24 @@ export const App: React.FC = () => {
       />
 
       {/* Main Content: Dynamic View Routing with Lazy Suspense */}
-      <main className="min-h-screen flex-1 flex flex-col w-full relative z-10">
+      <main className={`min-h-screen flex-1 flex flex-col w-full relative z-10 ${isNotFound || isAuthError ? 'overflow-hidden' : ''}`}>
         <Suspense fallback={<div className="min-h-screen flex-1 flex flex-col w-full bg-black" />}>
           {isAuthError ? (
-            <AuthErrorPage
-              status={authErrorStatus}
-              errorMessage={authErrorMessage}
-              currentLang={currentLang}
-              onBack={handleGoHome}
-            />
+            <div className="flex flex-col min-h-screen justify-between overflow-hidden">
+              <AuthErrorPage
+                status={authErrorStatus}
+                errorMessage={authErrorMessage}
+                currentLang={currentLang}
+                onBack={handleGoHome}
+              />
+            </div>
           ) : isNotFound ? (
-            <NotFoundPage 
-              currentLang={currentLang}
-              onBack={handleGoHome}
-            />
+            <div className="flex flex-col min-h-screen justify-between overflow-hidden">
+              <NotFoundPage 
+                currentLang={currentLang}
+                onBack={handleGoHome}
+              />
+            </div>
           ) : isTerms ? (
             <TermsPage 
               currentLang={currentLang}
