@@ -1,26 +1,32 @@
 import React, { useEffect } from 'react';
-import { ChevronLeft } from 'lucide-react';
+import type { Language } from '../translations';
+import { notFoundTranslations } from '../data/notFoundTranslations';
 import { PeeklyLogo } from './PeeklyLogo';
 
 interface NotFoundPageProps {
+  currentLang?: Language;
   onBack: () => void;
 }
 
-export const NotFoundPage: React.FC<NotFoundPageProps> = ({ onBack }) => {
+export const NotFoundPage: React.FC<NotFoundPageProps> = ({ currentLang = 'en', onBack }) => {
+  const t = notFoundTranslations[currentLang] || notFoundTranslations.en;
+  const isRtl = currentLang === 'ar';
+
   useEffect(() => {
     const prevTitle = document.title;
-    document.title = '404: Tactical Signal Lost — Peekly for FACEIT';
+    document.title = '404 — Peekly for FACEIT';
     return () => {
       document.title = prevTitle;
     };
-  }, []);
-
-  const currentPath = typeof window !== 'undefined' ? window.location.pathname : '404';
+  }, [currentLang]);
 
   return (
-    <div className="pt-[calc(5rem+env(safe-area-inset-top,0px))] sm:pt-24 pb-16 w-full max-w-5xl mx-auto px-4 sm:px-6 flex flex-col items-center justify-center flex-1 z-10 animate-apple-reveal font-sans text-center my-auto min-h-[65vh]">
+    <div 
+      dir={isRtl ? 'rtl' : 'ltr'}
+      className="pt-[calc(5rem+env(safe-area-inset-top,0px))] sm:pt-24 pb-16 w-full max-w-5xl mx-auto px-4 sm:px-6 flex flex-col items-center justify-center flex-1 z-10 animate-apple-reveal font-sans text-center my-auto min-h-[65vh]"
+    >
       {/* 1. Tactical Radar Ping & 404 Watermark Container */}
-      <div className="relative flex items-center justify-center mb-6 select-none">
+      <div className="relative flex items-center justify-center mb-8 select-none">
         {/* Massive 404 Background Typography in #141518 with subtle glow */}
         <div 
           className="text-8xl sm:text-9xl md:text-[160px] font-black font-sans tracking-tighter text-[#141518] leading-none select-none pointer-events-none drop-shadow-[0_0_35px_rgba(255,85,0,0.08)]"
@@ -44,31 +50,18 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({ onBack }) => {
         </div>
       </div>
 
-      {/* 2. Tactical Metadata Status Tag */}
-      <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#0a0a0c] border border-neutral-800 text-[11px] font-mono mb-4 select-text">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-pulse" />
-        <span className="text-[#FF5500] font-bold">STATUS:</span>
-        <span className="text-white font-medium">SECTOR_NOT_FOUND</span>
-        <span className="text-neutral-700">|</span>
-        <span className="text-neutral-400">COORD: {currentPath}</span>
-      </div>
-
-      {/* 3. Heading & Subtitle */}
-      <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-wider text-white uppercase font-sans mb-3 select-text">
-        TACTICAL SIGNAL LOST
-      </h1>
-      <p className="text-neutral-400 font-sans text-sm sm:text-[15px] max-w-md mx-auto leading-relaxed mb-8 select-text">
-        The requested coordinate does not exist in the active FACEIT map pool or has been relocated.
+      {/* 2. Localized Description text under radar */}
+      <p className="text-[15px] sm:text-[16px] text-[#8b8e96] max-w-md mx-auto leading-relaxed mb-8 select-text font-sans">
+        {t.description}
       </p>
 
-      {/* 4. Action Button: RETURN TO BASE */}
+      {/* 3. Localized Action Button with link/action to home */}
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3.5 bg-white text-black font-sans text-xs sm:text-sm font-bold tracking-wider uppercase rounded-none border border-white hover:bg-[#FF5500] hover:text-black hover:border-white transition-colors duration-150 cursor-pointer shadow-2xl active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
+        className="inline-flex items-center justify-center px-6 sm:px-8 py-3.5 bg-white text-black font-sans text-xs sm:text-sm font-bold tracking-wider uppercase rounded-none border border-white hover:bg-[#FF5500] hover:text-black hover:border-white transition-colors duration-150 cursor-pointer shadow-2xl active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
       >
-        <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
-        <span>RETURN TO BASE</span>
+        <span>{t.button}</span>
       </button>
     </div>
   );

@@ -205,7 +205,10 @@ export const App: React.FC = () => {
       <main className="min-h-screen flex-1 flex flex-col w-full relative z-10">
         <Suspense fallback={<div className="min-h-screen flex-1 flex flex-col w-full bg-black" />}>
           {isNotFound ? (
-            <NotFoundPage onBack={handleGoHome} />
+            <NotFoundPage 
+              currentLang={currentLang}
+              onBack={handleGoHome}
+            />
           ) : isTerms ? (
             <TermsPage 
               currentLang={currentLang}
