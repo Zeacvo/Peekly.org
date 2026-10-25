@@ -6,6 +6,7 @@ import path from 'node:path';
 import { onRequest as onCallbackRequest, generateErrorHtml } from './functions/api/auth/faceit/callback.ts';
 import { onRequest as onLoginRequest } from './functions/api/auth/faceit/login.ts';
 import { onRequest as onSuccessRequest } from './functions/auth/extension-success.ts';
+import { onRequest as onFeedbackRequest } from './functions/api/feedback.ts';
 
 function spa404Plugin(): Plugin {
   return {
@@ -31,7 +32,8 @@ function faceitOAuthDevPlugin(): Plugin {
         if (
           url.pathname === '/api/auth/faceit/callback' ||
           url.pathname === '/api/auth/faceit/login' ||
-          url.pathname === '/auth/extension-success'
+          url.pathname === '/auth/extension-success' ||
+          url.pathname === '/api/feedback'
         ) {
           try {
             const fullUrl = `http://localhost:5173${req.url}`;
@@ -44,16 +46,31 @@ function faceitOAuthDevPlugin(): Plugin {
               }
             }
 
+            let reqBody: Buffer | undefined;
+            if (req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'OPTIONS') {
+              const chunks: Buffer[] = [];
+              for await (const chunk of req) {
+                chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+              }
+              if (chunks.length > 0) {
+                reqBody = Buffer.concat(chunks);
+              }
+            }
+
             const webReq = new Request(fullUrl, {
               method: req.method,
               headers,
-            });
+              body: reqBody,
+              duplex: 'half',
+            } as RequestInit);
 
             let response: Response;
             if (url.pathname === '/api/auth/faceit/login') {
               response = await onLoginRequest();
             } else if (url.pathname === '/auth/extension-success') {
               response = await onSuccessRequest({ request: webReq });
+            } else if (url.pathname === '/api/feedback') {
+              response = await onFeedbackRequest({ request: webReq });
             } else {
               response = await onCallbackRequest({ request: webReq });
             }
