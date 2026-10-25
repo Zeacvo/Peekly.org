@@ -1,7 +1,7 @@
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-import { onRequest as onCallbackRequest } from './functions/api/auth/faceit/callback.ts';
+import { onRequest as onCallbackRequest, generateErrorHtml } from './functions/api/auth/faceit/callback.ts';
 import { onRequest as onLoginRequest } from './functions/api/auth/faceit/login.ts';
 import { onRequest as onSuccessRequest } from './functions/auth/extension-success.ts';
 
@@ -51,8 +51,8 @@ function faceitOAuthDevPlugin(): Plugin {
             return;
           } catch (err) {
             res.statusCode = 500;
-            res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-            res.end(String(err));
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+            res.end(generateErrorHtml(String(err), 500, 'SERVER ERROR'));
             return;
           }
         }

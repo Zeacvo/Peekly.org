@@ -141,25 +141,200 @@ export function generateSuccessHtml(profile: FaceitProfilePayload): string {
 </html>`;
 }
 
-export function generateErrorHtml(message: string, status = 400): string {
+export function generateErrorHtml(message: string, status = 400, title = 'AUTHORIZATION ERROR'): string {
+  const safeMessage = message
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+
+  const statusBadge = status === 400
+    ? 'STATUS: BAD_REQUEST'
+    : status === 500
+    ? 'STATUS: SERVER_ERROR'
+    : `STATUS: ERROR_${status}`;
+
+  const statusTitleText = status === 400 ? 'Bad Request' : status === 500 ? 'Internal Server Error' : 'Error';
+
   return `<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Peekly Auth - Error</title>
-    <style>
-      body { background: #0a0a0c; color: #fff; font-family: -apple-system, sans-serif; padding: 40px; text-align: center; }
-      .box { max-width: 440px; margin: 40px auto; padding: 24px; background: #121316; border: 1px solid #262626; }
-      h1 { font-size: 20px; color: #ff5500; margin-bottom: 8px; text-transform: uppercase; font-family: monospace; }
-      p { color: #8b8e96; font-size: 13px; line-height: 1.5; }
-    </style>
-  </head>
-  <body>
-    <div class="box">
-      <h1>${status} Bad Request</h1>
-      <p>${message}</p>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${status}: ${statusTitleText} — Peekly</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Play:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: #000000;
+      color: #ffffff;
+      font-family: 'Play', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+    .background-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+    .container {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 20px;
+      max-width: 680px;
+    }
+    .watermark-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .watermark-number {
+      font-size: clamp(120px, 20vw, 180px);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.05em;
+      color: #141518;
+      user-select: none;
+    }
+    .radar-center {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 76px;
+      height: 76px;
+    }
+    .radar-ping {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 85, 0, 0.4);
+      animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+    .radar-circle {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 85, 0, 0.15) 0%, transparent 70%);
+      border: 1px solid rgba(255, 85, 0, 0.3);
+    }
+    .crosshair-icon {
+      position: relative;
+      width: 32px;
+      height: 32px;
+      color: #ff5500;
+    }
+    @keyframes ping {
+      75%, 100% {
+        transform: scale(1.8);
+        opacity: 0;
+      }
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #0f1013;
+      border: 1px solid #1f2127;
+      padding: 5px 12px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #8b8e96;
+      margin-bottom: 16px;
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ff5500;
+      box-shadow: 0 0 8px #ff5500;
+    }
+    .title {
+      font-size: clamp(24px, 4vw, 32px);
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      color: #ffffff;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: #8b8e96;
+      line-height: 1.6;
+      margin-bottom: 32px;
+      max-width: 480px;
+      word-break: break-word;
+    }
+    .home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      color: #000000;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+    .home-btn:hover {
+      background: #ff5500;
+      color: #ffffff;
+      box-shadow: 0 0 16px rgba(255, 85, 0, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="background-grid"></div>
+  <div class="container">
+    <div class="watermark-container">
+      <div class="watermark-number">${status}</div>
+      <div class="radar-center">
+        <div class="radar-ping"></div>
+        <div class="radar-circle"></div>
+        <svg class="crosshair-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 3v4M12 17v4M3 12h4M17 12h4" />
+        </svg>
+      </div>
     </div>
-  </body>
+    
+    <div class="status-badge">
+      <span class="status-dot"></span>
+      ${statusBadge}
+    </div>
+
+    <h1 class="title">${title}</h1>
+    <p class="subtitle">${safeMessage}</p>
+
+    <a href="/" class="home-btn">&lt; Go to home page</a>
+  </div>
+</body>
 </html>`;
 }
 
