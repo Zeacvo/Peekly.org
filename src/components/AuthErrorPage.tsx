@@ -28,9 +28,18 @@ export const AuthErrorPage: React.FC<AuthErrorPageProps> = ({
     };
   }, [status, currentLang]);
 
-  // Determine description: if specific error was passed and it's not the default code missing string
-  const isDefaultMissing = !errorMessage || errorMessage === 'Missing required authorization code parameter.';
-  const displayDescription = isDefaultMissing ? authT.description : errorMessage;
+  // Determine description: handle 403 or specific error messages with graceful localization
+  const is403 = status === '403';
+  const default403Desc = currentLang === 'ru'
+    ? 'Доступ запрещен. Панель управления доступна только CEO.'
+    : 'Access Denied. Dashboard restricted to CEO.';
+
+  const isCustomMessage = errorMessage && errorMessage !== 'Missing required authorization code parameter.';
+  const displayDescription = isCustomMessage 
+    ? errorMessage 
+    : is403 
+      ? default403Desc 
+      : authT.description;
 
   return (
     <div 

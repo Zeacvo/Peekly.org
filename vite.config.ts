@@ -7,6 +7,7 @@ import { onRequest as onCallbackRequest, generateErrorHtml } from './functions/a
 import { onRequest as onLoginRequest } from './functions/api/auth/faceit/login.ts';
 import { onRequest as onSuccessRequest } from './functions/auth/extension-success.ts';
 import { onRequest as onFeedbackRequest } from './functions/api/feedback.ts';
+import { onRequest as onAdminUsersRequest } from './functions/api/admin/users.ts';
 
 function spa404Plugin(): Plugin {
   return {
@@ -33,7 +34,8 @@ function faceitOAuthDevPlugin(): Plugin {
           url.pathname === '/api/auth/faceit/callback' ||
           url.pathname === '/api/auth/faceit/login' ||
           url.pathname === '/auth/extension-success' ||
-          url.pathname === '/api/feedback'
+          url.pathname === '/api/feedback' ||
+          url.pathname === '/api/admin/users'
         ) {
           try {
             const fullUrl = `http://localhost:5173${req.url}`;
@@ -71,6 +73,8 @@ function faceitOAuthDevPlugin(): Plugin {
               response = await onSuccessRequest({ request: webReq });
             } else if (url.pathname === '/api/feedback') {
               response = await onFeedbackRequest({ request: webReq });
+            } else if (url.pathname === '/api/admin/users') {
+              response = await onAdminUsersRequest({ request: webReq, env: {} });
             } else {
               response = await onCallbackRequest({ request: webReq });
             }
