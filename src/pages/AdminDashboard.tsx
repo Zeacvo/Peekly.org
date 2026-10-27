@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import type { Language } from '../translations';
-import { type PlayerUser, type AdminStats } from '../../functions/api/storage/usersDb';
+import { type PlayerUser, type AdminStats, calculateFaceitLevel } from '../../functions/api/storage/usersDb';
+import { PeeklyLogo } from '../components/PeeklyLogo';
 
 interface AdminDashboardProps {
   currentLang?: Language;
@@ -15,40 +16,50 @@ function getFlagEmoji(countryCode: string): string {
   return String.fromCodePoint(...codePoints);
 }
 
-function getLevelBadgeStyle(level: number): { bg: string; text: string; border: string } {
-  if (level >= 10) return { bg: 'bg-[#FF5500]', text: 'text-white', border: 'border-[#FF5500]' };
-  if (level >= 8) return { bg: 'bg-[#FFAA00]', text: 'text-black', border: 'border-[#FFAA00]' };
-  if (level >= 4) return { bg: 'bg-[#32CD32]', text: 'text-black', border: 'border-[#32CD32]' };
-  return { bg: 'bg-[#6B7280]', text: 'text-white', border: 'border-[#6B7280]' };
+function parseSafeDate(val: string | number | undefined | null): Date {
+  if (!val) return new Date();
+  if (typeof val === 'number') {
+    const ms = val < 1e11 ? val * 1000 : val;
+    return new Date(ms);
+  }
+  const str = String(val).trim();
+  if (/^\d+$/.test(str)) {
+    const num = Number(str);
+    const ms = num < 1e11 ? num * 1000 : num;
+    return new Date(ms);
+  }
+  const d = new Date(str);
+  if (isNaN(d.getTime()) || d.getTime() < 946684800000) {
+    return new Date();
+  }
+  return d;
 }
 
-function formatDate(iso: string): string {
+function formatDate(iso: string | number | undefined | null): string {
   try {
-    const d = new Date(iso);
-    return d.toLocaleDateString('ru-RU', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    const d = parseSafeDate(iso);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${day}.${month}.${year}, ${hours}:${minutes}`;
   } catch {
-    return iso;
+    return '—';
   }
 }
 
-function formatRelativeTime(iso: string): string {
+function formatRelativeTime(iso: string | number | undefined | null): string {
   try {
-    const diffMs = Date.now() - new Date(iso).getTime();
+    const d = parseSafeDate(iso);
+    const diffMs = Math.abs(Date.now() - d.getTime());
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
-    if (diffMinutes < 1) return 'только что';
-    if (diffMinutes < 60) return `${diffMinutes} мин назад`;
-    const diffHours = Math.floor(diffMinutes / 60);
-    if (diffHours < 24) return `${diffHours} ч назад`;
-    const diffDays = Math.floor(diffHours / 24);
-    return `${diffDays} дн назад`;
-  } catch {
+    if (diffMinutes < 5) {
+      return 'Just now';
+    }
     return formatDate(iso);
+  } catch {
+    return 'Just now';
   }
 }
 
@@ -280,52 +291,48 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
 
   if (isAuthorized === false) {
     return (
-      <div className="min-h-screen bg-[#070809] flex items-center justify-center text-white">
-        <p className="text-sm font-mono text-[#8b8e96] animate-pulse">Checking authorization...</p>
+      <div className="min-h-screen bg-[#000000] flex items-center justify-center text-white">
+        <p className="text-xs font-mono text-[#888888] tracking-wider uppercase animate-pulse">
+          Checking authorization...
+        </p>
       </div>
     );
   }
 
+  const avgElo = stats?.averageElo ?? (users.length > 0 ? Math.round(users.reduce((acc, u) => acc + (u.elo || 0), 0) / users.length) : 0);
+
   return (
-    <div className="min-h-screen bg-[#08090b] text-[#f0f2f5] font-sans antialiased selection:bg-[#FF5500] selection:text-black">
+    <div className="min-h-screen bg-[#000000] text-white font-sans antialiased selection:bg-[#FF5500] selection:text-black">
       {/* 1. Header Navigation Bar */}
-      <header className="sticky top-0 z-40 bg-[#0e1013]/95 backdrop-blur-md border-b border-white/10 px-4 sm:px-8 py-3.5 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-[#000000]/90 backdrop-blur-md border-b border-white/[0.08] px-4 sm:px-8 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-3.5">
           <button
             type="button"
             onClick={onGoHome}
-            className="flex items-center gap-2 group cursor-pointer focus-visible:outline-none"
+            className="flex items-center gap-2.5 group cursor-pointer focus-visible:outline-none"
             title="Back to Landing Page"
           >
-            <div className="w-8 h-8 rounded-none bg-black border border-white/20 flex items-center justify-center text-[#ff5500] group-hover:border-[#ff5500] transition-colors">
-              <svg width="18" height="12" viewBox="6 22 88 56" fill="currentColor">
-                <path
-                  d="M 8 50 C 24 30, 36 24, 50 24 C 64 24, 76 30, 92 50 C 76 70, 64 76, 50 76 C 36 76, 24 70, 8 50 Z M 50 29 A 21 21 0 1 0 50 71 A 21 21 0 1 0 50 29 Z"
-                  fillRule="evenodd"
-                />
-              </svg>
-            </div>
-            <span className="font-mono text-sm font-bold tracking-widest text-white group-hover:text-[#ff5500] transition-colors">
+            <PeeklyLogo
+              size={28}
+              className="h-7 w-auto text-white group-hover:text-[#FF5500] transition-colors shrink-0"
+            />
+            <span className="font-sans text-xl font-black tracking-wider text-white select-none">
               PEEKLY
             </span>
           </button>
 
           <span className="text-white/20 font-mono text-xs">/</span>
 
-          <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-[#ff5500]/10 border border-[#ff5500]/30 text-[#ff5500] text-[11px] font-mono font-bold uppercase tracking-wider">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#ff5500] animate-pulse" />
-            CEO DASHBOARD
-          </div>
+          <span className="px-2 py-0.5 border border-white/20 text-neutral-300 font-mono text-xs font-semibold uppercase tracking-wider">
+            ADMIN
+          </span>
         </div>
 
         {/* Right Actions */}
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-2.5 px-3 py-1.5 bg-[#14161a] border border-white/10 text-xs">
-            <div className="w-5 h-5 rounded-full bg-[#20232a] flex items-center justify-center text-[10px] font-bold text-white border border-white/20">
-              Z
-            </div>
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[#0D0D0D] border border-white/[0.08] text-xs">
             <span className="font-bold text-white">{currentUser.nickname || 'Zeacvo'}</span>
-            <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 bg-[#ff5500]/20 text-[#ff5500] font-bold">
+            <span className="border border-white/20 text-neutral-300 text-[10px] font-mono px-1.5 py-0.5 font-semibold uppercase tracking-wider">
               OWNER
             </span>
           </div>
@@ -333,7 +340,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
           <button
             type="button"
             onClick={handleExportCsv}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white text-black hover:bg-[#ff5500] hover:text-black font-mono text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer border border-white"
+            className="inline-flex items-center gap-2 bg-white text-black font-bold px-4 py-2 text-xs uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer border border-white"
             title="Download CSV database export"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
@@ -347,9 +354,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
           <button
             type="button"
             onClick={onGoHome}
-            className="px-3 py-1.5 bg-[#15171c] hover:bg-[#202329] text-white/80 hover:text-white border border-white/10 font-mono text-xs font-medium uppercase tracking-wider transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 bg-white text-black font-bold px-4 py-2 text-xs uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer border border-white"
           >
-            &lt; Home
+            <span>&lt; HOME</span>
           </button>
         </div>
       </header>
@@ -363,7 +370,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
             <button
               type="button"
               onClick={handleRefresh}
-              className="text-xs uppercase font-mono px-2.5 py-1 bg-red-900/60 hover:bg-red-800 text-white"
+              className="text-xs uppercase font-mono px-2.5 py-1 bg-red-900/60 hover:bg-red-800 text-white cursor-pointer"
             >
               Retry
             </button>
@@ -373,118 +380,104 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
         {/* 3. Top KPI Metric Cards */}
         <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
           {/* Total Players */}
-          <div className="bg-[#121418] border border-white/10 p-5 relative overflow-hidden group hover:border-[#ff5500]/50 transition-colors">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-mono text-[#8b8e96] uppercase tracking-wider">Total Players</span>
-              <span className="text-white/30 text-xs">👥</span>
+          <div className="bg-[#080808] border border-white/[0.08] p-5">
+            <div className="text-xs text-neutral-400 font-semibold tracking-wider font-mono uppercase mb-2">
+              Total Players
             </div>
-            <div className="text-3xl font-black text-white font-sans tracking-tight">
+            <div className="text-3xl font-extrabold tracking-tight text-white font-sans">
               {stats?.totalPlayers ?? users.length}
             </div>
-            <div className="mt-2 text-[11px] text-[#4ade80] font-mono flex items-center gap-1">
-              <span>●</span> Verified FACEIT accounts
+            <div className="mt-2 text-xs text-[#888888] font-mono">
+              Verified FACEIT accounts
             </div>
           </div>
 
           {/* New Today */}
-          <div className="bg-[#121418] border border-white/10 p-5 relative overflow-hidden group hover:border-[#ff5500]/50 transition-colors">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-mono text-[#8b8e96] uppercase tracking-wider">New Today</span>
-              <span className="text-[#ff5500] text-xs">⚡</span>
+          <div className="bg-[#080808] border border-white/[0.08] p-5">
+            <div className="text-xs text-neutral-400 font-semibold tracking-wider font-mono uppercase mb-2">
+              New Today
             </div>
-            <div className="text-3xl font-black text-[#ff5500] font-sans tracking-tight">
-              +{stats?.newToday ?? 0}
+            <div className="text-3xl font-extrabold tracking-tight text-white font-sans">
+              {stats ? (stats.newToday > 0 ? `+${stats.newToday}` : '0') : users.length}
             </div>
-            <div className="mt-2 text-[11px] text-[#8b8e96] font-mono">
+            <div className="mt-2 text-xs text-[#888888] font-mono">
               Registrations last 24h
             </div>
           </div>
 
           {/* Average ELO */}
-          <div className="bg-[#121418] border border-white/10 p-5 relative overflow-hidden group hover:border-[#ff5500]/50 transition-colors">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-mono text-[#8b8e96] uppercase tracking-wider">Average CS2 ELO</span>
-              <span className="text-yellow-400 text-xs">🏆</span>
+          <div className="bg-[#080808] border border-white/[0.08] p-5">
+            <div className="text-xs text-neutral-400 font-semibold tracking-wider font-mono uppercase mb-2">
+              Average CS2 ELO
             </div>
-            <div className="text-3xl font-black text-white font-sans tracking-tight flex items-baseline gap-2">
-              <span>{stats?.averageElo?.toLocaleString() ?? '2,180'}</span>
-              <span className="text-xs font-mono font-bold text-yellow-400">LVL 9</span>
+            <div className="text-3xl font-extrabold tracking-tight text-white font-sans flex items-baseline gap-2">
+              <span>{avgElo ? avgElo.toLocaleString() : '—'}</span>
+              {avgElo > 0 && (
+                <span className="text-xs font-mono font-bold text-neutral-400 border border-white/20 px-1.5 py-0.5">
+                  LVL {calculateFaceitLevel(avgElo)}
+                </span>
+              )}
             </div>
-            <div className="mt-2 text-[11px] text-[#8b8e96] font-mono">
+            <div className="mt-2 text-xs text-[#888888] font-mono">
               Competitive skill tier
             </div>
           </div>
 
           {/* Active 24h */}
-          <div className="bg-[#121418] border border-white/10 p-5 relative overflow-hidden group hover:border-[#ff5500]/50 transition-colors">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-mono text-[#8b8e96] uppercase tracking-wider">Active 24h</span>
-              <span className="w-2 h-2 rounded-full bg-[#4ade80] animate-ping" />
+          <div className="bg-[#080808] border border-white/[0.08] p-5">
+            <div className="text-xs text-neutral-400 font-semibold tracking-wider font-mono uppercase mb-2">
+              Active 24h
             </div>
-            <div className="text-3xl font-black text-white font-sans tracking-tight">
+            <div className="text-3xl font-extrabold tracking-tight text-white font-sans">
               {stats?.active24h ?? users.length}
             </div>
-            <div className="mt-2 text-[11px] text-[#4ade80] font-mono flex items-center gap-1">
-              <span>●</span> In match queues now
+            <div className="mt-2 text-xs text-[#888888] font-mono">
+              In match queues now
             </div>
           </div>
 
           {/* Top Region */}
-          <div className="bg-[#121418] border border-white/10 p-5 relative overflow-hidden group hover:border-[#ff5500]/50 transition-colors col-span-2 sm:col-span-1">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-mono text-[#8b8e96] uppercase tracking-wider">Top Region</span>
-              <span className="text-xs">🌍</span>
+          <div className="bg-[#080808] border border-white/[0.08] p-5 col-span-2 sm:col-span-1">
+            <div className="text-xs text-neutral-400 font-semibold tracking-wider font-mono uppercase mb-2">
+              Top Region
             </div>
-            <div className="text-3xl font-black text-white font-sans tracking-tight flex items-center gap-2">
-              <span>{stats?.topCountry ?? 'RU (42%)'}</span>
+            <div className="text-3xl font-extrabold tracking-tight text-white font-sans">
+              {stats?.topCountry ?? '—'}
             </div>
-            <div className="mt-2 text-[11px] text-[#8b8e96] font-mono">
+            <div className="mt-2 text-xs text-[#888888] font-mono">
               Highest player density
             </div>
           </div>
         </section>
 
         {/* 4. Filter & Search Controls */}
-        <section className="bg-[#121418] border border-white/10 p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        <section className="bg-[#080808] border border-white/[0.08] p-3 sm:p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3.5">
           {/* Search Input */}
           <div className="relative flex-1">
             <svg
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40"
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500 w-4 h-4 pointer-events-none"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2"
+              viewBox="0 0 24 24"
             >
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              <circle cx="11" cy="11" r="8" strokeWidth="2" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" />
             </svg>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by nickname, email, or GUID..."
-              className="w-full bg-[#0a0b0d] border border-white/15 px-9 py-2 text-sm text-white placeholder-white/40 focus:border-[#ff5500] focus:outline-none transition-colors font-mono"
+              className="w-full bg-[#000000] border border-white/[0.12] focus:border-white focus:outline-none text-white text-xs font-mono placeholder:text-neutral-500 pl-10 pr-4 py-2 transition-colors"
             />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/40 hover:text-white"
-              >
-                ✕
-              </button>
-            )}
           </div>
 
-          {/* Filter Dropdowns */}
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Country Filter */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* Country Selector */}
             <select
               value={countryFilter}
               onChange={(e) => setCountryFilter(e.target.value)}
-              className="bg-[#0a0b0d] border border-white/15 px-3 py-2 text-xs font-mono text-white focus:border-[#ff5500] focus:outline-none"
+              className="bg-[#000000] border border-white/[0.12] focus:border-white focus:outline-none text-neutral-300 text-xs font-mono px-3 py-2 cursor-pointer transition-colors"
             >
               <option value="ALL">All Countries ({countries.length})</option>
               {countries.map((c) => (
@@ -494,56 +487,63 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
               ))}
             </select>
 
-            {/* Plan Filter */}
+            {/* Plan Selector */}
             <select
               value={planFilter}
               onChange={(e) => setPlanFilter(e.target.value as 'ALL' | 'FREE' | 'PRO')}
-              className="bg-[#0a0b0d] border border-white/15 px-3 py-2 text-xs font-mono text-white focus:border-[#ff5500] focus:outline-none"
+              className="bg-[#000000] border border-white/[0.12] focus:border-white focus:outline-none text-neutral-300 text-xs font-mono px-3 py-2 cursor-pointer transition-colors"
             >
               <option value="ALL">All Plans</option>
-              <option value="FREE">FREE</option>
               <option value="PRO">PRO</option>
+              <option value="FREE">FREE</option>
             </select>
 
-            {/* Sort Order */}
+            {/* Sort Selector */}
             <select
               value={sortBy}
-              onChange={(e) =>
-                setSortBy(e.target.value as 'last_login' | 'created_at' | 'elo' | 'nickname')
-              }
-              className="bg-[#0a0b0d] border border-white/15 px-3 py-2 text-xs font-mono text-white focus:border-[#ff5500] focus:outline-none"
+              onChange={(e) => setSortBy(e.target.value as 'last_login' | 'created_at' | 'elo' | 'nickname')}
+              className="bg-[#000000] border border-white/[0.12] focus:border-white focus:outline-none text-neutral-300 text-xs font-mono px-3 py-2 cursor-pointer transition-colors"
             >
               <option value="last_login">Sort: Last Active</option>
               <option value="created_at">Sort: Registration</option>
-              <option value="elo">Sort: Highest ELO</option>
+              <option value="elo">Sort: CS2 ELO</option>
               <option value="nickname">Sort: Nickname</option>
             </select>
 
-            {/* Refresh Button */}
+            {/* Refresh */}
             <button
               type="button"
               onClick={handleRefresh}
-              disabled={isLoading}
-              className="px-3 py-2 bg-[#1b1e24] hover:bg-[#252830] border border-white/10 text-white/80 hover:text-white text-xs font-mono uppercase tracking-wider transition-colors cursor-pointer"
-              title="Refresh player list from server"
+              className="bg-[#000000] border border-white/[0.12] hover:border-white hover:text-white text-neutral-400 p-2 cursor-pointer transition-colors"
+              title="Refresh database"
             >
-              {isLoading ? '...' : '↻'}
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className={isLoading ? 'animate-spin text-white' : ''}
+              >
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+              </svg>
             </button>
           </div>
         </section>
 
-        {/* 5. Player Database Table */}
-        <section className="bg-[#121418] border border-white/10 overflow-hidden shadow-2xl">
-          <div className="px-5 py-3.5 border-b border-white/10 flex items-center justify-between bg-[#15171d]">
-            <div className="flex items-center gap-2">
+        {/* 5. Registered Players Table */}
+        <section className="bg-[#080808] border border-white/[0.08] overflow-hidden">
+          <div className="px-5 py-4 border-b border-white/[0.08] flex items-center justify-between">
+            <div className="flex items-center gap-3">
               <span className="font-mono text-xs font-bold text-white uppercase tracking-wider">
                 REGISTERED PLAYERS
               </span>
-              <span className="px-2 py-0.5 bg-white/10 text-[11px] font-mono text-white/70">
+              <span className="px-2 py-0.5 bg-white/10 text-[10px] font-mono text-neutral-300">
                 {filteredUsers.length} of {users.length}
               </span>
             </div>
-            <span className="text-[11px] font-mono text-[#8b8e96]">
+            <span className="text-[11px] font-mono text-neutral-500">
               Real-time synchronization with FACEIT OAuth
             </span>
           </div>
@@ -551,7 +551,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-white/10 bg-[#0e1014] text-[11px] font-mono text-[#8b8e96] uppercase tracking-wider">
+                <tr className="border-b border-white/[0.08] bg-[#000000] text-xs font-mono text-[#777777] uppercase tracking-wider">
                   <th className="py-3 px-5">PLAYER</th>
                   <th className="py-3 px-5">EMAIL</th>
                   <th className="py-3 px-5">CS2 ELO & LEVEL</th>
@@ -560,31 +560,31 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
                   <th className="py-3 px-5 text-right">PLAN</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 text-sm">
+              <tbody className="divide-y divide-neutral-900 text-sm">
                 {isLoading && users.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-white/40 font-mono text-sm">
+                    <td colSpan={6} className="py-12 text-center text-neutral-500 font-mono text-xs">
                       Loading player records from database...
                     </td>
                   </tr>
                 ) : filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-white/40 font-mono text-sm">
+                    <td colSpan={6} className="py-12 text-center text-neutral-500 font-mono text-xs">
                       No players found matching current query or filters.
                     </td>
                   </tr>
                 ) : (
                   filteredUsers.map((player) => {
-                    const badge = getLevelBadgeStyle(player.level);
+                    const isCeo = player.nickname.toLowerCase() === 'zeacvo' || player.email.toLowerCase() === 'zeacvo@icloud.com';
                     return (
                       <tr
                         key={player.guid}
                         className="hover:bg-white/[0.03] transition-colors group"
                       >
-                        {/* Col 1: Avatar & Nickname */}
+                        {/* Col 1: Player (Avatar + Nickname + CEO Badge + GUID) */}
                         <td className="py-3.5 px-5">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-none bg-[#1d2026] border border-white/15 overflow-hidden shrink-0 flex items-center justify-center">
+                            <div className="w-8 h-8 bg-[#111111] border border-white/10 overflow-hidden shrink-0 flex items-center justify-center">
                               {player.avatar ? (
                                 <img
                                   src={player.avatar}
@@ -597,7 +597,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
                                   }}
                                 />
                               ) : (
-                                <span className="font-bold text-xs text-white/60">
+                                <span className="font-bold text-xs text-neutral-400">
                                   {player.nickname.substring(0, 2).toUpperCase()}
                                 </span>
                               )}
@@ -608,7 +608,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
                                   href={`https://www.faceit.com/en/players/${encodeURIComponent(player.nickname)}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="font-bold text-white group-hover:text-[#ff5500] transition-colors flex items-center gap-1.5"
+                                  className="font-bold text-white hover:text-neutral-300 transition-colors flex items-center gap-1.5"
                                   title="View on FACEIT"
                                 >
                                   <span>{player.nickname}</span>
@@ -626,13 +626,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
                                     <line x1="10" y1="14" x2="21" y2="3" />
                                   </svg>
                                 </a>
-                                {player.nickname.toLowerCase() === 'zeacvo' && (
-                                  <span className="px-1.5 py-0.5 bg-[#ff5500] text-black font-mono font-black text-[9px] uppercase tracking-wider">
+                                {isCeo && (
+                                  <span className="border border-white/20 text-neutral-300 text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider">
                                     CEO
                                   </span>
                                 )}
                               </div>
-                              <span className="text-[11px] font-mono text-[#8b8e96] truncate max-w-[150px]">
+                              <span className="text-[11px] font-mono text-[#888888] truncate max-w-[150px]">
                                 {player.guid}
                               </span>
                             </div>
@@ -644,17 +644,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
                           <div className="flex items-center gap-2">
                             <a
                               href={`mailto:${player.email}`}
-                              className="font-mono text-xs text-[#a0a5b0] hover:text-white transition-colors"
+                              className="font-mono text-xs text-neutral-300 hover:text-white transition-colors"
                             >
                               {player.email}
                             </a>
                             <button
                               type="button"
                               onClick={() => copyToClipboard(player.email)}
-                              className="opacity-0 group-hover:opacity-100 text-[10px] font-mono text-[#8b8e96] hover:text-white px-1.5 py-0.5 bg-white/5 border border-white/10 transition-opacity"
+                              className="opacity-0 group-hover:opacity-100 text-[10px] font-mono text-neutral-400 hover:text-white px-1.5 py-0.5 bg-white/5 border border-white/10 transition-opacity cursor-pointer"
                               title="Copy email"
                             >
-                              {copiedEmail === player.email ? '✓ Copied' : 'Copy'}
+                              {copiedEmail === player.email ? '✓' : (
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                </svg>
+                              )}
                             </button>
                           </div>
                         </td>
@@ -663,16 +668,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
                         <td className="py-3.5 px-5">
                           <div className="flex items-center gap-2.5">
                             <div
-                              className={`w-6 h-6 rounded-none flex items-center justify-center font-mono font-black text-xs ${badge.bg} ${badge.text} border ${badge.border} shadow-sm`}
+                              className="px-1.5 py-0.5 bg-white/10 border border-white/20 font-mono font-bold text-xs text-white"
                               title={`FACEIT Level ${player.level}`}
                             >
-                              {player.level}
+                              LVL {player.level}
                             </div>
                             <div className="flex flex-col">
                               <span className="font-mono text-sm font-bold text-white">
                                 {player.elo.toLocaleString()}
                               </span>
-                              <span className="text-[10px] font-mono text-[#8b8e96]">CS2 Matchmaking</span>
+                              <span className="text-[10px] font-mono text-[#888888]">CS2 Matchmaking</span>
                             </div>
                           </div>
                         </td>
@@ -681,18 +686,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
                         <td className="py-3.5 px-5">
                           <div className="flex items-center gap-2 font-mono text-xs">
                             <span className="text-base">{getFlagEmoji(player.country)}</span>
-                            <span className="font-bold text-white/90">{player.country}</span>
+                            <span className="font-bold text-white">{player.country}</span>
                           </div>
                         </td>
 
-                        {/* Col 5: Registration & Last Active */}
+                        {/* Col 5: Registration & Activity */}
                         <td className="py-3.5 px-5">
                           <div className="flex flex-col font-mono text-xs">
-                            <span className="text-white font-medium flex items-center gap-1.5">
-                              <span className="w-1.5 h-1.5 rounded-full bg-[#4ade80]" />
+                            <span className="text-white font-medium">
                               {formatRelativeTime(player.last_login_at)}
                             </span>
-                            <span className="text-[10px] text-[#8b8e96]">
+                            <span className="text-[10px] text-[#888888]">
                               Joined {formatDate(player.created_at)}
                             </span>
                           </div>
@@ -701,10 +705,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
                         {/* Col 6: Plan */}
                         <td className="py-3.5 px-5 text-right">
                           <span
-                            className={`inline-block px-2.5 py-1 font-mono text-[11px] font-bold uppercase tracking-wider ${
+                            className={`inline-block font-mono text-[10px] font-bold uppercase tracking-wider ${
                               player.plan === 'PRO'
-                                ? 'bg-[#ff5500]/15 text-[#ff5500] border border-[#ff5500]/40 shadow-[0_0_12px_rgba(255,85,0,0.2)]'
-                                : 'bg-white/5 text-white/70 border border-white/10'
+                                ? 'border border-white/20 text-neutral-200 px-2 py-0.5'
+                                : 'text-neutral-500'
                             }`}
                           >
                             {player.plan}
@@ -719,14 +723,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
           </div>
 
           {/* Table Footer */}
-          <div className="px-5 py-3 border-t border-white/10 bg-[#0e1014] flex items-center justify-between text-xs font-mono text-[#8b8e96]">
-            <span>Total registered database size: {users.length} players</span>
+          <div className="px-5 py-3 border-t border-white/[0.08] bg-[#000000] flex items-center justify-between text-xs font-mono text-[#888888]">
+            <span>Total registered database size: {users.length} {users.length === 1 ? 'player' : 'players'}</span>
             <div className="flex items-center gap-4">
               <span>Cloudflare D1 / KV Engine active</span>
               <button
                 type="button"
                 onClick={handleExportCsv}
-                className="text-white hover:text-[#ff5500] underline font-bold cursor-pointer"
+                className="text-white hover:underline font-bold cursor-pointer"
               >
                 Download CSV Export
               </button>
