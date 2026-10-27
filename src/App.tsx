@@ -253,6 +253,15 @@ export const App: React.FC = () => {
           onLanguageChange={handleLanguageChange}
           onGoHome={handleGoHome}
           onOpenChangelog={handleOpenChangelog}
+          onOpenAdmin={() => {
+            setIsAdmin(true);
+            try {
+              history.pushState(null, '', '/admin');
+            } catch {}
+            try {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch {}
+          }}
         />
       )}
 

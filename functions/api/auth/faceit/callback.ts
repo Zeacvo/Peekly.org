@@ -591,7 +591,7 @@ export async function onRequest(context: EventContext): Promise<Response> {
     let email = '';
     let avatar = '';
     let country = '';
-    let membership = 'free';
+    let _membership = 'free';
 
     // 2. Decode id_token if available (contains verified OpenID claims)
     if (tokenData.id_token) {
@@ -602,7 +602,7 @@ export async function onRequest(context: EventContext): Promise<Response> {
         email = idPayload.email || '';
         avatar = idPayload.picture || idPayload.avatar || '';
         country = idPayload.country || '';
-        membership = idPayload.membership || 'free';
+        _membership = idPayload.membership || 'free';
       }
     }
 
@@ -631,9 +631,9 @@ export async function onRequest(context: EventContext): Promise<Response> {
           email = userData.email || email;
           avatar = userData.avatar || avatar;
           country = userData.country || country;
-          membership = Array.isArray(userData.memberships)
-            ? userData.memberships[0] || membership
-            : userData.membership || membership;
+          _membership = Array.isArray(userData.memberships)
+            ? userData.memberships[0] || _membership
+            : userData.membership || _membership;
         }
       } catch {}
     }
@@ -687,17 +687,12 @@ export async function onRequest(context: EventContext): Promise<Response> {
       nickname,
       email: userEmail,
       avatar: avatar || 'https://assets.faceit-cdn.net/avatars/default_avatar.png',
-      country: country || 'RU',
+      country: country || 'BY',
       elo,
       level,
       created_at: new Date().toISOString(),
       last_login_at: new Date().toISOString(),
-      plan:
-        nickname.toLowerCase() === 'zeacvo' ||
-        membership.toLowerCase().includes('pro') ||
-        membership.toLowerCase().includes('premium')
-          ? 'PRO'
-          : 'FREE',
+      plan: 'FREE',
     };
 
     try {

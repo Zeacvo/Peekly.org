@@ -49,7 +49,7 @@ export const INITIAL_PLAYERS: PlayerUser[] = [
     level: 8,
     created_at: '2026-10-27T04:39:00.000Z',
     last_login_at: new Date().toISOString(),
-    plan: 'PRO',
+    plan: 'FREE',
   },
 ];
 
