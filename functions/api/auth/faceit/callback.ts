@@ -720,7 +720,11 @@ export async function onRequest(context: EventContext): Promise<Response> {
     headers.set('Location', targetUrl);
     headers.append(
       'Set-Cookie',
-      `peekly_auth=${cookieValue}; Path=/; SameSite=Lax; Max-Age=2592000`
+      `peekly_auth=${cookieValue}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000`
+    );
+    headers.append(
+      'Set-Cookie',
+      `peekly_user=${cookieValue}; Path=/; Secure; SameSite=Lax; Max-Age=2592000`
     );
 
     return new Response(null, {
@@ -732,6 +736,8 @@ export async function onRequest(context: EventContext): Promise<Response> {
     const errorUrl = new URL('/auth/error', context.request.url);
     errorUrl.searchParams.set('status', '500');
     errorUrl.searchParams.set('message', message);
-    return Response.redirect(errorUrl.toString(), 302);
+    const errHeaders = new Headers();
+    errHeaders.set('Location', errorUrl.toString());
+    return new Response(null, { status: 302, headers: errHeaders });
   }
 }
