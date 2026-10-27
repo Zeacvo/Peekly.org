@@ -675,15 +675,6 @@ export async function onRequest(context: EventContext): Promise<Response> {
       } catch {}
     }
 
-    const profile: FaceitProfilePayload = {
-      guid,
-      nickname,
-      avatar,
-      country,
-      elo,
-      level,
-      membership,
-    };
 
     const userEmail =
       email ||
@@ -701,7 +692,12 @@ export async function onRequest(context: EventContext): Promise<Response> {
       level,
       created_at: new Date().toISOString(),
       last_login_at: new Date().toISOString(),
-      plan: nickname.toLowerCase() === 'zeacvo' ? 'PRO' : 'FREE',
+      plan:
+        nickname.toLowerCase() === 'zeacvo' ||
+        membership.toLowerCase().includes('pro') ||
+        membership.toLowerCase().includes('premium')
+          ? 'PRO'
+          : 'FREE',
     };
 
     try {
@@ -710,20 +706,27 @@ export async function onRequest(context: EventContext): Promise<Response> {
       console.warn('[Storage] Player upsert warning:', dbErr);
     }
 
-    // Redirect user to the extension completion page with profile payload
-    const successUrl = new URL('/auth/extension-success', context.request.url);
-    successUrl.searchParams.set('data', JSON.stringify(profile));
+    const isCeo =
+      nickname.toLowerCase() === 'zeacvo' || userEmail.toLowerCase() === 'zeacvo@icloud.com';
 
-    const response = Response.redirect(successUrl.toString(), 302);
-    const sessionCookie = encodeURIComponent(
-      JSON.stringify({ nickname, email: userEmail, guid: userRecord.guid })
-    );
-    response.headers.set(
+    const targetUrl = isCeo
+      ? new URL('/admin', context.request.url).toString()
+      : new URL('/', context.request.url).toString();
+
+    const sessionData = { nickname, email: userEmail, guid: userRecord.guid };
+    const cookieValue = encodeURIComponent(JSON.stringify(sessionData));
+
+    const headers = new Headers();
+    headers.set('Location', targetUrl);
+    headers.append(
       'Set-Cookie',
-      `peekly_auth=${sessionCookie}; Path=/; SameSite=Lax; Max-Age=2592000`
+      `peekly_auth=${cookieValue}; Path=/; SameSite=Lax; Max-Age=2592000`
     );
 
-    return response;
+    return new Response(null, {
+      status: 302,
+      headers,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     const errorUrl = new URL('/auth/error', context.request.url);

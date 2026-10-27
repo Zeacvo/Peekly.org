@@ -103,11 +103,11 @@ function getInitialAuth(): { isAuthed: boolean; nickname: string; email: string 
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
   const [initialAuth] = useState(getInitialAuth);
-  const isAuthorized = initialAuth.isAuthed;
-  const currentUser = {
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(initialAuth.isAuthed);
+  const [currentUser, setCurrentUser] = useState<{ nickname: string; email: string }>({
     nickname: initialAuth.nickname,
     email: initialAuth.email,
-  };
+  });
 
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<PlayerUser[]>([]);
@@ -121,13 +121,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
   const [sortBy, setSortBy] = useState<'last_login' | 'created_at' | 'elo' | 'nickname'>('last_login');
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
 
-  // 1. Client-Side Authentication Enforcement
-  useEffect(() => {
-    if (!isAuthorized) {
-      window.location.replace('/auth/error?status=403&message=Access+Denied.+Restricted+to+CEO.');
-    }
-  }, [isAuthorized]);
-
   // 2. Fetch Data from Protected Server Endpoint
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -138,15 +131,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
   };
 
   useEffect(() => {
-    if (!isAuthorized) return;
     let isMounted = true;
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'X-Admin-User': 'Zeacvo',
     };
+    if (currentUser.nickname) {
+      headers['X-Admin-User'] = currentUser.nickname;
+    }
 
-    fetch('/api/admin/users?admin_user=Zeacvo', {
+    const apiUrl = currentUser.nickname
+      ? `/api/admin/users?admin_user=${encodeURIComponent(currentUser.nickname)}`
+      : '/api/admin/users';
+
+    fetch(apiUrl, {
       headers,
       credentials: 'include',
     })
@@ -162,6 +160,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
       })
       .then((data) => {
         if (!isMounted || !data) return;
+        setIsAuthorized(true);
+        if (data.currentUser) {
+          setCurrentUser({
+            nickname: data.currentUser.nickname,
+            email: data.currentUser.email,
+          });
+          try {
+            localStorage.setItem('peekly_auth', JSON.stringify(data.currentUser));
+          } catch {}
+        }
         setStats(data.stats);
         setUsers(data.users || []);
         setErrorMsg(null);
@@ -180,7 +188,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
     return () => {
       isMounted = false;
     };
-  }, [isAuthorized, refreshTrigger]);
+  }, [refreshTrigger, currentUser.nickname]);
 
   // Distinct countries list for dropdown
   const countries = useMemo(() => {
