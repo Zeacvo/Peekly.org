@@ -1,18 +1,32 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { PeeklyLogo } from './PeeklyLogo';
 
-export const FaceitLogo: React.FC<{ size?: number; className?: string }> = ({
-  size = 16,
-  className = '',
-}) => (
+export const FaceitLogo: React.FC<{ className?: string }> = ({ className = '' }) => (
   <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="#FF5500"
+    width="18"
+    height="14"
+    viewBox="0 0 24 18"
+    fill="none"
     className={`shrink-0 ${className}`}
   >
-    <path d="M23.999 2.503a.502.502 0 0 0-.447-.28H.448A.5.5 0 0 0 .1 3.078l7.684 9.176a.5.5 0 0 0 .383.178h8.868a.5.5 0 0 0 .383-.822L9.585 3.224h13.967a.5.5 0 0 0 .447-.721zm-7.684 9.421H7.447a.5.5 0 0 0-.383.822l7.834 8.755a.5.5 0 0 0 .383.178h7.871a.5.5 0 0 0 .348-.855l-7.186-8.9z" />
+    <path
+      d="M23.998 0.771c-.066-.341-.336-.606-.677-.665-.341-.059-.684.088-.86.37L10.98 17.229c-.215.344-.06.797.311.947.117.047.24.068.361.063l11.669-.001c.379 0 .708-.261.792-.63L23.998.771z"
+      fill="#FF5500"
+    />
+    <path
+      d="M0 0.771c.066-.341.336-.606.677-.665.341-.059.684.088.86.37l5.228 8.375-3.87 5.76L0 .771z"
+      fill="#FF5500"
+    />
+  </svg>
+);
+
+export const PrivacyIcon: React.FC<{ className?: string }> = ({ className = 'w-7 h-7' }) => (
+  <svg
+    className={`mx-auto mb-2 text-neutral-400 ${className}`}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+  >
+    <path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zm6 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-6 2c-3.11 0-6 1.57-6 4v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-1c0-2.43-2.89-4-6-4zm6 1c-.34 0-.67.03-.99.09.62.83.99 1.84.99 2.91v1h4a1 1 0 0 0 1-1v-1c0-1.87-2.13-3-5-3z" />
   </svg>
 );
 
@@ -39,7 +53,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   // Form fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [faceitNickname, setFaceitNickname] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [nickname, setNickname] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -113,6 +128,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!nickname.trim()) {
+      setError('Please enter your nickname.');
+      return;
+    }
     if (!email.trim() || !email.includes('@')) {
       setError('Please enter a valid email address.');
       return;
@@ -121,12 +140,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setError('Password must be at least 6 characters.');
       return;
     }
-    if (!faceitNickname.trim()) {
-      setError('Please enter your FACEIT Nickname.');
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
       return;
     }
 
-    const cleanNickname = faceitNickname.trim();
+    const cleanNickname = nickname.trim();
     const cleanEmail = email.trim();
     const isZeacvo =
       cleanNickname.toLowerCase() === 'zeacvo' ||
@@ -136,8 +155,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       nickname: cleanNickname,
       email: cleanEmail,
       country: 'BY',
-      elo: isZeacvo ? 1699 : 1600,
-      level: isZeacvo ? 8 : 7,
+      elo: isZeacvo ? 1699 : 1500,
+      level: isZeacvo ? 8 : 6,
     };
 
     try {
@@ -208,7 +227,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               Sign in to Peekly
             </h2>
 
-            <div className="border border-white/20 focus-within:border-white transition p-3 bg-black">
+            <div className="border border-white/15 focus-within:border-white transition p-3 bg-black">
               <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
                 Email
               </label>
@@ -238,17 +257,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
             {/* Privacy Disclaimer */}
             <div className="my-6 text-center">
-              <svg
-                className="w-7 h-7 text-neutral-400 mx-auto mb-2"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <circle cx="9" cy="7" r="3" />
-                <circle cx="15" cy="7" r="3" />
-                <path d="M4 19c0-2.8 2.2-5 5-5h6c2.8 0 5 2.2 5 5" />
-              </svg>
+              <PrivacyIcon />
               <p className="text-[11px] text-neutral-500 font-sans leading-relaxed max-w-xs mx-auto">
                 Your Peekly Account information is used to allow you to sign in securely
                 and access your CS2 stats.{' '}
@@ -263,25 +272,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </p>
             </div>
 
-            {/* Action Buttons */}
-            <button
-              type="submit"
-              className="w-full py-2.5 bg-white text-black font-bold text-xs uppercase tracking-wider hover:bg-neutral-200 transition cursor-pointer rounded-none"
-            >
-              Continue
-            </button>
+            {/* Action Buttons (without OR separator) */}
+            <div className="flex flex-col gap-3">
+              <button
+                type="submit"
+                className="w-full py-2.5 bg-white text-black font-bold text-xs uppercase tracking-wider hover:bg-neutral-200 transition cursor-pointer rounded-none"
+              >
+                Continue
+              </button>
 
-            <div className="my-4 text-center text-neutral-600 text-xs font-mono">
-              OR
+              <a
+                href="/api/auth/faceit/login"
+                className="w-full h-10 bg-black border border-white/20 hover:border-white/40 text-white font-mono font-bold text-xs flex items-center justify-center gap-2.5 transition cursor-pointer rounded-none uppercase tracking-wider"
+              >
+                <FaceitLogo />
+                <span>SIGN IN WITH FACEIT</span>
+              </a>
             </div>
-
-            <a
-              href="/api/auth/faceit/login"
-              className="w-full py-2.5 bg-[#121315] border border-white/15 hover:border-white/40 text-white font-bold text-xs flex items-center justify-center gap-2.5 transition cursor-pointer rounded-none uppercase tracking-wider"
-            >
-              <FaceitLogo size={16} />
-              <span>Sign in with FACEIT</span>
-            </a>
           </form>
         )}
 
@@ -293,10 +300,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </h2>
 
             {/* Apple ID Style Stacked Field */}
-            <div className="border border-white/20 bg-black mb-3">
+            <div className="border border-white/15 bg-black mb-3">
               <div className="p-3 border-b border-white/10 flex items-center justify-between">
                 <div>
-                  <label className="block text-[10px] uppercase font-mono text-neutral-500">
+                  <label className="block text-[10px] uppercase font-mono text-neutral-500 mb-0.5">
                     Email
                   </label>
                   <div className="text-white text-sm font-sans truncate max-w-[280px]">
@@ -316,7 +323,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
 
               <div className="p-3 focus-within:bg-white/[0.02]">
-                <label className="block text-[10px] uppercase font-mono text-neutral-400">
+                <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
                   Password
                 </label>
                 <input
@@ -353,40 +360,64 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </button>
             </div>
 
-            <button
-              type="submit"
-              className="w-full py-2.5 bg-white text-black font-bold text-xs uppercase tracking-wider hover:bg-neutral-200 transition cursor-pointer rounded-none"
-            >
-              SIGN IN
-            </button>
+            {/* Action Buttons (without OR separator) */}
+            <div className="flex flex-col gap-3">
+              <button
+                type="submit"
+                className="w-full py-2.5 bg-white text-black font-bold text-xs uppercase tracking-wider hover:bg-neutral-200 transition cursor-pointer rounded-none"
+              >
+                SIGN IN
+              </button>
 
-            <div className="my-4 text-center text-neutral-600 text-xs font-mono">
-              OR
+              <a
+                href="/api/auth/faceit/login"
+                className="w-full h-10 bg-black border border-white/20 hover:border-white/40 text-white font-mono font-bold text-xs flex items-center justify-center gap-2.5 transition cursor-pointer rounded-none uppercase tracking-wider"
+              >
+                <FaceitLogo />
+                <span>SIGN IN WITH FACEIT</span>
+              </a>
             </div>
-
-            <a
-              href="/api/auth/faceit/login"
-              className="w-full py-2.5 bg-[#121315] border border-white/15 hover:border-white/40 text-white font-bold text-xs flex items-center justify-center gap-2.5 transition cursor-pointer rounded-none uppercase tracking-wider"
-            >
-              <FaceitLogo size={16} />
-              <span>Sign in with FACEIT</span>
-            </a>
           </form>
         )}
 
-        {/* VIEW 2: CREATE ACCOUNT */}
+        {/* VIEW 2: CREATE ACCOUNT (Apple ID Style) */}
         {view === 'register' && (
           <form onSubmit={handleRegister} className="mt-3">
             <h2 className="text-xl font-bold text-white text-center mb-1 font-sans">
               Create Your Peekly Account
             </h2>
-            <p className="text-xs text-neutral-400 text-center mb-6 font-mono">
-              Track your FACEIT stats and dominate the lobby
+            <p className="text-xs text-neutral-400 text-center mb-6 font-mono leading-relaxed">
+              One Peekly Account is all you need. Already have an account?{' '}
+              <button
+                type="button"
+                onClick={() => {
+                  setView('login');
+                  setStep(1);
+                  setError(null);
+                }}
+                className="text-white underline ml-1 hover:text-neutral-200 cursor-pointer"
+              >
+                Sign in ↗
+              </button>
             </p>
 
-            <div className="border border-white/20 bg-black divide-y divide-white/10 mb-5">
-              <div className="p-3">
-                <label className="block text-[10px] uppercase font-mono text-neutral-400">
+            <div className="border border-white/15 bg-black divide-y divide-white/10 mb-5">
+              <div className="p-3 focus-within:bg-white/[0.02]">
+                <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
+                  Nickname
+                </label>
+                <input
+                  type="text"
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                  placeholder="e.g. Zeacvo"
+                  className="w-full bg-transparent text-white text-sm outline-none font-sans"
+                  autoFocus
+                  required
+                />
+              </div>
+              <div className="p-3 focus-within:bg-white/[0.02]">
+                <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
                   Email
                 </label>
                 <input
@@ -395,12 +426,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
                   className="w-full bg-transparent text-white text-sm outline-none font-sans"
-                  autoFocus
                   required
                 />
               </div>
-              <div className="p-3">
-                <label className="block text-[10px] uppercase font-mono text-neutral-400">
+              <div className="p-3 focus-within:bg-white/[0.02]">
+                <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
                   Password
                 </label>
                 <input
@@ -412,59 +442,44 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   required
                 />
               </div>
-              <div className="p-3">
-                <div className="flex items-center justify-between mb-0.5">
-                  <label className="block text-[10px] uppercase font-mono text-neutral-400">
-                    FACEIT Nickname
-                  </label>
-                  <span className="text-[10px] font-mono text-[#FF5500]">
-                    Required for stats
-                  </span>
-                </div>
+              <div className="p-3 focus-within:bg-white/[0.02]">
+                <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
+                  Confirm Password
+                </label>
                 <input
-                  type="text"
-                  value={faceitNickname}
-                  onChange={(e) => setFaceitNickname(e.target.value)}
-                  placeholder="e.g. Zeacvo"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Repeat your password"
                   className="w-full bg-transparent text-white text-sm outline-none font-sans"
                   required
                 />
-                <p className="text-[10px] text-neutral-500 font-mono mt-1">
-                  Used to sync your ELO, rank, and match history
-                </p>
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full py-2.5 bg-white text-black font-bold text-xs uppercase tracking-wider hover:bg-neutral-200 transition cursor-pointer rounded-none mb-3"
+              className="w-full py-2.5 bg-white text-black font-bold text-xs uppercase tracking-wider hover:bg-neutral-200 transition cursor-pointer rounded-none"
             >
-              CREATE ACCOUNT
+              CONTINUE
             </button>
 
-            <div className="my-3 text-center text-neutral-600 text-xs font-mono">
-              OR
+            {/* Privacy Disclaimer */}
+            <div className="mt-6 text-center">
+              <PrivacyIcon />
+              <p className="text-[11px] text-neutral-500 font-sans leading-relaxed max-w-xs mx-auto">
+                Your Peekly Account information is used to allow you to sign in securely
+                and protect your account.{' '}
+                <a
+                  href="/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-neutral-400 hover:text-white underline"
+                >
+                  See how your data is managed...
+                </a>
+              </p>
             </div>
-
-            <a
-              href="/api/auth/faceit/login"
-              className="w-full py-2.5 bg-[#121315] border border-white/15 hover:border-white/40 text-white font-bold text-xs flex items-center justify-center gap-2.5 transition cursor-pointer rounded-none uppercase tracking-wider"
-            >
-              <FaceitLogo size={16} />
-              <span>Sign up in 1 click with FACEIT</span>
-            </a>
-
-            <button
-              type="button"
-              onClick={() => {
-                setView('login');
-                setStep(1);
-                setError(null);
-              }}
-              className="text-xs text-neutral-400 hover:text-white mt-4 block mx-auto font-mono cursor-pointer transition-colors"
-            >
-              Already have an account? Sign in ↗
-            </button>
           </form>
         )}
       </div>
