@@ -12,6 +12,7 @@ interface HeaderProps {
   onGoHome?: () => void;
   onOpenChangelog?: () => void;
   onOpenAdmin?: () => void;
+  onOpenAuthModal?: () => void;
 }
 
 interface UserSession {
@@ -63,6 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
   onGoHome,
   onOpenChangelog,
   onOpenAdmin,
+  onOpenAuthModal,
 }) => {
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const [installDropdownOpen, setInstallDropdownOpen] = useState(false);
@@ -287,13 +289,14 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             </div>
           ) : (
-            <a
-              href="/api/auth/faceit/login"
-              className="inline-flex items-center justify-center text-center h-8 sm:h-9 px-3 sm:px-3.5 rounded-none bg-black text-white hover:text-[#FF5500] hover:border-[#FF5500] border border-white/20 font-sans font-bold text-[10px] sm:text-[11px] md:text-xs tracking-wider uppercase transition-colors shrink-0 shadow-sm"
-              title="Log in with your FACEIT account"
+            <button
+              type="button"
+              onClick={onOpenAuthModal}
+              className="inline-flex items-center justify-center text-center h-8 sm:h-9 px-5 sm:px-6 rounded-none bg-black text-white hover:border-white/50 border border-white/20 font-mono text-xs font-bold tracking-wider uppercase transition-colors shrink-0 shadow-sm cursor-pointer focus-visible:ring-1 focus-visible:ring-white"
+              title="Sign in to Peekly"
             >
-              <span>LOG IN WITH FACEIT</span>
-            </a>
+              <span>SIGN IN</span>
+            </button>
           )}
 
           {/* Install Extension CTA Button & Dropdown */}

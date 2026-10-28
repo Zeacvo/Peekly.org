@@ -3,6 +3,7 @@ import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { Features } from './components/Features';
 import { Footer } from './components/Footer';
+import { AuthModal } from './components/AuthModal';
 import { getSafeInitialLanguage, saveLanguagePreference } from './translations';
 import type { Language } from './translations';
 
@@ -121,6 +122,7 @@ export const App: React.FC = () => {
   const [isAuthError, setIsAuthError] = useState<boolean>(() => checkRoutes().isAuthError);
   const [authErrorStatus, setAuthErrorStatus] = useState<string>(() => checkRoutes().authErrorStatus);
   const [authErrorMessage, setAuthErrorMessage] = useState<string>(() => checkRoutes().authErrorMessage);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const handleLocationChange = () => {
@@ -253,6 +255,7 @@ export const App: React.FC = () => {
           onLanguageChange={handleLanguageChange}
           onGoHome={handleGoHome}
           onOpenChangelog={handleOpenChangelog}
+          onOpenAuthModal={() => setIsAuthModalOpen(true)}
           onOpenAdmin={() => {
             setIsAdmin(true);
             try {
@@ -332,6 +335,20 @@ export const App: React.FC = () => {
           onGoHome={handleGoHome}
         />
       )}
+
+      {/* Apple-Style Authentication Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onLoginSuccess={(session) => {
+          if (session.nickname.toLowerCase() === 'zeacvo') {
+            setIsAdmin(true);
+            try {
+              history.pushState(null, '', '/admin');
+            } catch {}
+          }
+        }}
+      />
     </div>
   );
 };
