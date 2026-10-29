@@ -383,7 +383,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        setError(data?.error || 'Registration failed.');
+        if (res.status === 409) {
+          const conflictMsg =
+            data?.error ||
+            'Account with this email or username already exists. Please sign in instead.';
+          setError(conflictMsg);
+          if (
+            data?.field === 'nickname' ||
+            data?.error?.toLowerCase().includes('nickname') ||
+            data?.error?.toLowerCase().includes('username')
+          ) {
+            setNicknameTouched(true);
+          } else {
+            setEmailTouched(true);
+          }
+        } else {
+          setError(data?.error || 'Registration failed.');
+        }
+
         if (window.turnstile?.reset) {
           try {
             window.turnstile.reset(widgetIdRef.current || undefined);
@@ -454,7 +471,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <PeeklyLogo size={36} className="text-white h-9 w-auto" />
         </div>
 
-        {error && (
+        {error && view === 'login' && (
           <div className="my-3 p-2.5 bg-red-950/60 border border-red-500/40 text-red-300 text-xs font-mono text-center rounded-none">
             {error}
           </div>
@@ -757,6 +774,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   value={nickname}
                   onChange={(e) => {
                     setNickname(e.target.value);
+                    if (error) setError(null);
                     if (!nicknameTouched) setNicknameTouched(true);
                   }}
                   onBlur={() => setNicknameTouched(true)}
@@ -766,7 +784,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       ? '!border-[#FF1744] bg-[#FF1744]/5'
                       : 'border-white/15 focus:border-white/50'
                   } text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition-colors font-sans`}
-                  autoFocus
                 />
                 {showNicknameError && (
                   <span className="text-xs text-[#FF1744] flex items-center gap-1.5 mt-1 font-mono tracking-tight">
@@ -783,6 +800,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
+                    if (error) setError(null);
                     if (!emailTouched) setEmailTouched(true);
                   }}
                   onBlur={() => setEmailTouched(true)}
@@ -914,33 +932,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 )}
               </div>
 
-              {/* Announcements & Updates Opt-in Checkbox (Apple-style Brutalist) */}
-              <div className="flex items-start gap-3 p-3 bg-[#0F0F11] border border-white/10 hover:border-white/20 transition-colors my-2">
+              {/* Checkbox 1: Announcements & Updates (Clean Brutalist Black) */}
+              <div className="flex items-start gap-3 my-2 bg-black">
                 <input
                   type="checkbox"
                   id="peekly-announcements"
                   checked={newsletterOptIn}
                   onChange={(e) => setNewsletterOptIn(e.target.checked)}
-                  className="mt-1 h-4 w-4 rounded-none bg-black border border-white/30 checked:bg-[#FF5500] checked:border-[#FF5500] focus:ring-0 focus:outline-none cursor-pointer accent-[#FF5500]"
+                  className="mt-0.5 h-4 w-4 rounded-none bg-black border border-white/30 checked:bg-[#FF5500] checked:border-[#FF5500] focus:ring-0 cursor-pointer accent-[#FF5500]"
                 />
-                <label htmlFor="peekly-announcements" className="cursor-pointer select-none">
-                  <span className="block text-xs font-bold text-white tracking-wide">
-                    Announcements & Updates
-                  </span>
-                  <span className="block text-[11px] leading-relaxed text-neutral-400 mt-0.5">
-                    Receive Peekly product announcements, feature updates, extension changelogs, and CS2 competitive analytics via email.
-                  </span>
+                <label htmlFor="peekly-announcements" className="text-xs text-neutral-300 select-none cursor-pointer leading-tight">
+                  <span className="font-semibold text-white">Announcements & Updates.</span> Receive product updates and CS2 analytics via email.
                 </label>
               </div>
 
-              {/* Cloudflare Turnstile Human Verification Container (Theme: dark) */}
-              <div
-                id="turnstile-container"
-                className="w-full flex justify-center items-center my-2 min-h-[65px]"
-              />
-
-              {/* Mandatory Terms & Privacy Checkbox */}
-              <div className="flex items-start gap-2.5 my-2">
+              {/* Checkbox 2: Terms & Privacy (Clean Brutalist Black) */}
+              <div className="flex items-start gap-3 my-2 bg-black">
                 <input
                   type="checkbox"
                   id="terms-agree"
@@ -948,7 +955,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   onChange={(e) => setTermsAgreed(e.target.checked)}
                   className="mt-0.5 h-4 w-4 rounded-none bg-black border border-white/30 checked:bg-[#FF5500] checked:border-[#FF5500] focus:ring-0 cursor-pointer accent-[#FF5500]"
                 />
-                <label htmlFor="terms-agree" className="text-xs text-neutral-300 select-none cursor-pointer leading-normal">
+                <label htmlFor="terms-agree" className="text-xs text-neutral-300 select-none cursor-pointer leading-tight">
                   I agree to the{' '}
                   <a
                     href="/legal/terms"
@@ -970,6 +977,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   .
                 </label>
               </div>
+
+              {/* Cloudflare Turnstile Human Verification Container (Theme: dark, Centered) */}
+              <div className="w-full flex justify-center items-center my-3 bg-black py-1">
+                <div id="turnstile-container" className="flex justify-center" />
+              </div>
+
+              {/* System Error Banner */}
+              {error && (
+                <div className="w-full my-2 p-2.5 bg-red-950/80 border border-[#FF1744] text-[#FF1744] text-xs font-mono text-left rounded-none flex items-start gap-2">
+                  <ExclamationIcon className="w-4 h-4 shrink-0 text-[#FF1744] mt-0.5" />
+                  <span className="leading-snug">{error}</span>
+                </div>
+              )}
 
               {/* Submit Button - Disabled until form is fully valid and Turnstile is completed */}
               <button

@@ -141,24 +141,66 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
 
     // 3. Check if user already exists
     if (db) {
-      const existing = await db
+      const existingEmail = await db
         .prepare('SELECT id FROM users WHERE email = ?')
         .bind(cleanEmail)
         .first();
 
-      if (existing) {
-        return new Response(JSON.stringify({ error: 'Email already registered.' }), {
-          status: 409,
-          headers: { 'Content-Type': 'application/json' },
-        });
+      if (existingEmail) {
+        return new Response(
+          JSON.stringify({
+            error: 'Account with this email already exists. Please sign in instead.',
+            field: 'email',
+          }),
+          {
+            status: 409,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
+      }
+
+      const existingNickname = await db
+        .prepare('SELECT id FROM users WHERE LOWER(nickname) = ?')
+        .bind(cleanNickname.toLowerCase())
+        .first();
+
+      if (existingNickname) {
+        return new Response(
+          JSON.stringify({
+            error: 'Account with this username already exists. Please choose another username or sign in.',
+            field: 'nickname',
+          }),
+          {
+            status: 409,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
       }
     } else {
       for (const u of memoryAuthUsers.values()) {
         if (u.email === cleanEmail) {
-          return new Response(JSON.stringify({ error: 'Email already registered.' }), {
-            status: 409,
-            headers: { 'Content-Type': 'application/json' },
-          });
+          return new Response(
+            JSON.stringify({
+              error: 'Account with this email already exists. Please sign in instead.',
+              field: 'email',
+            }),
+            {
+              status: 409,
+              headers: { 'Content-Type': 'application/json' },
+            }
+          );
+        }
+        if (u.nickname.toLowerCase() === cleanNickname.toLowerCase()) {
+          return new Response(
+            JSON.stringify({
+              error: 'Account with this username already exists. Please choose another username or sign in.',
+              field: 'nickname',
+            }),
+            {
+              status: 409,
+              headers: { 'Content-Type': 'application/json' },
+            }
+          );
         }
       }
     }
@@ -196,36 +238,53 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
     // 5. Save to D1 or memory
     if (db) {
       try {
-        await db
-          .prepare(
-            'INSERT INTO users (id, email, password_hash, salt, nickname, role, created_at, newsletter_subscribed) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-          )
-          .bind(
-            newUser.id,
-            newUser.email,
-            newUser.password_hash,
-            newUser.salt,
-            newUser.nickname,
-            newUser.role,
-            newUser.created_at,
-            newsletterSubscribed
-          )
-          .run();
-      } catch {
-        await db
-          .prepare(
-            'INSERT INTO users (id, email, password_hash, salt, nickname, role, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
-          )
-          .bind(
-            newUser.id,
-            newUser.email,
-            newUser.password_hash,
-            newUser.salt,
-            newUser.nickname,
-            newUser.role,
-            newUser.created_at
-          )
-          .run();
+        try {
+          await db
+            .prepare(
+              'INSERT INTO users (id, email, password_hash, salt, nickname, role, created_at, newsletter_subscribed) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+            )
+            .bind(
+              newUser.id,
+              newUser.email,
+              newUser.password_hash,
+              newUser.salt,
+              newUser.nickname,
+              newUser.role,
+              newUser.created_at,
+              newsletterSubscribed
+            )
+            .run();
+        } catch {
+          await db
+            .prepare(
+              'INSERT INTO users (id, email, password_hash, salt, nickname, role, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+            )
+            .bind(
+              newUser.id,
+              newUser.email,
+              newUser.password_hash,
+              newUser.salt,
+              newUser.nickname,
+              newUser.role,
+              newUser.created_at
+            )
+            .run();
+        }
+      } catch (insertErr: unknown) {
+        const errMsg = String(insertErr);
+        if (errMsg.includes('UNIQUE') || errMsg.includes('constraint')) {
+          return new Response(
+            JSON.stringify({
+              error: 'Account with this email or username already exists. Please sign in instead.',
+              field: 'email',
+            }),
+            {
+              status: 409,
+              headers: { 'Content-Type': 'application/json' },
+            }
+          );
+        }
+        throw insertErr;
       }
 
       await db
