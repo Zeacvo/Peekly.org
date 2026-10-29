@@ -253,6 +253,7 @@ export const onRequest = async (context: EventContext): Promise<Response> => {
     });
   } catch (err) {
     console.error('[Google OAuth] Exception in callback:', err);
-    return Response.redirect(`${url.origin}/?auth_error=server_error`, 302);
+    const errParam = encodeURIComponent(err instanceof Error ? err.message : String(err));
+    return Response.redirect(`${url.origin}/?auth_error=${errParam}`, 302);
   }
 };
