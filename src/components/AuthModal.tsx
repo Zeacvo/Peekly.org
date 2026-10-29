@@ -70,6 +70,7 @@ export const PrivacyIcon: React.FC<{ className?: string }> = ({
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialError?: string | null;
   onLoginSuccess?: (session: {
     nickname: string;
     email: string;
@@ -82,6 +83,7 @@ interface AuthModalProps {
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
+  initialError,
   onLoginSuccess,
 }) => {
   const [view, setView] = useState<'login' | 'register'>('login');
@@ -95,10 +97,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [turnstileToken, setTurnstileToken] = useState('');
 
   const [rememberMe, setRememberMe] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError || null);
   const [infoNotice, setInfoNotice] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const widgetIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (initialError) {
+      setError(initialError);
+    }
+  }, [initialError]);
 
   const handleClose = useCallback(() => {
     setError(null);

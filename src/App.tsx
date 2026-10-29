@@ -138,6 +138,19 @@ export const App: React.FC = () => {
   const [authErrorStatus, setAuthErrorStatus] = useState<string>(() => checkRoutes().authErrorStatus);
   const [authErrorMessage, setAuthErrorMessage] = useState<string>(() => checkRoutes().authErrorMessage);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [authErrorParam, setAuthErrorParam] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const sp = new URLSearchParams(window.location.search);
+      const authErr = sp.get('auth_error');
+      if (authErr) {
+        setAuthErrorParam(decodeURIComponent(authErr));
+        setIsAuthModalOpen(true);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    } catch {}
+  }, []);
 
   useEffect(() => {
     const handleLocationChange = () => {
@@ -367,7 +380,11 @@ export const App: React.FC = () => {
       {/* Apple-Style Authentication Modal */}
       <AuthModal
         isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
+        initialError={authErrorParam}
+        onClose={() => {
+          setIsAuthModalOpen(false);
+          setAuthErrorParam(null);
+        }}
         onLoginSuccess={(session) => {
           if (session.nickname.toLowerCase() === 'zeacvo') {
             setIsAdmin(true);

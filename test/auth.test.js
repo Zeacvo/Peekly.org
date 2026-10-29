@@ -190,4 +190,38 @@ describe('Authentication & Crypto Logic', () => {
       globalThis.fetch = origFetch;
     }
   });
+
+  test('Google OAuth callback logs and redirects with granular error when token exchange fails', async () => {
+    const origFetch = globalThis.fetch;
+    try {
+      globalThis.fetch = async (url) => {
+        const urlStr = url.toString();
+        if (urlStr.includes('oauth2.googleapis.com/token')) {
+          return new Response(
+            JSON.stringify({
+              error: 'redirect_uri_mismatch',
+              error_description: 'Bad Request: redirect_uri mismatch',
+            }),
+            {
+              status: 400,
+              headers: { 'Content-Type': 'application/json' },
+            }
+          );
+        }
+        return new Response('Not found', { status: 404 });
+      };
+
+      const callbackReq = new Request(
+        'http://localhost/api/auth/callback/google?code=mismatched_code'
+      );
+      const callbackRes = await onGoogleCallback({ request: callbackReq, env: {} });
+      assert.strictEqual(callbackRes.status, 302);
+      assert.strictEqual(
+        callbackRes.headers.get('Location'),
+        'http://localhost/?auth_error=Bad%20Request%3A%20redirect_uri%20mismatch'
+      );
+    } finally {
+      globalThis.fetch = origFetch;
+    }
+  });
 });

@@ -30,7 +30,7 @@ export const onRequest = async (context: EventContext): Promise<Response> => {
   const { request, env } = context;
   const url = new URL(request.url);
 
-  // Read credentials from Cloudflare Pages environment variables / context bindings
+  // Read credentials from Cloudflare Pages environment variables or process.env
   const clientId =
     env?.GOOGLE_CLIENT_ID ||
     (typeof process !== 'undefined' ? process.env?.GOOGLE_CLIENT_ID : '') ||
@@ -45,16 +45,26 @@ export const onRequest = async (context: EventContext): Promise<Response> => {
   const errorParam = url.searchParams.get('error');
 
   if (errorParam) {
+    console.warn('[Google OAuth] Error param in query:', errorParam);
     return Response.redirect(`${url.origin}/?auth_error=${encodeURIComponent(errorParam)}`, 302);
   }
 
   if (!code) {
+    console.warn('[Google OAuth] Missing code parameter');
     return Response.redirect(`${url.origin}/?auth_error=no_code`, 302);
   }
 
-  try {
-    const redirectUri = `${url.origin}/api/auth/callback/google`;
+  // Derive redirect URI dynamically from the incoming request origin
+  const redirectUri = `${url.origin}/api/auth/callback/google`;
 
+  console.log('[Google OAuth Token Request]:', {
+    code_present: Boolean(code),
+    client_id: clientId,
+    has_client_secret: Boolean(clientSecret),
+    redirect_uri: redirectUri,
+  });
+
+  try {
     // 2. Exchange code for Google tokens
     const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
@@ -68,23 +78,29 @@ export const onRequest = async (context: EventContext): Promise<Response> => {
       }),
     });
 
-    if (!tokenRes.ok) {
-      const errText = await tokenRes.text().catch(() => '');
-      console.error('[Google OAuth] Token exchange error:', errText);
-      return Response.redirect(`${url.origin}/?auth_error=token_exchange_failed`, 302);
-    }
+    const tokenData = (await tokenRes.json().catch(() => ({}))) as {
+      access_token?: string;
+      id_token?: string;
+      error?: string;
+      error_description?: string;
+    };
 
-    const tokens = (await tokenRes.json()) as { access_token?: string; id_token?: string };
-    if (!tokens.access_token) {
-      return Response.redirect(`${url.origin}/?auth_error=no_access_token`, 302);
+    if (!tokenRes.ok || !tokenData.access_token) {
+      console.error('[Google OAuth Token Error]:', tokenRes.status, tokenData);
+      const errReason =
+        tokenData.error_description || tokenData.error || 'token_exchange_failed';
+      const errParam = encodeURIComponent(errReason);
+      return Response.redirect(`${url.origin}/?auth_error=${errParam}`, 302);
     }
 
     // 3. Fetch Google User Profile
     const userRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-      headers: { Authorization: `Bearer ${tokens.access_token}` },
+      headers: { Authorization: `Bearer ${tokenData.access_token}` },
     });
 
     if (!userRes.ok) {
+      const userErrText = await userRes.text().catch(() => '');
+      console.error('[Google OAuth UserInfo Error]:', userRes.status, userErrText);
       return Response.redirect(`${url.origin}/?auth_error=userinfo_failed`, 302);
     }
 
@@ -96,6 +112,7 @@ export const onRequest = async (context: EventContext): Promise<Response> => {
     };
 
     if (!googleUser.email) {
+      console.error('[Google OAuth] No email found in Google user profile');
       return Response.redirect(`${url.origin}/?auth_error=no_email`, 302);
     }
 
