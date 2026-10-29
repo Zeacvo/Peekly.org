@@ -11,6 +11,7 @@ export interface DbUser {
   nickname: string;
   role: string;
   created_at: number;
+  newsletter_subscribed?: number;
 }
 
 export interface DbSession {
@@ -128,6 +129,9 @@ export async function ensureAuthSchema(db?: D1Database): Promise<void> {
       CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token);
       CREATE INDEX IF NOT EXISTS idx_verification_email ON verification_codes(email);
     `);
+    try {
+      await db.exec('ALTER TABLE users ADD COLUMN newsletter_subscribed INTEGER DEFAULT 1;');
+    } catch {}
     schemaInitialized = true;
   } catch (err) {
     console.warn('[D1] Schema init warning:', err);

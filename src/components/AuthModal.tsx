@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { PeeklyLogo } from './PeeklyLogo';
-import { isValidEmail } from '../../functions/api/utils/auth.ts';
+import { isValidEmail, isValidNickname, checkPasswordRequirements } from '../../functions/api/utils/auth.ts';
 
 declare global {
   interface Window {
@@ -67,6 +67,16 @@ export const PrivacyIcon: React.FC<{ className?: string }> = ({
   </svg>
 );
 
+export const ExclamationIcon: React.FC<{ className?: string }> = ({ className = 'w-3.5 h-3.5 shrink-0' }) => (
+  <svg className={className} viewBox="0 0 16 16" fill="currentColor">
+    <path
+      fillRule="evenodd"
+      d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0-9.5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 5.5zm0 6.5a.875.875 0 1 0 0-1.75.875.875 0 0 0 0 1.75z"
+      clipRule="evenodd"
+    />
+  </svg>
+);
+
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -96,11 +106,62 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [nickname, setNickname] = useState('');
   const [turnstileToken, setTurnstileToken] = useState('');
 
+  // Form validation & focus states
+  const [nicknameTouched, setNicknameTouched] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
+  const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+
+  // Opt-in for announcements & updates (default enabled)
+  const [newsletterOptIn, setNewsletterOptIn] = useState(true);
+
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState<string | null>(initialError || null);
   const [infoNotice, setInfoNotice] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const widgetIdRef = useRef<string | null>(null);
+
+  // Derived validation states
+  const isNicknameValid = isValidNickname(nickname);
+  const isEmailValid = isValidEmail(email);
+  const pwdReq = checkPasswordRequirements(password);
+  const isConfirmValid = confirmPassword.length > 0 && confirmPassword === password;
+
+  const showNicknameError = nicknameTouched && !isNicknameValid;
+  const showEmailError = emailTouched && !isEmailValid;
+  const showPasswordError = passwordTouched && !pwdReq.isValid && !isPasswordFocused;
+  const showConfirmError = confirmPasswordTouched && !isConfirmValid;
+  const showLoginEmailError = emailTouched && !isEmailValid;
+
+  const isRegisterFormValid =
+    isNicknameValid &&
+    isEmailValid &&
+    pwdReq.isValid &&
+    isConfirmValid &&
+    Boolean(turnstileToken);
+
+  const getStrengthColor = (score: number) => {
+    if (score < 40) return 'bg-[#FF1744]';
+    if (score < 100) return 'bg-[#FF5500]';
+    return 'bg-[#00E676]';
+  };
+
+  const requirements = [
+    { met: pwdReq.hasLength, label: 'At least 8 characters' },
+    { met: pwdReq.hasNumber, label: 'At least 1 number' },
+    { met: pwdReq.hasUpper, label: 'At least 1 uppercase letter' },
+    { met: pwdReq.hasLower, label: 'At least 1 lowercase letter' },
+    { met: pwdReq.hasSpecial, label: 'At least one special character' },
+  ];
+
+  const resetFormValidation = () => {
+    setNicknameTouched(false);
+    setEmailTouched(false);
+    setPasswordTouched(false);
+    setConfirmPasswordTouched(false);
+    setIsPasswordFocused(false);
+  };
 
   useEffect(() => {
     if (initialError) {
@@ -111,6 +172,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const handleClose = useCallback(() => {
     setError(null);
     setInfoNotice(null);
+    resetFormValidation();
     onClose();
   }, [onClose]);
 
@@ -195,9 +257,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleContinueEmail = (e: React.FormEvent) => {
     e.preventDefault();
+    setEmailTouched(true);
     const cleanEmail = email.trim().toLowerCase();
     if (!cleanEmail || !isValidEmail(cleanEmail)) {
-      setError('Please enter a valid email address.');
+      setError('Enter a valid email address to use as your account email.');
       return;
     }
     setError(null);
@@ -249,19 +312,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setNicknameTouched(true);
+    setEmailTouched(true);
+    setPasswordTouched(true);
+    setConfirmPasswordTouched(true);
+
     const cleanNickname = nickname.trim();
     const cleanEmail = email.trim().toLowerCase();
 
-    if (!cleanNickname) {
-      setError('Nickname is required.');
+    if (!isValidNickname(cleanNickname)) {
+      setError('3 to 20 characters, letters and numbers only.');
       return;
     }
-    if (!cleanEmail || !isValidEmail(cleanEmail)) {
-      setError('Please enter a valid email address.');
+    if (!isValidEmail(cleanEmail)) {
+      setError('Enter a valid email address to use as your account email.');
       return;
     }
-    if (!password || password.length < 6) {
-      setError('Password must be at least 6 characters.');
+    const currentPwdReq = checkPasswordRequirements(password);
+    if (!currentPwdReq.isValid) {
+      setError('Must meet all password requirements.');
       return;
     }
     if (password !== confirmPassword) {
@@ -285,6 +354,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           email: cleanEmail,
           password,
           turnstileToken,
+          newsletterOptIn,
         }),
       });
 
@@ -400,7 +470,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-sans text-xs font-semibold tracking-wide flex items-center justify-center gap-3 rounded-none transition cursor-pointer"
                 >
                   <FaceitLogo className="w-4 h-4" />
-                  <span>Sign in with FACEIT</span>
+                  <span>Continue with FACEIT</span>
                 </a>
               </div>
 
@@ -419,14 +489,30 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 noValidate
                 className="w-full flex flex-col gap-3.5"
               >
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email"
-                  className="w-full h-11 bg-black border border-white/20 focus:border-white text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans"
-                  autoFocus
-                />
+                <div className="w-full flex flex-col">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (!emailTouched) setEmailTouched(true);
+                    }}
+                    onBlur={() => setEmailTouched(true)}
+                    placeholder="Email"
+                    className={`w-full h-11 bg-[#0F0F11] border ${
+                      showLoginEmailError
+                        ? '!border-[#FF1744] bg-[#FF1744]/5'
+                        : 'border-white/15 focus:border-white/50'
+                    } text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition-colors font-sans`}
+                    autoFocus
+                  />
+                  {showLoginEmailError && (
+                    <span className="text-xs text-[#FF1744] flex items-center gap-1.5 mt-1 font-mono tracking-tight">
+                      <ExclamationIcon />
+                      <span>Enter a valid email address to use as your account email.</span>
+                    </span>
+                  )}
+                </div>
 
                 <div className="w-full flex justify-start">
                   <button
@@ -434,6 +520,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     onClick={() => {
                       setView('register');
                       setError(null);
+                      resetFormValidation();
                     }}
                     className="text-xs text-neutral-400 hover:text-white transition font-mono cursor-pointer text-left"
                   >
@@ -515,7 +602,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Password"
-                  className="w-full h-11 bg-black border border-white/20 focus:border-white text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans"
+                  className="w-full h-11 bg-[#0F0F11] border border-white/15 focus:border-white/50 text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans"
                   autoFocus
                 />
               </div>
@@ -588,6 +675,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   setView('login');
                   setStep(1);
                   setError(null);
+                  resetFormValidation();
                 }}
                 className="text-white hover:text-neutral-300 ml-1 cursor-pointer transition font-mono"
               >
@@ -611,7 +699,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-sans text-xs font-semibold tracking-wide flex items-center justify-center gap-3 rounded-none transition cursor-pointer"
               >
                 <FaceitLogo className="w-4 h-4" />
-                <span>Sign in with FACEIT</span>
+                <span>Continue with FACEIT</span>
               </a>
             </div>
 
@@ -630,38 +718,168 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               noValidate
               className="w-full flex flex-col gap-3"
             >
-              <input
-                type="text"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                placeholder="Nickname"
-                className="w-full h-11 bg-black border border-white/20 focus:border-white text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans"
-                autoFocus
-              />
+              {/* Nickname Input */}
+              <div className="w-full flex flex-col">
+                <input
+                  type="text"
+                  value={nickname}
+                  onChange={(e) => {
+                    setNickname(e.target.value);
+                    if (!nicknameTouched) setNicknameTouched(true);
+                  }}
+                  onBlur={() => setNicknameTouched(true)}
+                  placeholder="Nickname"
+                  className={`w-full h-11 bg-[#0F0F11] border ${
+                    showNicknameError
+                      ? '!border-[#FF1744] bg-[#FF1744]/5'
+                      : 'border-white/15 focus:border-white/50'
+                  } text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition-colors font-sans`}
+                  autoFocus
+                />
+                {showNicknameError && (
+                  <span className="text-xs text-[#FF1744] flex items-center gap-1.5 mt-1 font-mono tracking-tight">
+                    <ExclamationIcon />
+                    <span>3 to 20 characters, letters and numbers only.</span>
+                  </span>
+                )}
+              </div>
 
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
-                className="w-full h-11 bg-black border border-white/20 focus:border-white text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans"
-              />
+              {/* Email Input */}
+              <div className="w-full flex flex-col">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (!emailTouched) setEmailTouched(true);
+                  }}
+                  onBlur={() => setEmailTouched(true)}
+                  placeholder="Email address"
+                  className={`w-full h-11 bg-[#0F0F11] border ${
+                    showEmailError
+                      ? '!border-[#FF1744] bg-[#FF1744]/5'
+                      : 'border-white/15 focus:border-white/50'
+                  } text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition-colors font-sans`}
+                />
+                {showEmailError && (
+                  <span className="text-xs text-[#FF1744] flex items-center gap-1.5 mt-1 font-mono tracking-tight">
+                    <ExclamationIcon />
+                    <span>Enter a valid email address to use as your account email.</span>
+                  </span>
+                )}
+              </div>
 
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password (at least 6 characters)"
-                className="w-full h-11 bg-black border border-white/20 focus:border-white text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans"
-              />
+              {/* Password Input with Dynamic Apple-style Popover */}
+              <div className="w-full flex flex-col">
+                <div className="relative w-full">
+                  {isPasswordFocused && (
+                    <div
+                      className="absolute bottom-full left-0 mb-2 w-full sm:w-[340px] bg-[#141416] border border-white/20 p-4 shadow-2xl z-50 rounded-none pointer-events-none"
+                    >
+                      <div className="flex items-center justify-between text-xs font-mono text-neutral-300 mb-1.5">
+                        <span>Strength: {pwdReq.score}%</span>
+                      </div>
+                      <div className="w-full h-[3px] bg-white/10 rounded-none overflow-hidden mb-3">
+                        <div
+                          className={`h-full transition-all duration-200 ${getStrengthColor(pwdReq.score)}`}
+                          style={{ width: `${pwdReq.score}%` }}
+                        />
+                      </div>
+                      <div className="text-xs font-bold uppercase tracking-wider text-neutral-200 mt-1 mb-2">
+                        Password Requirements
+                      </div>
+                      <div className="space-y-1.5 font-mono text-xs">
+                        {requirements.map((req, idx) => (
+                          <div
+                            key={idx}
+                            className={`flex items-center gap-2 transition-colors ${
+                              req.met ? 'text-[#00E676] font-semibold' : 'text-neutral-500 font-normal'
+                            }`}
+                          >
+                            <span className={`w-3.5 text-center shrink-0 ${req.met ? 'text-[#00E676] font-bold' : 'opacity-40'}`}>
+                              {req.met ? '✓' : '•'}
+                            </span>
+                            <span>{req.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="text-[11px] leading-relaxed text-neutral-400 mt-3 pt-2.5 border-t border-white/10 font-sans">
+                        Avoid using a password that you use with other websites or that might be easy for someone else to guess.
+                      </div>
+                    </div>
+                  )}
 
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm Password"
-                className="w-full h-11 bg-black border border-white/20 focus:border-white text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans"
-              />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (!passwordTouched) setPasswordTouched(true);
+                    }}
+                    onFocus={() => setIsPasswordFocused(true)}
+                    onBlur={() => {
+                      setIsPasswordFocused(false);
+                      setPasswordTouched(true);
+                    }}
+                    placeholder="Password"
+                    className={`w-full h-11 bg-[#0F0F11] border ${
+                      showPasswordError
+                        ? '!border-[#FF1744] bg-[#FF1744]/5'
+                        : 'border-white/15 focus:border-white/50'
+                    } text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition-colors font-sans`}
+                  />
+                </div>
+                {showPasswordError && (
+                  <span className="text-xs text-[#FF1744] flex items-center gap-1.5 mt-1 font-mono tracking-tight">
+                    <ExclamationIcon />
+                    <span>Must meet all password requirements.</span>
+                  </span>
+                )}
+              </div>
+
+              {/* Confirm Password Input */}
+              <div className="w-full flex flex-col">
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    if (!confirmPasswordTouched) setConfirmPasswordTouched(true);
+                  }}
+                  onBlur={() => setConfirmPasswordTouched(true)}
+                  placeholder="Confirm password"
+                  className={`w-full h-11 bg-[#0F0F11] border ${
+                    showConfirmError
+                      ? '!border-[#FF1744] bg-[#FF1744]/5'
+                      : 'border-white/15 focus:border-white/50'
+                  } text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition-colors font-sans`}
+                />
+                {showConfirmError && (
+                  <span className="text-xs text-[#FF1744] flex items-center gap-1.5 mt-1 font-mono tracking-tight">
+                    <ExclamationIcon />
+                    <span>Passwords do not match.</span>
+                  </span>
+                )}
+              </div>
+
+              {/* Announcements & Updates Opt-in Checkbox (Apple-style Brutalist) */}
+              <div className="flex items-start gap-3 p-3 bg-[#0F0F11] border border-white/10 hover:border-white/20 transition-colors my-2">
+                <input
+                  type="checkbox"
+                  id="peekly-announcements"
+                  checked={newsletterOptIn}
+                  onChange={(e) => setNewsletterOptIn(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded-none bg-black border border-white/30 checked:bg-[#FF5500] checked:border-[#FF5500] focus:ring-0 focus:outline-none cursor-pointer accent-[#FF5500]"
+                />
+                <label htmlFor="peekly-announcements" className="cursor-pointer select-none">
+                  <span className="block text-xs font-bold text-white tracking-wide">
+                    Announcements & Updates
+                  </span>
+                  <span className="block text-[11px] leading-relaxed text-neutral-400 mt-0.5">
+                    Receive Peekly product announcements, feature updates, extension changelogs, and CS2 competitive analytics via email.
+                  </span>
+                </label>
+              </div>
 
               {/* Cloudflare Turnstile Human Verification Container (Theme: dark) */}
               <div
@@ -669,25 +887,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 className="w-full flex justify-center items-center my-2 min-h-[65px]"
               />
 
-              {/* Submit Button - Disabled until Turnstile is verified */}
+              {/* Submit Button - Disabled until form is fully valid and Turnstile is completed */}
               <button
                 type="submit"
-                disabled={
-                  isLoading ||
-                  !nickname.trim() ||
-                  !email.trim() ||
-                  password.length < 6 ||
-                  password !== confirmPassword ||
-                  !turnstileToken
-                }
+                disabled={isLoading || !isRegisterFormValid}
                 className={`w-full h-11 rounded-none font-mono font-bold text-xs uppercase tracking-wider transition ${
-                  isLoading ||
-                  !nickname.trim() ||
-                  !email.trim() ||
-                  password.length < 6 ||
-                  password !== confirmPassword ||
-                  !turnstileToken
-                    ? 'bg-white/20 text-neutral-400 cursor-not-allowed border-none shadow-none'
+                  isLoading || !isRegisterFormValid
+                    ? 'opacity-40 cursor-not-allowed bg-white/20 text-neutral-400 border-none shadow-none'
                     : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
                 }`}
               >

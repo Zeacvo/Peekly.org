@@ -87,7 +87,7 @@ export const Footer: React.FC<FooterProps> = ({
 
         {/* Right Column: Navigation Links & Copyright */}
         <div className="flex flex-col items-start md:items-end text-left md:text-right gap-1.5 text-[12px]">
-          {/* Row 1: Terms of Service Link (strictly above Changelog) */}
+          {/* Row 1: Terms of Service Link */}
           <a
             href="/terms"
             onClick={(e) => {
@@ -104,19 +104,7 @@ export const Footer: React.FC<FooterProps> = ({
             {termsLabelMap[currentLang] || 'Terms of Service'}
           </a>
 
-          {/* Row 2: Localized Changelog Link */}
-          <button
-            type="button"
-            onClick={() => {
-              if (onOpenChangelog) onOpenChangelog();
-              else window.location.hash = '#changelog';
-            }}
-            className="text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer bg-transparent border-none p-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
-          >
-            {t.footer.changelog || t.nav.changelog}
-          </button>
-
-          {/* Row 3: Privacy Policy Link */}
+          {/* Row 2: Privacy Policy Link */}
           <a
             href="/privacy"
             onClick={(e) => {
@@ -132,6 +120,18 @@ export const Footer: React.FC<FooterProps> = ({
           >
             {privacyLabelMap[currentLang] || 'Privacy Policy'}
           </a>
+
+          {/* Row 3: Localized Changelog Link */}
+          <button
+            type="button"
+            onClick={() => {
+              if (onOpenChangelog) onOpenChangelog();
+              else window.location.hash = '#changelog';
+            }}
+            className="text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer bg-transparent border-none p-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
+          >
+            {t.footer.changelog || t.nav.changelog}
+          </button>
 
           {/* Row 4: Copyright */}
           <p className="text-[11px] text-neutral-500 font-sans whitespace-nowrap m-0 mt-1">

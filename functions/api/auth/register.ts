@@ -52,11 +52,12 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
       });
     }
 
-    const { nickname, email, password, turnstileToken } = body as {
+    const { nickname, email, password, turnstileToken, newsletterOptIn } = body as {
       nickname?: string;
       email?: string;
       password?: string;
       turnstileToken?: string;
+      newsletterOptIn?: boolean;
     };
 
     const cleanNickname = (nickname || '').trim();
@@ -189,22 +190,43 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
       created_at: now,
     };
 
+    const newsletterSubscribed = typeof newsletterOptIn === 'boolean' ? (newsletterOptIn ? 1 : 0) : 1;
+    newUser.newsletter_subscribed = newsletterSubscribed;
+
     // 5. Save to D1 or memory
     if (db) {
-      await db
-        .prepare(
-          'INSERT INTO users (id, email, password_hash, salt, nickname, role, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
-        )
-        .bind(
-          newUser.id,
-          newUser.email,
-          newUser.password_hash,
-          newUser.salt,
-          newUser.nickname,
-          newUser.role,
-          newUser.created_at
-        )
-        .run();
+      try {
+        await db
+          .prepare(
+            'INSERT INTO users (id, email, password_hash, salt, nickname, role, created_at, newsletter_subscribed) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+          )
+          .bind(
+            newUser.id,
+            newUser.email,
+            newUser.password_hash,
+            newUser.salt,
+            newUser.nickname,
+            newUser.role,
+            newUser.created_at,
+            newsletterSubscribed
+          )
+          .run();
+      } catch {
+        await db
+          .prepare(
+            'INSERT INTO users (id, email, password_hash, salt, nickname, role, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+          )
+          .bind(
+            newUser.id,
+            newUser.email,
+            newUser.password_hash,
+            newUser.salt,
+            newUser.nickname,
+            newUser.role,
+            newUser.created_at
+          )
+          .run();
+      }
 
       await db
         .prepare(
