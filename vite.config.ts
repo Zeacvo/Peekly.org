@@ -8,6 +8,10 @@ import { onRequest as onLoginRequest } from './functions/api/auth/faceit/login.t
 import { onRequest as onSuccessRequest } from './functions/auth/extension-success.ts';
 import { onRequest as onFeedbackRequest } from './functions/api/feedback.ts';
 import { onRequest as onAdminUsersRequest } from './functions/api/admin/users.ts';
+import { onRequest as onRegisterRequest } from './functions/api/auth/register.ts';
+import { onRequest as onAuthLoginRequest } from './functions/api/auth/login.ts';
+import { onRequest as onAuthMeRequest } from './functions/api/auth/me.ts';
+import { onRequest as onAuthLogoutRequest } from './functions/api/auth/logout.ts';
 
 function spa404Plugin(): Plugin {
   return {
@@ -35,7 +39,11 @@ function faceitOAuthDevPlugin(): Plugin {
           url.pathname === '/api/auth/faceit/login' ||
           url.pathname === '/auth/extension-success' ||
           url.pathname === '/api/feedback' ||
-          url.pathname === '/api/admin/users'
+          url.pathname === '/api/admin/users' ||
+          url.pathname === '/api/auth/register' ||
+          url.pathname === '/api/auth/login' ||
+          url.pathname === '/api/auth/me' ||
+          url.pathname === '/api/auth/logout'
         ) {
           try {
             const fullUrl = `http://localhost:5173${req.url}`;
@@ -75,6 +83,14 @@ function faceitOAuthDevPlugin(): Plugin {
               response = await onFeedbackRequest({ request: webReq });
             } else if (url.pathname === '/api/admin/users') {
               response = await onAdminUsersRequest({ request: webReq, env: {} });
+            } else if (url.pathname === '/api/auth/register') {
+              response = await onRegisterRequest({ request: webReq, env: {} });
+            } else if (url.pathname === '/api/auth/login') {
+              response = await onAuthLoginRequest({ request: webReq, env: {} });
+            } else if (url.pathname === '/api/auth/me') {
+              response = await onAuthMeRequest({ request: webReq, env: {} });
+            } else if (url.pathname === '/api/auth/logout') {
+              response = await onAuthLogoutRequest({ request: webReq, env: {} });
             } else {
               response = await onCallbackRequest({ request: webReq });
             }

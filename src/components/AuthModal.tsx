@@ -3,13 +3,16 @@ import { PeeklyLogo } from './PeeklyLogo';
 
 export const FaceitLogo: React.FC<{ className?: string }> = ({ className = '' }) => (
   <svg
-    width="20"
-    height="15"
-    viewBox="0 0 100 75"
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
     fill="none"
     className={`shrink-0 ${className}`}
   >
-    <path d="M0 37.5H75L100 0V75L0 37.5Z" fill="#FF5500" />
+    <path
+      d="M23.999 2.705a.167.167 0 00-.312-.1 1141.27 1141.27 0 00-6.053 9.375H.218c-.221 0-.301.282-.11.352 7.227 2.73 17.667 6.836 23.5 9.134.15.06.39-.08.39-.18z"
+      fill="#FF5500"
+    />
   </svg>
 );
 
@@ -50,6 +53,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [nickname, setNickname] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleClose = useCallback(() => {
     setError(null);
@@ -80,46 +84,49 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setStep(2);
   };
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!password.trim()) {
       setError('Please enter your password.');
       return;
     }
-
-    const cleanEmail = email.trim();
-    const isZeacvo =
-      cleanEmail.toLowerCase() === 'zeacvo@icloud.com' ||
-      cleanEmail.toLowerCase().includes('zeacvo');
-
-    const sessionData = {
-      nickname: isZeacvo ? 'Zeacvo' : cleanEmail.split('@')[0],
-      email: cleanEmail,
-      country: 'BY',
-      elo: isZeacvo ? 1699 : 1500,
-      level: isZeacvo ? 8 : 6,
-    };
+    setError(null);
+    setIsLoading(true);
 
     try {
-      localStorage.setItem('peekly_auth', JSON.stringify(sessionData));
-      localStorage.setItem('peekly_user', JSON.stringify(sessionData));
-      document.cookie = `peekly_auth=${encodeURIComponent(
-        JSON.stringify(sessionData)
-      )}; Path=/; Max-Age=2592000; SameSite=Lax`;
-      document.cookie = `peekly_user=${encodeURIComponent(
-        JSON.stringify(sessionData)
-      )}; Path=/; Max-Age=2592000; SameSite=Lax`;
-      window.dispatchEvent(new Event('storage'));
-    } catch {}
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
 
-    if (onLoginSuccess) {
-      onLoginSuccess(sessionData);
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        setError(data?.error || 'Invalid email or password.');
+        setIsLoading(false);
+        return;
+      }
+
+      const sessionData = data.user;
+      try {
+        localStorage.setItem('peekly_auth', JSON.stringify(sessionData));
+        localStorage.setItem('peekly_user', JSON.stringify(sessionData));
+        window.dispatchEvent(new Event('storage'));
+      } catch {}
+
+      if (onLoginSuccess) {
+        onLoginSuccess(sessionData);
+      }
+      onClose();
+    } catch (err) {
+      setError(`Connection error: ${String(err)}`);
+    } finally {
+      setIsLoading(false);
     }
-
-    onClose();
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nickname.trim()) {
       setError('Please enter your nickname.');
@@ -138,37 +145,44 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       return;
     }
 
-    const cleanNickname = nickname.trim();
-    const cleanEmail = email.trim();
-    const isZeacvo =
-      cleanNickname.toLowerCase() === 'zeacvo' ||
-      cleanEmail.toLowerCase() === 'zeacvo@icloud.com';
-
-    const sessionData = {
-      nickname: cleanNickname,
-      email: cleanEmail,
-      country: 'BY',
-      elo: isZeacvo ? 1699 : 1500,
-      level: isZeacvo ? 8 : 6,
-    };
+    setError(null);
+    setIsLoading(true);
 
     try {
-      localStorage.setItem('peekly_auth', JSON.stringify(sessionData));
-      localStorage.setItem('peekly_user', JSON.stringify(sessionData));
-      document.cookie = `peekly_auth=${encodeURIComponent(
-        JSON.stringify(sessionData)
-      )}; Path=/; Max-Age=2592000; SameSite=Lax`;
-      document.cookie = `peekly_user=${encodeURIComponent(
-        JSON.stringify(sessionData)
-      )}; Path=/; Max-Age=2592000; SameSite=Lax`;
-      window.dispatchEvent(new Event('storage'));
-    } catch {}
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nickname: nickname.trim(),
+          email: email.trim(),
+          password,
+        }),
+      });
 
-    if (onLoginSuccess) {
-      onLoginSuccess(sessionData);
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        setError(data?.error || 'Registration failed.');
+        setIsLoading(false);
+        return;
+      }
+
+      const sessionData = data.user;
+      try {
+        localStorage.setItem('peekly_auth', JSON.stringify(sessionData));
+        localStorage.setItem('peekly_user', JSON.stringify(sessionData));
+        window.dispatchEvent(new Event('storage'));
+      } catch {}
+
+      if (onLoginSuccess) {
+        onLoginSuccess(sessionData);
+      }
+      onClose();
+    } catch (err) {
+      setError(`Connection error: ${String(err)}`);
+    } finally {
+      setIsLoading(false);
     }
-
-    onClose();
   };
 
   return (
@@ -366,14 +380,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               {/* Action Buttons */}
               <button
                 type="submit"
-                disabled={!password.trim()}
+                disabled={isLoading || !password.trim()}
                 className={`w-full h-11 rounded-lg font-mono font-bold text-xs uppercase tracking-wider transition ${
-                  !password.trim()
+                  isLoading || !password.trim()
                     ? 'bg-white/20 text-neutral-400 cursor-not-allowed border-none shadow-none'
                     : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
                 }`}
               >
-                SIGN IN
+                {isLoading ? 'PLEASE WAIT...' : 'SIGN IN'}
               </button>
 
               <a
@@ -456,12 +470,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="submit"
                 disabled={
+                  isLoading ||
                   !nickname.trim() ||
                   !email.trim() ||
                   !password.trim() ||
                   !confirmPassword.trim()
                 }
                 className={`w-full h-11 rounded-lg font-mono font-bold text-xs uppercase tracking-wider transition ${
+                  isLoading ||
                   !nickname.trim() ||
                   !email.trim() ||
                   !password.trim() ||
@@ -470,7 +486,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
                 }`}
               >
-                CONTINUE
+                {isLoading ? 'PLEASE WAIT...' : 'CREATE ACCOUNT'}
               </button>
 
               {/* Privacy Disclaimer */}

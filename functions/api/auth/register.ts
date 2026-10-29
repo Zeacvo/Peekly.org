@@ -1,0 +1,190 @@
+/**
+ * Cloudflare Pages Function: POST /api/auth/register
+ * Handles user registration with PBKDF2 password hashing in D1 Database.
+ */
+
+import {
+  ensureAuthSchema,
+  hashPassword,
+  generateSessionToken,
+  createSessionCookieHeader,
+  memoryAuthUsers,
+  memoryAuthSessions,
+  type D1Database,
+  type DbUser,
+  type DbSession,
+} from '../utils/auth.ts';
+
+interface EventContext {
+  request: Request;
+  env?: {
+    DB?: D1Database;
+    [key: string]: unknown;
+  };
+}
+
+export const onRequestOptions = async (): Promise<Response> => {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
+};
+
+export const onRequestPost = async (context: EventContext): Promise<Response> => {
+  try {
+    const { request, env } = context;
+    const db = env?.DB;
+
+    // Ensure schema tables exist if D1 is attached
+    if (db) {
+      await ensureAuthSchema(db);
+    }
+
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== 'object') {
+      return new Response(JSON.stringify({ error: 'Invalid JSON payload.' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { nickname, email, password } = body as {
+      nickname?: string;
+      email?: string;
+      password?: string;
+    };
+
+    const cleanNickname = (nickname || '').trim();
+    const cleanEmail = (email || '').trim().toLowerCase();
+    const cleanPassword = (password || '').trim();
+
+    if (!cleanNickname) {
+      return new Response(JSON.stringify({ error: 'Nickname is required.' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      return new Response(JSON.stringify({ error: 'A valid email address is required.' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!cleanPassword || cleanPassword.length < 6) {
+      return new Response(JSON.stringify({ error: 'Password must be at least 6 characters.' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // 1. Check if user already exists
+    if (db) {
+      const existing = await db
+        .prepare('SELECT id FROM users WHERE email = ?')
+        .bind(cleanEmail)
+        .first();
+
+      if (existing) {
+        return new Response(JSON.stringify({ error: 'Email already registered.' }), {
+          status: 409,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    } else {
+      for (const u of memoryAuthUsers.values()) {
+        if (u.email === cleanEmail) {
+          return new Response(JSON.stringify({ error: 'Email already registered.' }), {
+            status: 409,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+      }
+    }
+
+    // 2. Hash password & determine role
+    const { hash, salt } = await hashPassword(cleanPassword);
+    const userId = crypto.randomUUID();
+    const now = Date.now();
+    const isCeo = cleanEmail === 'zeacvo@icloud.com' || cleanNickname.toLowerCase() === 'zeacvo';
+    const role = isCeo ? 'ADMIN' : 'USER';
+
+    const newUser: DbUser = {
+      id: userId,
+      email: cleanEmail,
+      password_hash: hash,
+      salt,
+      nickname: cleanNickname,
+      role,
+      created_at: now,
+    };
+
+    // 3. Create session token (expires in 30 days)
+    const token = generateSessionToken();
+    const expiresAt = now + 30 * 24 * 60 * 60 * 1000;
+    const newSession: DbSession = {
+      token,
+      user_id: userId,
+      expires_at: expiresAt,
+      created_at: now,
+    };
+
+    // 4. Save to D1 or memory
+    if (db) {
+      await db
+        .prepare(
+          'INSERT INTO users (id, email, password_hash, salt, nickname, role, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+        )
+        .bind(newUser.id, newUser.email, newUser.password_hash, newUser.salt, newUser.nickname, newUser.role, newUser.created_at)
+        .run();
+
+      await db
+        .prepare('INSERT INTO sessions (token, user_id, expires_at, created_at) VALUES (?, ?, ?, ?)')
+        .bind(newSession.token, newSession.user_id, newSession.expires_at, newSession.created_at)
+        .run();
+    } else {
+      memoryAuthUsers.set(userId, newUser);
+      memoryAuthSessions.set(token, newSession);
+    }
+
+    // 5. Response headers with Cookies
+    const headers = new Headers();
+    headers.set('Content-Type', 'application/json');
+    headers.append('Set-Cookie', createSessionCookieHeader(token));
+
+    const clientSession = {
+      id: userId,
+      email: cleanEmail,
+      nickname: cleanNickname,
+      role,
+      country: 'BY',
+      elo: isCeo ? 1699 : 1500,
+      level: isCeo ? 8 : 6,
+    };
+    headers.append(
+      'Set-Cookie',
+      `peekly_user=${encodeURIComponent(JSON.stringify(clientSession))}; Path=/; Secure; SameSite=Lax; Max-Age=2592000`
+    );
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        user: clientSession,
+      }),
+      { status: 201, headers }
+    );
+  } catch (err) {
+    return new Response(JSON.stringify({ error: `Server error: ${String(err)}` }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+};
+
+export const onRequest = onRequestPost;

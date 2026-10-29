@@ -79,6 +79,21 @@ export const Header: React.FC<HeaderProps> = ({
       setUserSession(getStoredUser());
     };
     syncUser();
+
+    // Verify session with server endpoint /api/auth/me
+    fetch('/api/auth/me')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.authenticated && data?.user) {
+          setUserSession(data.user);
+          try {
+            localStorage.setItem('peekly_user', JSON.stringify(data.user));
+            localStorage.setItem('peekly_auth', JSON.stringify(data.user));
+          } catch {}
+        }
+      })
+      .catch(() => {});
+
     window.addEventListener('storage', syncUser);
     window.addEventListener('focus', syncUser);
     return () => {
@@ -87,10 +102,12 @@ export const Header: React.FC<HeaderProps> = ({
     };
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
+      await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
       localStorage.removeItem('peekly_auth');
       localStorage.removeItem('peekly_user');
+      document.cookie = 'peekly_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0;';
       document.cookie = 'peekly_auth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0;';
       document.cookie = 'peekly_user=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0;';
     } catch {}
