@@ -43,11 +43,6 @@ export const GoogleLogo: React.FC<{ className?: string }> = ({ className = 'w-4 
   </svg>
 );
 
-export const AppleLogo: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
-  <svg className={`shrink-0 ${className}`} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.62-.75 1.04-1.8 1.01-2.87-.9.04-2 .6-2.65 1.36-.58.65-1.09 1.73-1.01 2.77 1 .08 2.03-.51 2.65-1.26z" />
-  </svg>
-);
 
 export const FaceitLogo: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
   <svg viewBox="0 0 24 24" fill="none" className={`shrink-0 ${className}`}>
@@ -101,11 +96,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [infoNotice, setInfoNotice] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const widgetIdRef = useRef<string | null>(null);
 
   const handleClose = useCallback(() => {
     setError(null);
+    setInfoNotice(null);
     onClose();
   }, [onClose]);
 
@@ -363,6 +360,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         )}
 
+        {infoNotice && (
+          <div className="my-3 p-2.5 bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-mono text-center rounded-none">
+            {infoNotice}
+          </div>
+        )}
+
         {/* =========================================================================
             VIEW 1: SIGN IN - STEP 1 (EMAIL)
            ========================================================================= */}
@@ -373,7 +376,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </h2>
 
             <div className="w-full flex flex-col gap-3.5">
-              {/* Social Auth Buttons (Google, Apple, FACEIT) */}
+              {/* Social Auth Buttons (Google, FACEIT) */}
               <div className="w-full flex flex-col gap-2.5">
                 <button
                   type="button"
@@ -382,22 +385,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 >
                   <GoogleLogo className="w-4 h-4" />
                   <span>Continue with Google</span>
-                </button>
-
-                <button
-                  type="button"
-                  disabled
-                  aria-disabled="true"
-                  className="w-full h-11 bg-black border border-white/10 text-neutral-500 font-sans text-xs font-semibold tracking-wide flex items-center justify-between px-3.5 rounded-none opacity-50 cursor-not-allowed select-none"
-                  title="Sign in with Apple is coming soon"
-                >
-                  <div className="flex items-center gap-3">
-                    <AppleLogo className="w-4 h-4 text-neutral-500" />
-                    <span>Continue with Apple</span>
-                  </div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400 bg-white/10 px-2 py-0.5 rounded-none">
-                    Coming Soon
-                  </span>
                 </button>
 
                 <a
@@ -537,9 +524,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </label>
                 <button
                   type="button"
-                  onClick={() =>
-                    alert(`A password reset link will be sent to ${email}`)
-                  }
+                  onClick={() => {
+                    setError(null);
+                    setInfoNotice(
+                      email.trim()
+                        ? `A password reset link will be sent to ${email}`
+                        : 'Please enter your email address to receive a password reset link.'
+                    );
+                  }}
                   className="text-neutral-400 hover:text-white cursor-pointer"
                 >
                   Forgot password? ↗
@@ -595,7 +587,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </button>
             </p>
 
-            {/* Social Auth Buttons */}
+            {/* Social Auth Buttons (Google, FACEIT) */}
             <div className="w-full flex flex-col gap-2.5 mb-3.5">
               <button
                 type="button"
@@ -604,22 +596,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               >
                 <GoogleLogo className="w-4 h-4" />
                 <span>Continue with Google</span>
-              </button>
-
-              <button
-                type="button"
-                disabled
-                aria-disabled="true"
-                className="w-full h-11 bg-black border border-white/10 text-neutral-500 font-sans text-xs font-semibold tracking-wide flex items-center justify-between px-3.5 rounded-none opacity-50 cursor-not-allowed select-none"
-                title="Sign in with Apple is coming soon"
-              >
-                <div className="flex items-center gap-3">
-                  <AppleLogo className="w-4 h-4 text-neutral-500" />
-                  <span>Continue with Apple</span>
-                </div>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400 bg-white/10 px-2 py-0.5 rounded-none">
-                  Coming Soon
-                </span>
               </button>
 
               <a
