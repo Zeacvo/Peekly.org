@@ -1,10 +1,26 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { PeeklyLogo } from './PeeklyLogo';
-import {
-  isValidEmail,
-  isValidNickname,
-  checkPasswordRequirements,
-} from '../../functions/api/utils/auth.ts';
+import { isValidEmail } from '../../functions/api/utils/auth.ts';
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (
+        container: string | HTMLElement,
+        params: {
+          sitekey: string;
+          theme?: 'light' | 'dark' | 'auto';
+          callback?: (token: string) => void;
+          'expired-callback'?: () => void;
+          'error-callback'?: () => void;
+          [key: string]: unknown;
+        }
+      ) => string;
+      reset?: (widgetId?: string) => void;
+      remove?: (widgetId?: string) => void;
+    };
+  }
+}
 
 export const GoogleLogo: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
   <svg className={`shrink-0 ${className}`} viewBox="0 0 24 24">
@@ -73,7 +89,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   onLoginSuccess,
 }) => {
-  const [view, setView] = useState<'login' | 'register' | 'verify'>('login');
+  const [view, setView] = useState<'login' | 'register'>('login');
   const [step, setStep] = useState<1 | 2>(1);
 
   // Form fields
@@ -81,18 +97,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [nickname, setNickname] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [devCode, setDevCode] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState('');
 
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [successNotice, setSuccessNotice] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const widgetIdRef = useRef<string | null>(null);
 
   const handleClose = useCallback(() => {
     setError(null);
-    setSuccessNotice(null);
     onClose();
   }, [onClose]);
 
@@ -108,10 +121,53 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, handleClose]);
 
-  // Dynamic Apple Password Requirements
-  const pwReqs = useMemo(() => checkPasswordRequirements(password), [password]);
-  const isConfirmMismatch =
-    Boolean(confirmPassword) && password !== confirmPassword;
+  // Turnstile Widget lifecycle
+  useEffect(() => {
+    let timer: ReturnType<typeof setInterval> | null = null;
+
+    if (isOpen && view === 'register') {
+      const renderWidget = () => {
+        const container = document.getElementById('turnstile-container');
+        if (window.turnstile && container) {
+          if (container.childElementCount > 0) return true;
+          try {
+            widgetIdRef.current = window.turnstile.render('#turnstile-container', {
+              sitekey: '0x4AAAAAAFqpQSJmI_csGCP9',
+              theme: 'dark',
+              callback: (token: string) => setTurnstileToken(token),
+              'expired-callback': () => setTurnstileToken(''),
+              'error-callback': () => setTurnstileToken(''),
+            });
+            return true;
+          } catch (err) {
+            console.warn('[Turnstile] render error:', err);
+            return false;
+          }
+        }
+        return false;
+      };
+
+      if (!renderWidget()) {
+        timer = setInterval(() => {
+          if (renderWidget() && timer) {
+            clearInterval(timer);
+            timer = null;
+          }
+        }, 120);
+      }
+    }
+
+    return () => {
+      if (timer) clearInterval(timer);
+      if (widgetIdRef.current && window.turnstile?.remove) {
+        try {
+          window.turnstile.remove(widgetIdRef.current);
+        } catch {}
+      }
+      widgetIdRef.current = null;
+      setTurnstileToken('');
+    };
+  }, [isOpen, view]);
 
   if (!isOpen) return null;
 
@@ -185,22 +241,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setError('Nickname is required.');
       return;
     }
-    if (!isValidNickname(cleanNickname)) {
-      setError(
-        'Nickname must be 3-20 characters long and contain only Latin letters, numbers, underscores, or hyphens.'
-      );
-      return;
-    }
     if (!cleanEmail || !isValidEmail(cleanEmail)) {
       setError('Please enter a valid email address.');
       return;
     }
-    if (!pwReqs.isValid) {
-      setError('Please meet all password requirements listed in the checklist.');
+    if (!password || password.length < 6) {
+      setError('Password must be at least 6 characters.');
       return;
     }
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
+      return;
+    }
+    if (!turnstileToken) {
+      setError('Please complete the Cloudflare Turnstile human verification.');
       return;
     }
 
@@ -215,6 +269,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           nickname: cleanNickname,
           email: cleanEmail,
           password,
+          turnstileToken,
         }),
       });
 
@@ -222,50 +277,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
       if (!res.ok) {
         setError(data?.error || 'Registration failed.');
-        setIsLoading(false);
-        return;
-      }
-
-      // Transition to code verification screen
-      if (data?.devCode) {
-        setDevCode(data.devCode);
-      }
-      setSuccessNotice(`Verification code sent to ${cleanEmail}`);
-      setView('verify');
-    } catch (err) {
-      setError(`Connection error: ${String(err)}`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleVerifyCodeSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const cleanCode = verificationCode.trim().replace(/\D/g, '');
-    const cleanEmail = email.trim().toLowerCase();
-
-    if (cleanCode.length !== 6) {
-      setError('Please enter the complete 6-digit verification code.');
-      return;
-    }
-
-    setError(null);
-    setIsLoading(true);
-
-    try {
-      const res = await fetch('/api/auth/verify-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: cleanEmail,
-          code: cleanCode,
-        }),
-      });
-
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok) {
-        setError(data?.error || 'Invalid or expired verification code.');
+        if (window.turnstile?.reset) {
+          try {
+            window.turnstile.reset(widgetIdRef.current || undefined);
+          } catch {}
+          setTurnstileToken('');
+        }
         setIsLoading(false);
         return;
       }
@@ -282,54 +299,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }
       onClose();
     } catch (err) {
-      setError(`Verification error: ${String(err)}`);
+      setError(`Connection error: ${String(err)}`);
+      if (window.turnstile?.reset) {
+        try {
+          window.turnstile.reset(widgetIdRef.current || undefined);
+        } catch {}
+        setTurnstileToken('');
+      }
     } finally {
       setIsLoading(false);
     }
   };
-
-  const handleResendCode = async () => {
-    const cleanEmail = email.trim().toLowerCase();
-    if (!cleanEmail) return;
-
-    setError(null);
-    setSuccessNotice('Sending new code...');
-
-    try {
-      const res = await fetch('/api/auth/resend-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: cleanEmail }),
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        setError(data?.error || 'Failed to resend code.');
-        setSuccessNotice(null);
-        return;
-      }
-      if (data?.devCode) {
-        setDevCode(data.devCode);
-      }
-      setSuccessNotice('A new 6-digit code has been sent!');
-    } catch {
-      setError('Failed to resend code. Please check your connection.');
-      setSuccessNotice(null);
-    }
-  };
-
-  // Strength Bar Colors
-  let strengthColor = 'bg-neutral-600';
-  let strengthLabel = 'Weak';
-  if (pwReqs.score > 0 && pwReqs.score < 40) {
-    strengthColor = 'bg-red-500';
-    strengthLabel = 'Weak';
-  } else if (pwReqs.score >= 40 && pwReqs.score <= 70) {
-    strengthColor = 'bg-yellow-500';
-    strengthLabel = 'Medium';
-  } else if (pwReqs.score > 70) {
-    strengthColor = 'bg-emerald-500';
-    strengthLabel = 'Strong';
-  }
 
   return (
     <div
@@ -341,7 +321,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         if (e.target === e.currentTarget) handleClose();
       }}
     >
-      <div className="w-full max-w-[460px] max-h-[92vh] overflow-y-auto bg-black border border-white/15 p-7 sm:p-8 relative shadow-2xl rounded-none">
+      <div className="w-full max-w-[420px] max-h-[92vh] overflow-y-auto bg-black border border-white/15 p-7 sm:p-8 relative shadow-2xl rounded-none">
         {/* Close Button */}
         <button
           type="button"
@@ -370,12 +350,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {error && (
           <div className="my-3 p-2.5 bg-red-950/60 border border-red-500/40 text-red-300 text-xs font-mono text-center rounded-none">
             {error}
-          </div>
-        )}
-
-        {successNotice && (
-          <div className="my-3 p-2.5 bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-mono text-center rounded-none">
-            {successNotice}
           </div>
         )}
 
@@ -448,7 +422,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     onClick={() => {
                       setView('register');
                       setError(null);
-                      setSuccessNotice(null);
                     }}
                     className="text-xs text-neutral-400 hover:text-white transition font-mono cursor-pointer text-left"
                   >
@@ -518,7 +491,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     onClick={() => {
                       setStep(1);
                       setError(null);
-                      setSuccessNotice(null);
                     }}
                     className="text-xs font-mono text-neutral-400 hover:text-white cursor-pointer shrink-0"
                   >
@@ -584,7 +556,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         )}
 
         {/* =========================================================================
-            VIEW 2: CREATE ACCOUNT (WITH APPLE PASSWORD POPOVER)
+            VIEW 2: CREATE ACCOUNT (WITH TURNSTILE HUMAN VERIFICATION)
            ========================================================================= */}
         {view === 'register' && (
           <div className="mt-3">
@@ -599,7 +571,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   setView('login');
                   setStep(1);
                   setError(null);
-                  setSuccessNotice(null);
                 }}
                 className="text-white hover:text-neutral-300 ml-1 cursor-pointer transition font-mono"
               >
@@ -655,7 +626,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 type="text"
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
-                placeholder="Nickname (e.g. Zeacvo)"
+                placeholder="Nickname"
                 className="w-full h-11 bg-black border border-white/20 focus:border-white text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans"
                 autoFocus
               />
@@ -664,137 +635,50 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email (e.g. user@example.com)"
+                placeholder="Email"
                 className="w-full h-11 bg-black border border-white/20 focus:border-white text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans"
               />
 
-              {/* Password Input with Popover Anchor */}
-              <div className="w-full relative">
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onFocus={() => setIsPasswordFocused(true)}
-                  placeholder="Password"
-                  className="w-full h-11 bg-black border border-white/20 focus:border-white text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans"
-                />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password (at least 6 characters)"
+                className="w-full h-11 bg-black border border-white/20 focus:border-white text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans"
+              />
 
-                {/* Apple Password Requirements Popover */}
-                {(isPasswordFocused || password.length > 0) && (
-                  <div className="w-full mt-2 p-3.5 bg-[#0D0D0D] border border-white/20 rounded-none shadow-2xl animate-fade-in font-sans">
-                    <div className="flex items-center justify-between text-xs mb-1.5 font-mono">
-                      <span className="text-neutral-400">Password Strength:</span>
-                      <span
-                        className={`font-bold ${
-                          strengthLabel === 'Strong'
-                            ? 'text-emerald-400'
-                            : strengthLabel === 'Medium'
-                            ? 'text-yellow-400'
-                            : 'text-red-400'
-                        }`}
-                      >
-                        {strengthLabel}
-                      </span>
-                    </div>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm Password"
+                className="w-full h-11 bg-black border border-white/20 focus:border-white text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans"
+              />
 
-                    {/* Dynamic Strength Progress Bar */}
-                    <div className="w-full h-1.5 bg-white/10 rounded-none overflow-hidden mb-3">
-                      <div
-                        className={`h-full transition-all duration-300 ${strengthColor}`}
-                        style={{ width: `${Math.max(10, pwReqs.score)}%` }}
-                      />
-                    </div>
+              {/* Cloudflare Turnstile Human Verification Container (Theme: dark) */}
+              <div
+                id="turnstile-container"
+                className="w-full flex justify-center items-center my-2 min-h-[65px]"
+              />
 
-                    {/* Apple Requirements Checklist */}
-                    <div className="space-y-1.5 text-xs">
-                      <div
-                        className={`flex items-center gap-2 transition-colors ${
-                          pwReqs.hasLength ? 'text-emerald-400 font-medium' : 'text-neutral-500'
-                        }`}
-                      >
-                        <span>{pwReqs.hasLength ? '✓' : '•'}</span>
-                        <span>At least 8 characters.</span>
-                      </div>
-
-                      <div
-                        className={`flex items-center gap-2 transition-colors ${
-                          pwReqs.hasNumber ? 'text-emerald-400 font-medium' : 'text-neutral-500'
-                        }`}
-                      >
-                        <span>{pwReqs.hasNumber ? '✓' : '•'}</span>
-                        <span>At least 1 number.</span>
-                      </div>
-
-                      <div
-                        className={`flex items-center gap-2 transition-colors ${
-                          pwReqs.hasUpper ? 'text-emerald-400 font-medium' : 'text-neutral-500'
-                        }`}
-                      >
-                        <span>{pwReqs.hasUpper ? '✓' : '•'}</span>
-                        <span>At least 1 uppercase letter.</span>
-                      </div>
-
-                      <div
-                        className={`flex items-center gap-2 transition-colors ${
-                          pwReqs.hasLower ? 'text-emerald-400 font-medium' : 'text-neutral-500'
-                        }`}
-                      >
-                        <span>{pwReqs.hasLower ? '✓' : '•'}</span>
-                        <span>At least 1 lowercase letter.</span>
-                      </div>
-
-                      <div
-                        className={`flex items-center gap-2 transition-colors ${
-                          pwReqs.hasSpecial ? 'text-emerald-400 font-medium' : 'text-neutral-500'
-                        }`}
-                      >
-                        <span>{pwReqs.hasSpecial ? '✓' : '•'}</span>
-                        <span>At least one special character (!@#$%^&*).</span>
-                      </div>
-                    </div>
-
-                    <p className="text-[10px] text-neutral-400 italic mt-2.5 pt-2 border-t border-white/10 font-sans">
-                      Avoid using a password that you use with other websites.
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Confirm Password Input */}
-              <div className="w-full">
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm Password"
-                  className={`w-full h-11 bg-black border text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans ${
-                    isConfirmMismatch
-                      ? 'border-red-500 focus:border-red-500'
-                      : 'border-white/20 focus:border-white'
-                  }`}
-                />
-                {isConfirmMismatch && (
-                  <p className="text-red-400 text-xs font-mono mt-1 text-left">
-                    Passwords do not match
-                  </p>
-                )}
-              </div>
-
+              {/* Submit Button - Disabled until Turnstile is verified */}
               <button
                 type="submit"
                 disabled={
                   isLoading ||
                   !nickname.trim() ||
                   !email.trim() ||
-                  !pwReqs.isValid ||
-                  password !== confirmPassword
+                  password.length < 6 ||
+                  password !== confirmPassword ||
+                  !turnstileToken
                 }
                 className={`w-full h-11 rounded-none font-mono font-bold text-xs uppercase tracking-wider transition ${
                   isLoading ||
                   !nickname.trim() ||
                   !email.trim() ||
-                  !pwReqs.isValid ||
-                  password !== confirmPassword
+                  password.length < 6 ||
+                  password !== confirmPassword ||
+                  !turnstileToken
                     ? 'bg-white/20 text-neutral-400 cursor-not-allowed border-none shadow-none'
                     : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
                 }`}
@@ -817,91 +701,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     See how your data is managed...
                   </a>
                 </p>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* =========================================================================
-            VIEW 3: OTP EMAIL VERIFICATION CODE
-           ========================================================================= */}
-        {view === 'verify' && (
-          <div className="mt-3">
-            <h2 className="text-xl font-bold text-white text-center mb-1 font-sans">
-              Enter Verification Code
-            </h2>
-            <p className="text-xs text-neutral-400 text-center mb-5 font-mono leading-relaxed">
-              A 6-digit code has been sent to your email: <br />
-              <span className="text-white font-bold">{email}</span>
-            </p>
-
-            {devCode && (
-              <div className="mb-4 p-2.5 bg-[#141414] border border-[#FF5500]/40 text-center">
-                <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider mr-2">
-                  Dev Test Code:
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setVerificationCode(devCode)}
-                  className="font-mono text-sm font-bold text-[#FF5500] hover:underline cursor-pointer"
-                  title="Click to autofill code"
-                >
-                  {devCode} (Click to fill)
-                </button>
-              </div>
-            )}
-
-            <form
-              onSubmit={handleVerifyCodeSubmit}
-              noValidate
-              className="w-full flex flex-col gap-4"
-            >
-              <div className="w-full">
-                <input
-                  type="text"
-                  maxLength={6}
-                  value={verificationCode}
-                  onChange={(e) =>
-                    setVerificationCode(e.target.value.replace(/\D/g, ''))
-                  }
-                  placeholder="000000"
-                  className="w-full h-13 bg-black border border-white/20 focus:border-white text-white font-mono text-2xl tracking-[0.6em] sm:tracking-[0.8em] text-center uppercase outline-none rounded-none transition"
-                  autoFocus
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading || verificationCode.length !== 6}
-                className={`w-full h-11 rounded-none font-mono font-bold text-xs uppercase tracking-wider transition ${
-                  isLoading || verificationCode.length !== 6
-                    ? 'bg-white/20 text-neutral-400 cursor-not-allowed border-none shadow-none'
-                    : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
-                }`}
-              >
-                {isLoading ? 'VERIFYING...' : 'VERIFY & COMPLETE'}
-              </button>
-
-              <div className="flex items-center justify-between text-xs font-mono w-full text-neutral-400">
-                <button
-                  type="button"
-                  onClick={handleResendCode}
-                  className="hover:text-white transition cursor-pointer"
-                >
-                  Didn't receive a code? Resend
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setView('register');
-                    setError(null);
-                    setSuccessNotice(null);
-                  }}
-                  className="hover:text-white transition cursor-pointer"
-                >
-                  ← Edit details
-                </button>
               </div>
             </form>
           </div>
