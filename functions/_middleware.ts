@@ -25,7 +25,7 @@ export const onRequest = async (context: {
   const response = await context.next();
 
   // If route is not a static asset, serve SPA index.html with 200 OK
-  if (response.status === 404 && context.request.method === 'GET') {
+  if (response.status === 404 && (context.request.method === 'GET' || context.request.method === 'HEAD')) {
     const rootUrl = new URL('/', context.request.url);
     const spaRequest = new Request(rootUrl.toString(), context.request);
     const spaResponse = await context.env.ASSETS.fetch(spaRequest);
