@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { LanguageIcon } from './LanguageIcon';
 import { PeeklyLogo } from './PeeklyLogo';
+import { FaceitLogo } from './AuthModal';
 import { translations, SUPPORTED_LANGUAGES } from '../translations';
 import type { Language } from '../translations';
 import { BROWSERS } from '../constants/browsers';
@@ -16,12 +17,17 @@ interface HeaderProps {
 }
 
 interface UserSession {
+  id?: string;
   nickname: string;
   email?: string;
   avatar?: string;
-  country?: string;
-  elo?: number;
-  level?: number;
+  picture?: string;
+  country?: string | null;
+  elo?: number | null;
+  level?: number | null;
+  faceit_connected?: boolean;
+  faceit_nickname?: string | null;
+  role?: string;
 }
 
 function getStoredUser(): UserSession | null {
@@ -33,9 +39,13 @@ function getStoredUser(): UserSession | null {
       const ceoSession: UserSession = {
         nickname: 'Zeacvo',
         email: 'zeacvo@icloud.com',
-        country: 'BY',
-        elo: 1699,
-        level: 8,
+        avatar: '',
+        country: null,
+        elo: null,
+        level: null,
+        faceit_connected: false,
+        faceit_nickname: null,
+        role: 'ceo',
       };
       try {
         localStorage.setItem('peekly_auth', JSON.stringify(ceoSession));
@@ -68,9 +78,11 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const [installDropdownOpen, setInstallDropdownOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [userSession, setUserSession] = useState<UserSession | null>(getStoredUser);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const installDropdownRef = useRef<HTMLDivElement>(null);
+  const userDropdownRef = useRef<HTMLDivElement>(null);
 
   const t = translations[currentLang] || translations.en;
 
@@ -120,7 +132,9 @@ export const Header: React.FC<HeaderProps> = ({
 
   const isCeo =
     userSession?.nickname?.toLowerCase() === 'zeacvo' ||
-    userSession?.email?.toLowerCase() === 'zeacvo@icloud.com';
+    userSession?.email?.toLowerCase() === 'zeacvo@icloud.com' ||
+    userSession?.role === 'ceo' ||
+    userSession?.role === 'admin';
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -130,11 +144,15 @@ export const Header: React.FC<HeaderProps> = ({
       if (installDropdownRef.current && !installDropdownRef.current.contains(e.target as Node)) {
         setInstallDropdownOpen(false);
       }
+      if (userDropdownRef.current && !userDropdownRef.current.contains(e.target as Node)) {
+        setUserDropdownOpen(false);
+      }
     };
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setLangDropdownOpen(false);
         setInstallDropdownOpen(false);
+        setUserDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -249,64 +267,154 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
 
-          {/* FACEIT Authentication: Mini-Profile if logged in, or LOG IN WITH FACEIT button */}
+          {/* User Profile Trigger & Dropdown */}
           {userSession ? (
-            <div className="flex items-center gap-2 sm:gap-2.5 px-2.5 py-1 bg-[#0A0A0A] border border-white/10 text-xs">
-              <div className="w-6 h-6 rounded-none bg-[#141414] border border-white/10 overflow-hidden shrink-0 flex items-center justify-center">
-                {userSession.avatar && !userSession.avatar.includes('default_avatar.png') ? (
-                  <img
-                    src={userSession.avatar}
-                    alt={userSession.nickname}
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                ) : (
-                  <svg
-                    className="w-3.5 h-3.5 text-neutral-400"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                  >
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                )}
-              </div>
-              <span className="font-bold text-white text-xs">{userSession.nickname}</span>
-              <img
-                src={`https://flagcdn.com/w40/${(userSession.country || 'by').toLowerCase()}.png`}
-                srcSet={`https://flagcdn.com/w40/${(userSession.country || 'by').toLowerCase()}.png 1x, https://flagcdn.com/w80/${(userSession.country || 'by').toLowerCase()}.png 2x`}
-                alt={userSession.country || 'BY'}
-                className="w-3.5 h-2.5 object-cover inline-block border border-white/20 shrink-0"
-              />
-              <span className="font-mono text-[10px] font-bold text-neutral-400 border border-white/20 px-1 py-0.5">
-                LVL {userSession.level || 8}
-              </span>
-              {isCeo && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (onOpenAdmin) onOpenAdmin();
-                    else window.location.href = '/admin';
-                  }}
-                  className="border border-white/30 text-white hover:border-[#FF5500] hover:text-[#FF5500] px-2 py-0.5 text-[10px] font-mono font-bold tracking-wider uppercase transition-colors cursor-pointer"
-                  title="Open Admin Dashboard"
-                >
-                  ADMIN
-                </button>
-              )}
+            <div className="relative inline-flex items-center shrink-0" ref={userDropdownRef}>
               <button
                 type="button"
-                onClick={handleLogout}
-                className="text-neutral-500 hover:text-white transition-colors cursor-pointer text-[10px] font-mono uppercase tracking-wider px-1 py-0.5 ml-0.5"
-                title="Log out"
+                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                aria-expanded={userDropdownOpen}
+                aria-haspopup="menu"
+                aria-label="User account menu"
+                className="group flex items-center gap-2 px-2.5 py-1 bg-[#0A0A0A] hover:bg-white/[0.06] border border-white/15 hover:border-white/30 text-xs transition-colors rounded-none cursor-pointer focus-visible:ring-1 focus-visible:ring-white"
               >
-                ✕
+                {/* Avatar / Monogram */}
+                <div className="w-6 h-6 rounded-none bg-[#1F1F23] border border-white/20 overflow-hidden shrink-0 flex items-center justify-center">
+                  {(userSession.avatar || userSession.picture) &&
+                  !(userSession.avatar || userSession.picture)?.includes('default_avatar.png') ? (
+                    <img
+                      src={userSession.avatar || userSession.picture}
+                      alt={userSession.nickname}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <span className="font-mono font-bold text-white text-[11px] select-none leading-none">
+                      {(userSession.nickname || userSession.email || 'U')[0].toUpperCase()}
+                    </span>
+                  )}
+                </div>
+
+                {/* Nickname */}
+                <span className="font-bold text-white text-xs max-w-[120px] truncate leading-none">
+                  {userSession.nickname}
+                </span>
+
+                {/* Dropdown Chevron */}
+                <ChevronDown
+                  className={`w-3.5 h-3.5 shrink-0 text-neutral-400 group-hover:text-white transition-transform duration-150 ${
+                    userDropdownOpen ? 'rotate-180' : ''
+                  }`}
+                />
               </button>
+
+              {/* User Dropdown Menu */}
+              {userDropdownOpen && (
+                <div
+                  role="menu"
+                  aria-label="User Account Options"
+                  className="absolute right-0 top-full mt-2 w-72 bg-[#0D0D0D] border border-white/15 rounded-none shadow-2xl p-4 flex flex-col gap-3.5 z-50 animate-fade-in"
+                >
+                  {/* Profile Header */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-none bg-[#1F1F23] border border-white/20 overflow-hidden shrink-0 flex items-center justify-center">
+                      {(userSession.avatar || userSession.picture) &&
+                      !(userSession.avatar || userSession.picture)?.includes('default_avatar.png') ? (
+                        <img
+                          src={userSession.avatar || userSession.picture}
+                          alt={userSession.nickname}
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <span className="font-mono font-bold text-white text-base select-none">
+                          {(userSession.nickname || userSession.email || 'U')[0].toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-bold text-white text-sm truncate leading-snug">
+                        {userSession.nickname}
+                      </div>
+                      {userSession.email && (
+                        <div className="font-mono text-xs text-neutral-400 truncate leading-snug">
+                          {userSession.email}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Plan Badge */}
+                  <div className="border border-white/10 bg-white/[0.03] px-3 py-2 flex items-center justify-between text-xs font-mono">
+                    <span className="text-neutral-400">Plan</span>
+                    <span className="text-white font-semibold">Peekly Free Tier (Early Beta)</span>
+                  </div>
+
+                  {/* Extension Status */}
+                  <div className="border border-white/10 bg-white/[0.03] px-3 py-2 flex items-center justify-between text-xs font-mono">
+                    <span className="text-neutral-400">Extension</span>
+                    <span className="text-neutral-300">Not Linked</span>
+                  </div>
+
+                  {/* FACEIT Integration */}
+                  {userSession.faceit_connected || userSession.faceit_nickname ? (
+                    <div className="border border-white/10 bg-white/[0.03] px-3 py-2 flex items-center justify-between text-xs font-mono">
+                      <span className="flex items-center gap-1.5 text-neutral-400">
+                        <FaceitLogo className="w-3.5 h-3.5" />
+                        <span>FACEIT</span>
+                      </span>
+                      <span className="text-[#FF5500] font-semibold truncate max-w-[120px]">
+                        {userSession.faceit_nickname || 'Connected'}
+                      </span>
+                    </div>
+                  ) : (
+                    <a
+                      href="/api/auth/faceit/login"
+                      className="w-full h-9 bg-[#FF5500] hover:bg-[#e04b00] text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 rounded-none transition cursor-pointer"
+                    >
+                      <FaceitLogo className="w-3.5 h-3.5" />
+                      <span>Link FACEIT Account</span>
+                    </a>
+                  )}
+
+                  {/* Admin Dashboard (if CEO / Admin) */}
+                  {isCeo && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        if (onOpenAdmin) onOpenAdmin();
+                        else window.location.href = '/admin';
+                      }}
+                      className="w-full text-left py-1 text-xs font-mono text-neutral-300 hover:text-[#FF5500] flex items-center justify-between transition-colors cursor-pointer bg-transparent border-none p-0"
+                    >
+                      <span>Admin Dashboard</span>
+                      <span>↗</span>
+                    </button>
+                  )}
+
+                  {/* Divider */}
+                  <div className="border-t border-white/10" />
+
+                  {/* Sign Out Button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full h-8 bg-transparent border border-white/20 hover:border-red-500/50 hover:text-red-400 text-neutral-400 font-mono text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <button

@@ -121,15 +121,17 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
     headers.set('Content-Type', 'application/json');
     headers.append('Set-Cookie', createSessionCookieHeader(token));
 
-    const isCeo = user.email === 'zeacvo@icloud.com' || user.nickname.toLowerCase() === 'zeacvo';
     const clientSession = {
       id: user.id,
       email: user.email,
       nickname: user.nickname,
       role: user.role,
-      country: 'BY',
-      elo: isCeo ? 1699 : 1500,
-      level: isCeo ? 8 : 6,
+      avatar: user.avatar_url || '',
+      country: user.country || null,
+      elo: user.elo || null,
+      level: user.level || null,
+      faceit_connected: Boolean(user.faceit_id || user.faceit_nickname),
+      faceit_nickname: user.faceit_nickname || null,
     };
     headers.append(
       'Set-Cookie',

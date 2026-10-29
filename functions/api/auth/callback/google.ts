@@ -220,15 +220,29 @@ export const onRequest = async (context: EventContext): Promise<Response> => {
     }
 
     // 6. Set Cookies & redirect to /?auth=success
+    if (googleUser.picture && user) {
+      user.avatar_url = googleUser.picture;
+      if (db) {
+        try {
+          await db
+            .prepare('UPDATE users SET avatar_url = ? WHERE id = ?')
+            .bind(googleUser.picture, user.id)
+            .run();
+        } catch {}
+      }
+    }
+
     const clientSession = {
       id: user.id,
       email: user.email,
       nickname: user.nickname,
       role: user.role,
-      avatar: googleUser.picture || '',
-      country: 'BY',
-      elo: user.role === 'ADMIN' ? 1699 : 1500,
-      level: user.role === 'ADMIN' ? 8 : 6,
+      avatar: googleUser.picture || user.avatar_url || '',
+      country: user.country || null,
+      elo: user.elo || null,
+      level: user.level || null,
+      faceit_connected: Boolean(user.faceit_id || user.faceit_nickname),
+      faceit_nickname: user.faceit_nickname || null,
     };
 
     const headers = new Headers();

@@ -254,9 +254,12 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
       email: cleanEmail,
       nickname: cleanNickname,
       role,
-      country: 'BY',
-      elo: isCeo ? 1699 : 1500,
-      level: isCeo ? 8 : 6,
+      avatar: '',
+      country: null,
+      elo: null,
+      level: null,
+      faceit_connected: false,
+      faceit_nickname: null,
     };
     headers.append(
       'Set-Cookie',

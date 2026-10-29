@@ -74,7 +74,7 @@ export const onRequestGet = async (context: EventContext): Promise<Response> => 
     if (db) {
       const row = await db
         .prepare(
-          `SELECT u.id, u.email, u.nickname, u.role, u.created_at, s.expires_at
+          `SELECT u.id, u.email, u.nickname, u.role, u.created_at, u.avatar_url, u.country, u.level, u.elo, u.faceit_id, u.faceit_nickname, s.expires_at
            FROM sessions s
            JOIN users u ON s.user_id = u.id
            WHERE s.token = ? AND s.expires_at > ?`
@@ -86,11 +86,16 @@ export const onRequestGet = async (context: EventContext): Promise<Response> => 
           nickname: string;
           role: string;
           created_at: number;
+          avatar_url?: string | null;
+          country?: string | null;
+          level?: number | null;
+          elo?: number | null;
+          faceit_id?: string | null;
+          faceit_nickname?: string | null;
           expires_at: number;
         }>();
 
       if (row) {
-        const isCeo = row.email === 'zeacvo@icloud.com' || row.nickname.toLowerCase() === 'zeacvo';
         return new Response(
           JSON.stringify({
             authenticated: true,
@@ -99,9 +104,12 @@ export const onRequestGet = async (context: EventContext): Promise<Response> => 
               email: row.email,
               nickname: row.nickname,
               role: row.role,
-              country: 'BY',
-              elo: isCeo ? 1699 : 1500,
-              level: isCeo ? 8 : 6,
+              avatar: row.avatar_url || '',
+              country: row.country || null,
+              elo: row.elo || null,
+              level: row.level || null,
+              faceit_connected: Boolean(row.faceit_id || row.faceit_nickname),
+              faceit_nickname: row.faceit_nickname || null,
             },
           }),
           {
@@ -115,7 +123,6 @@ export const onRequestGet = async (context: EventContext): Promise<Response> => 
       if (session && session.expires_at > now) {
         const user = memoryAuthUsers.get(session.user_id);
         if (user) {
-          const isCeo = user.email === 'zeacvo@icloud.com' || user.nickname.toLowerCase() === 'zeacvo';
           return new Response(
             JSON.stringify({
               authenticated: true,
@@ -124,9 +131,12 @@ export const onRequestGet = async (context: EventContext): Promise<Response> => 
                 email: user.email,
                 nickname: user.nickname,
                 role: user.role,
-                country: 'BY',
-                elo: isCeo ? 1699 : 1500,
-                level: isCeo ? 8 : 6,
+                avatar: user.avatar_url || '',
+                country: user.country || null,
+                elo: user.elo || null,
+                level: user.level || null,
+                faceit_connected: Boolean(user.faceit_id || user.faceit_nickname),
+                faceit_nickname: user.faceit_nickname || null,
               },
             }),
             {

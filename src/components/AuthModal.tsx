@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { PeeklyLogo } from './PeeklyLogo';
 import { isValidEmail, isValidNickname, checkPasswordRequirements } from '../../functions/api/utils/auth.ts';
 
@@ -106,6 +107,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [nickname, setNickname] = useState('');
   const [turnstileToken, setTurnstileToken] = useState('');
 
+  // Password visibility toggles
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Mandatory terms agreement checkbox
+  const [termsAgreed, setTermsAgreed] = useState(false);
+
   // Form validation & focus states
   const [nicknameTouched, setNicknameTouched] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
@@ -132,14 +141,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const showEmailError = emailTouched && !isEmailValid;
   const showPasswordError = passwordTouched && !pwdReq.isValid && !isPasswordFocused;
   const showConfirmError = confirmPasswordTouched && !isConfirmValid;
-  const showLoginEmailError = emailTouched && !isEmailValid;
+  const showLoginEmailError = emailTouched && email.trim().length > 0 && !isEmailValid;
 
   const isRegisterFormValid =
     isNicknameValid &&
     isEmailValid &&
     pwdReq.isValid &&
     isConfirmValid &&
-    Boolean(turnstileToken);
+    Boolean(turnstileToken) &&
+    termsAgreed;
 
   const getStrengthColor = (score: number) => {
     if (score < 40) return 'bg-[#FF1744]';
@@ -161,6 +171,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setPasswordTouched(false);
     setConfirmPasswordTouched(false);
     setIsPasswordFocused(false);
+    setTermsAgreed(false);
+    setShowLoginPassword(false);
+    setShowPassword(false);
+    setShowConfirmPassword(false);
   };
 
   useEffect(() => {
@@ -238,7 +252,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    setError(null);
+    setEmailTouched(false);
     const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
     const options = {
       redirect_uri: `${window.location.origin}/api/auth/callback/google`,
@@ -335,6 +353,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
+      return;
+    }
+    if (!termsAgreed) {
+      setError('Please agree to the Terms of Service and Privacy Policy.');
       return;
     }
     if (!turnstileToken) {
@@ -504,7 +526,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         ? '!border-[#FF1744] bg-[#FF1744]/5'
                         : 'border-white/15 focus:border-white/50'
                     } text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition-colors font-sans`}
-                    autoFocus
                   />
                   {showLoginEmailError && (
                     <span className="text-xs text-[#FF1744] flex items-center gap-1.5 mt-1 font-mono tracking-tight">
@@ -597,14 +618,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   </button>
                 </div>
 
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  className="w-full h-11 bg-[#0F0F11] border border-white/15 focus:border-white/50 text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans"
-                  autoFocus
-                />
+                <div className="relative w-full">
+                  <input
+                    type={showLoginPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    className="w-full h-11 bg-[#0F0F11] border border-white/15 focus:border-white/50 text-white placeholder-neutral-500 pl-3.5 pr-10 text-sm outline-none rounded-none transition font-sans"
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => setShowLoginPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white transition-colors cursor-pointer bg-transparent border-none p-1 flex items-center justify-center focus:outline-none"
+                    aria-label={showLoginPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
               <div className="flex items-center justify-between text-xs font-mono w-full">
@@ -810,7 +842,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   )}
 
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
@@ -826,8 +858,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       showPasswordError
                         ? '!border-[#FF1744] bg-[#FF1744]/5'
                         : 'border-white/15 focus:border-white/50'
-                    } text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition-colors font-sans`}
+                    } text-white placeholder-neutral-500 pl-3.5 pr-10 text-sm outline-none rounded-none transition-colors font-sans`}
                   />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white transition-colors cursor-pointer bg-transparent border-none p-1 flex items-center justify-center focus:outline-none"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
                 {showPasswordError && (
                   <span className="text-xs text-[#FF1744] flex items-center gap-1.5 mt-1 font-mono tracking-tight">
@@ -839,21 +880,32 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
               {/* Confirm Password Input */}
               <div className="w-full flex flex-col">
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => {
-                    setConfirmPassword(e.target.value);
-                    if (!confirmPasswordTouched) setConfirmPasswordTouched(true);
-                  }}
-                  onBlur={() => setConfirmPasswordTouched(true)}
-                  placeholder="Confirm password"
-                  className={`w-full h-11 bg-[#0F0F11] border ${
-                    showConfirmError
-                      ? '!border-[#FF1744] bg-[#FF1744]/5'
-                      : 'border-white/15 focus:border-white/50'
-                  } text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition-colors font-sans`}
-                />
+                <div className="relative w-full">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      if (!confirmPasswordTouched) setConfirmPasswordTouched(true);
+                    }}
+                    onBlur={() => setConfirmPasswordTouched(true)}
+                    placeholder="Confirm password"
+                    className={`w-full h-11 bg-[#0F0F11] border ${
+                      showConfirmError
+                        ? '!border-[#FF1744] bg-[#FF1744]/5'
+                        : 'border-white/15 focus:border-white/50'
+                    } text-white placeholder-neutral-500 pl-3.5 pr-10 text-sm outline-none rounded-none transition-colors font-sans`}
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white transition-colors cursor-pointer bg-transparent border-none p-1 flex items-center justify-center focus:outline-none"
+                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
                 {showConfirmError && (
                   <span className="text-xs text-[#FF1744] flex items-center gap-1.5 mt-1 font-mono tracking-tight">
                     <ExclamationIcon />
@@ -886,6 +938,38 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 id="turnstile-container"
                 className="w-full flex justify-center items-center my-2 min-h-[65px]"
               />
+
+              {/* Mandatory Terms & Privacy Checkbox */}
+              <div className="flex items-start gap-2.5 my-2">
+                <input
+                  type="checkbox"
+                  id="terms-agree"
+                  checked={termsAgreed}
+                  onChange={(e) => setTermsAgreed(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded-none bg-black border border-white/30 checked:bg-[#FF5500] checked:border-[#FF5500] focus:ring-0 cursor-pointer accent-[#FF5500]"
+                />
+                <label htmlFor="terms-agree" className="text-xs text-neutral-300 select-none cursor-pointer leading-normal">
+                  I agree to the{' '}
+                  <a
+                    href="/legal/terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white underline hover:text-[#FF5500] transition-colors"
+                  >
+                    Terms of Service
+                  </a>{' '}
+                  and{' '}
+                  <a
+                    href="/legal/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white underline hover:text-[#FF5500] transition-colors"
+                  >
+                    Privacy Policy
+                  </a>
+                  .
+                </label>
+              </div>
 
               {/* Submit Button - Disabled until form is fully valid and Turnstile is completed */}
               <button

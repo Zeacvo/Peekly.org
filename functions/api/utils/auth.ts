@@ -12,6 +12,12 @@ export interface DbUser {
   role: string;
   created_at: number;
   newsletter_subscribed?: number;
+  avatar_url?: string | null;
+  faceit_id?: string | null;
+  faceit_nickname?: string | null;
+  country?: string | null;
+  level?: number | null;
+  elo?: number | null;
 }
 
 export interface DbSession {
@@ -131,6 +137,24 @@ export async function ensureAuthSchema(db?: D1Database): Promise<void> {
     `);
     try {
       await db.exec('ALTER TABLE users ADD COLUMN newsletter_subscribed INTEGER DEFAULT 1;');
+    } catch {}
+    try {
+      await db.exec('ALTER TABLE users ADD COLUMN avatar_url TEXT;');
+    } catch {}
+    try {
+      await db.exec('ALTER TABLE users ADD COLUMN faceit_id TEXT;');
+    } catch {}
+    try {
+      await db.exec('ALTER TABLE users ADD COLUMN faceit_nickname TEXT;');
+    } catch {}
+    try {
+      await db.exec('ALTER TABLE users ADD COLUMN country TEXT;');
+    } catch {}
+    try {
+      await db.exec('ALTER TABLE users ADD COLUMN level INTEGER;');
+    } catch {}
+    try {
+      await db.exec('ALTER TABLE users ADD COLUMN elo INTEGER;');
     } catch {}
     schemaInitialized = true;
   } catch (err) {
