@@ -1,18 +1,18 @@
 /**
  * Cloudflare Pages Function: POST /api/auth/register
- * Handles user registration with PBKDF2 password hashing in D1 Database.
+ * Validates nickname, email, Apple password criteria, hashes password,
+ * and issues a 6-digit verification code.
  */
 
 import {
   ensureAuthSchema,
   hashPassword,
-  generateSessionToken,
-  createSessionCookieHeader,
+  isValidEmail,
+  isValidNickname,
+  checkPasswordRequirements,
   memoryAuthUsers,
-  memoryAuthSessions,
+  memoryVerificationCodes,
   type D1Database,
-  type DbUser,
-  type DbSession,
 } from '../utils/auth.ts';
 
 interface EventContext {
@@ -40,7 +40,6 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
     const { request, env } = context;
     const db = env?.DB;
 
-    // Ensure schema tables exist if D1 is attached
     if (db) {
       await ensureAuthSchema(db);
     }
@@ -63,28 +62,53 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
     const cleanEmail = (email || '').trim().toLowerCase();
     const cleanPassword = (password || '').trim();
 
+    // 1. Validate Nickname (3 to 20 chars, alphanumeric + _ -)
     if (!cleanNickname) {
       return new Response(JSON.stringify({ error: 'Nickname is required.' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
     }
-
-    if (!cleanEmail || !cleanEmail.includes('@')) {
-      return new Response(JSON.stringify({ error: 'A valid email address is required.' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    if (!isValidNickname(cleanNickname)) {
+      return new Response(
+        JSON.stringify({
+          error:
+            'Nickname must be 3-20 characters long and contain only Latin letters, numbers, underscores, or hyphens.',
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
 
-    if (!cleanPassword || cleanPassword.length < 6) {
-      return new Response(JSON.stringify({ error: 'Password must be at least 6 characters.' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    // 2. Validate Email
+    if (!cleanEmail || !isValidEmail(cleanEmail)) {
+      return new Response(
+        JSON.stringify({ error: 'Please enter a valid email address.' }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
 
-    // 1. Check if user already exists
+    // 3. Validate Password (Apple Policy)
+    const pwCheck = checkPasswordRequirements(cleanPassword);
+    if (!pwCheck.isValid) {
+      return new Response(
+        JSON.stringify({
+          error:
+            'Password must be at least 8 characters and include at least one number, one uppercase letter, one lowercase letter, and one special character.',
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    // 4. Check if user already exists
     if (db) {
       const existing = await db
         .prepare('SELECT id FROM users WHERE email = ?')
@@ -108,76 +132,55 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
       }
     }
 
-    // 2. Hash password & determine role
+    // 5. Hash password with PBKDF2 (SHA-256 100k) + unique salt
     const { hash, salt } = await hashPassword(cleanPassword);
-    const userId = crypto.randomUUID();
     const now = Date.now();
-    const isCeo = cleanEmail === 'zeacvo@icloud.com' || cleanNickname.toLowerCase() === 'zeacvo';
-    const role = isCeo ? 'ADMIN' : 'USER';
+    const expiresAt = now + 10 * 60 * 1000; // 10 minutes expiry
 
-    const newUser: DbUser = {
-      id: userId,
-      email: cleanEmail,
-      password_hash: hash,
-      salt,
-      nickname: cleanNickname,
-      role,
-      created_at: now,
-    };
+    // Generate 6-digit numeric verification code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // 3. Create session token (expires in 30 days)
-    const token = generateSessionToken();
-    const expiresAt = now + 30 * 24 * 60 * 60 * 1000;
-    const newSession: DbSession = {
-      token,
-      user_id: userId,
-      expires_at: expiresAt,
-      created_at: now,
-    };
-
-    // 4. Save to D1 or memory
+    // 6. Save pending registration to verification_codes table
     if (db) {
       await db
         .prepare(
-          'INSERT INTO users (id, email, password_hash, salt, nickname, role, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+          `INSERT INTO verification_codes (email, code, nickname, password_hash, salt, expires_at, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?)
+           ON CONFLICT(email) DO UPDATE SET
+           code = excluded.code,
+           nickname = excluded.nickname,
+           password_hash = excluded.password_hash,
+           salt = excluded.salt,
+           expires_at = excluded.expires_at,
+           created_at = excluded.created_at`
         )
-        .bind(newUser.id, newUser.email, newUser.password_hash, newUser.salt, newUser.nickname, newUser.role, newUser.created_at)
-        .run();
-
-      await db
-        .prepare('INSERT INTO sessions (token, user_id, expires_at, created_at) VALUES (?, ?, ?, ?)')
-        .bind(newSession.token, newSession.user_id, newSession.expires_at, newSession.created_at)
+        .bind(cleanEmail, code, cleanNickname, hash, salt, expiresAt, now)
         .run();
     } else {
-      memoryAuthUsers.set(userId, newUser);
-      memoryAuthSessions.set(token, newSession);
+      memoryVerificationCodes.set(cleanEmail, {
+        email: cleanEmail,
+        code,
+        nickname: cleanNickname,
+        password_hash: hash,
+        salt,
+        expires_at: expiresAt,
+        created_at: now,
+      });
     }
 
-    // 5. Response headers with Cookies
-    const headers = new Headers();
-    headers.set('Content-Type', 'application/json');
-    headers.append('Set-Cookie', createSessionCookieHeader(token));
-
-    const clientSession = {
-      id: userId,
-      email: cleanEmail,
-      nickname: cleanNickname,
-      role,
-      country: 'BY',
-      elo: isCeo ? 1699 : 1500,
-      level: isCeo ? 8 : 6,
-    };
-    headers.append(
-      'Set-Cookie',
-      `peekly_user=${encodeURIComponent(JSON.stringify(clientSession))}; Path=/; Secure; SameSite=Lax; Max-Age=2592000`
-    );
+    console.log(`[AUTH OTP] 6-digit verification code for ${cleanEmail}: ${code}`);
 
     return new Response(
       JSON.stringify({
         success: true,
-        user: clientSession,
+        message: `A 6-digit code has been sent to your email: ${cleanEmail}`,
+        email: cleanEmail,
+        devCode: code,
       }),
-      { status: 201, headers }
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }
     );
   } catch (err) {
     return new Response(JSON.stringify({ error: `Server error: ${String(err)}` }), {

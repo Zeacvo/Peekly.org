@@ -20,6 +20,16 @@ export interface DbSession {
   created_at: number;
 }
 
+export interface DbVerificationCode {
+  email: string;
+  code: string;
+  nickname: string;
+  password_hash: string;
+  salt: string;
+  expires_at: number;
+  created_at: number;
+}
+
 export interface D1Database {
   exec: (sql: string) => Promise<unknown>;
   prepare: (sql: string) => {
@@ -34,6 +44,51 @@ export interface D1Database {
 // In-memory fallback stores for development when D1 is not attached
 export const memoryAuthUsers = new Map<string, DbUser>();
 export const memoryAuthSessions = new Map<string, DbSession>();
+export const memoryVerificationCodes = new Map<string, DbVerificationCode>();
+
+export const isValidEmail = (email: string): boolean =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
+export const isValidNickname = (nickname: string): boolean =>
+  /^[a-zA-Z0-9_-]{3,20}$/.test(nickname.trim());
+
+export interface PasswordRequirements {
+  hasLength: boolean;
+  hasNumber: boolean;
+  hasUpper: boolean;
+  hasLower: boolean;
+  hasSpecial: boolean;
+  score: number; // 0 to 100
+  isValid: boolean;
+}
+
+export function checkPasswordRequirements(password: string): PasswordRequirements {
+  const hasLength = password.length >= 8;
+  const hasNumber = /\d/.test(password);
+  const hasUpper = /[A-Z]/.test(password);
+  const hasLower = /[a-z]/.test(password);
+  const hasSpecial = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
+
+  let passedCount = 0;
+  if (hasLength) passedCount++;
+  if (hasNumber) passedCount++;
+  if (hasUpper) passedCount++;
+  if (hasLower) passedCount++;
+  if (hasSpecial) passedCount++;
+
+  const score = Math.round((passedCount / 5) * 100);
+  const isValid = passedCount === 5;
+
+  return {
+    hasLength,
+    hasNumber,
+    hasUpper,
+    hasLower,
+    hasSpecial,
+    score,
+    isValid,
+  };
+}
 
 let schemaInitialized = false;
 
@@ -59,8 +114,19 @@ export async function ensureAuthSchema(db?: D1Database): Promise<void> {
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
 
+      CREATE TABLE IF NOT EXISTS verification_codes (
+        email TEXT PRIMARY KEY,
+        code TEXT NOT NULL,
+        nickname TEXT NOT NULL,
+        password_hash TEXT NOT NULL,
+        salt TEXT NOT NULL,
+        expires_at INTEGER NOT NULL,
+        created_at INTEGER NOT NULL
+      );
+
       CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
       CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token);
+      CREATE INDEX IF NOT EXISTS idx_verification_email ON verification_codes(email);
     `);
     schemaInitialized = true;
   } catch (err) {
@@ -100,7 +166,7 @@ export async function hashPassword(
   const derivedBits = await crypto.subtle.deriveBits(
     {
       name: 'PBKDF2',
-      salt: saltBytes,
+      salt: saltBytes as unknown as ArrayBuffer,
       iterations: 100000,
       hash: 'SHA-256',
     },

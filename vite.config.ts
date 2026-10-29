@@ -9,6 +9,8 @@ import { onRequest as onSuccessRequest } from './functions/auth/extension-succes
 import { onRequest as onFeedbackRequest } from './functions/api/feedback.ts';
 import { onRequest as onAdminUsersRequest } from './functions/api/admin/users.ts';
 import { onRequest as onRegisterRequest } from './functions/api/auth/register.ts';
+import { onRequest as onVerifyCodeRequest } from './functions/api/auth/verify-code.ts';
+import { onRequest as onResendCodeRequest } from './functions/api/auth/resend-code.ts';
 import { onRequest as onAuthLoginRequest } from './functions/api/auth/login.ts';
 import { onRequest as onAuthMeRequest } from './functions/api/auth/me.ts';
 import { onRequest as onAuthLogoutRequest } from './functions/api/auth/logout.ts';
@@ -41,6 +43,8 @@ function faceitOAuthDevPlugin(): Plugin {
           url.pathname === '/api/feedback' ||
           url.pathname === '/api/admin/users' ||
           url.pathname === '/api/auth/register' ||
+          url.pathname === '/api/auth/verify-code' ||
+          url.pathname === '/api/auth/resend-code' ||
           url.pathname === '/api/auth/login' ||
           url.pathname === '/api/auth/me' ||
           url.pathname === '/api/auth/logout'
@@ -85,6 +89,10 @@ function faceitOAuthDevPlugin(): Plugin {
               response = await onAdminUsersRequest({ request: webReq, env: {} });
             } else if (url.pathname === '/api/auth/register') {
               response = await onRegisterRequest({ request: webReq, env: {} });
+            } else if (url.pathname === '/api/auth/verify-code') {
+              response = await onVerifyCodeRequest({ request: webReq, env: {} });
+            } else if (url.pathname === '/api/auth/resend-code') {
+              response = await onResendCodeRequest({ request: webReq, env: {} });
             } else if (url.pathname === '/api/auth/login') {
               response = await onAuthLoginRequest({ request: webReq, env: {} });
             } else if (url.pathname === '/api/auth/me') {
