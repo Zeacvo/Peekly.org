@@ -1,8 +1,0 @@
-/login /index.html 200
-/register /index.html 200
-/admin /index.html 200
-/terms /index.html 200
-/privacy /index.html 200
-/changelog /index.html 200
-/legal/* /index.html 200
-/auth/* /index.html 200
