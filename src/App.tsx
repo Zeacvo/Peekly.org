@@ -31,11 +31,17 @@ const AdminDashboard = lazy(() =>
 const AccountPrivacy = lazy(() =>
   import('./pages/AccountPrivacy').then((m) => ({ default: m.AccountPrivacy }))
 );
+const LoginPage = lazy(() =>
+  import('./pages/LoginPage').then((m) => ({ default: m.LoginPage }))
+);
+const RegisterPage = lazy(() =>
+  import('./pages/RegisterPage').then((m) => ({ default: m.RegisterPage }))
+);
 
 const checkRoutes = () => {
   try {
     if (typeof window === 'undefined') {
-      return { isAdmin: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+      return { isAdmin: false, isLogin: false, isRegister: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
     const rawPath = window.location.pathname.toLowerCase();
     const path = rawPath.replace(/\/$/, '') || '/';
@@ -44,6 +50,40 @@ const checkRoutes = () => {
     if (path === '/admin' || hash === '#admin') {
       return {
         isAdmin: true,
+        isLogin: false,
+        isRegister: false,
+        isTerms: false,
+        isPrivacy: false,
+        isAccountPrivacy: false,
+        isChangelog: false,
+        featureId: null,
+        isNotFound: false,
+        isAuthError: false,
+        authErrorStatus: '400',
+        authErrorMessage: '',
+      };
+    }
+    if (path === '/login' || path === '/login.html' || hash === '#login') {
+      return {
+        isAdmin: false,
+        isLogin: true,
+        isRegister: false,
+        isTerms: false,
+        isPrivacy: false,
+        isAccountPrivacy: false,
+        isChangelog: false,
+        featureId: null,
+        isNotFound: false,
+        isAuthError: false,
+        authErrorStatus: '400',
+        authErrorMessage: '',
+      };
+    }
+    if (path === '/register' || path === '/register.html' || hash === '#register') {
+      return {
+        isAdmin: false,
+        isLogin: false,
+        isRegister: true,
         isTerms: false,
         isPrivacy: false,
         isAccountPrivacy: false,
@@ -59,6 +99,8 @@ const checkRoutes = () => {
       const searchParams = new URLSearchParams(window.location.search);
       return {
         isAdmin: false,
+        isLogin: false,
+        isRegister: false,
         isTerms: false,
         isPrivacy: false,
         isAccountPrivacy: false,
@@ -77,32 +119,32 @@ const checkRoutes = () => {
       hash === '#legal/account-privacy' ||
       hash === '#account-privacy'
     ) {
-      return { isAdmin: false, isTerms: false, isPrivacy: false, isAccountPrivacy: true, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+      return { isAdmin: false, isLogin: false, isRegister: false, isTerms: false, isPrivacy: false, isAccountPrivacy: true, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
     if (path === '/terms' || path === '/terms.html' || hash === '#terms') {
-      return { isAdmin: false, isTerms: true, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+      return { isAdmin: false, isLogin: false, isRegister: false, isTerms: true, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
     if (path === '/privacy' || hash === '#privacy') {
-      return { isAdmin: false, isTerms: false, isPrivacy: true, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+      return { isAdmin: false, isLogin: false, isRegister: false, isTerms: false, isPrivacy: true, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
     if (path === '/changelog' || hash === '#changelog') {
-      return { isAdmin: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: true, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+      return { isAdmin: false, isLogin: false, isRegister: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: true, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
     if (window.location.hash.startsWith('#feature/')) {
       const id = window.location.hash.replace('#feature/', '');
-      return { isAdmin: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: id, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+      return { isAdmin: false, isLogin: false, isRegister: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: id, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
     if (path === '/auth/extension-success') {
-      return { isAdmin: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+      return { isAdmin: false, isLogin: false, isRegister: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
     if (path === '/') {
-      return { isAdmin: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+      return { isAdmin: false, isLogin: false, isRegister: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
 
     // Any other path is treated as 404 Not Found
-    return { isAdmin: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: true, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+    return { isAdmin: false, isLogin: false, isRegister: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: true, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
   } catch {
-    return { isAdmin: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+    return { isAdmin: false, isLogin: false, isRegister: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
   }
 };
 
@@ -133,6 +175,8 @@ export const App: React.FC = () => {
   const [isTerms, setIsTerms] = useState<boolean>(() => checkRoutes().isTerms);
   const [isAccountPrivacy, setIsAccountPrivacy] = useState<boolean>(() => checkRoutes().isAccountPrivacy);
   const [isAdmin, setIsAdmin] = useState<boolean>(() => checkRoutes().isAdmin);
+  const [isLogin, setIsLogin] = useState<boolean>(() => checkRoutes().isLogin);
+  const [isRegister, setIsRegister] = useState<boolean>(() => checkRoutes().isRegister);
   const [isNotFound, setIsNotFound] = useState<boolean>(() => checkRoutes().isNotFound);
   const [isAuthError, setIsAuthError] = useState<boolean>(() => checkRoutes().isAuthError);
   const [authErrorStatus, setAuthErrorStatus] = useState<string>(() => checkRoutes().authErrorStatus);
@@ -146,8 +190,10 @@ export const App: React.FC = () => {
       const authErr = sp.get('auth_error');
       if (authErr) {
         setAuthErrorParam(decodeURIComponent(authErr));
-        setIsAuthModalOpen(true);
-        window.history.replaceState({}, document.title, window.location.pathname);
+        setIsLogin(true);
+        try {
+          history.replaceState(null, '', '/login');
+        } catch {}
       }
     } catch {}
   }, []);
@@ -156,6 +202,8 @@ export const App: React.FC = () => {
     const handleLocationChange = () => {
       const routes = checkRoutes();
       setIsAdmin(routes.isAdmin);
+      setIsLogin(routes.isLogin);
+      setIsRegister(routes.isRegister);
       setIsTerms(routes.isTerms);
       setIsPrivacy(routes.isPrivacy);
       setIsAccountPrivacy(routes.isAccountPrivacy);
@@ -187,6 +235,8 @@ export const App: React.FC = () => {
     setIsPrivacy(false);
     setIsAccountPrivacy(false);
     setIsChangelog(false);
+    setIsLogin(false);
+    setIsRegister(false);
     setActiveFeatureId(id);
     try {
       const path = window.location.pathname.toLowerCase();
@@ -202,7 +252,9 @@ export const App: React.FC = () => {
         path === '/changelog/' ||
         isNotFound ||
         isAuthError ||
-        isAdmin
+        isAdmin ||
+        isLogin ||
+        isRegister
       ) {
         history.pushState(null, '', `/#feature/${id}`);
       } else {
@@ -222,6 +274,8 @@ export const App: React.FC = () => {
     setIsTerms(false);
     setIsPrivacy(false);
     setIsAccountPrivacy(false);
+    setIsLogin(false);
+    setIsRegister(false);
     setIsChangelog(true);
     try {
       history.pushState(null, '', '/changelog');
@@ -239,6 +293,8 @@ export const App: React.FC = () => {
     setIsTerms(false);
     setIsAccountPrivacy(false);
     setIsChangelog(false);
+    setIsLogin(false);
+    setIsRegister(false);
     setIsPrivacy(true);
     try {
       history.pushState(null, '', '/privacy');
@@ -256,9 +312,49 @@ export const App: React.FC = () => {
     setIsChangelog(false);
     setIsPrivacy(false);
     setIsAccountPrivacy(false);
+    setIsLogin(false);
+    setIsRegister(false);
     setIsTerms(true);
     try {
       history.pushState(null, '', '/terms');
+    } catch {}
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch {}
+  };
+
+  const handleOpenLogin = () => {
+    setActiveFeatureId(null);
+    setIsNotFound(false);
+    setIsAuthError(false);
+    setIsAdmin(false);
+    setIsChangelog(false);
+    setIsPrivacy(false);
+    setIsAccountPrivacy(false);
+    setIsTerms(false);
+    setIsRegister(false);
+    setIsLogin(true);
+    try {
+      history.pushState(null, '', '/login');
+    } catch {}
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch {}
+  };
+
+  const handleOpenRegister = () => {
+    setActiveFeatureId(null);
+    setIsNotFound(false);
+    setIsAuthError(false);
+    setIsAdmin(false);
+    setIsChangelog(false);
+    setIsPrivacy(false);
+    setIsAccountPrivacy(false);
+    setIsTerms(false);
+    setIsLogin(false);
+    setIsRegister(true);
+    try {
+      history.pushState(null, '', '/register');
     } catch {}
     try {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -274,6 +370,9 @@ export const App: React.FC = () => {
     setIsPrivacy(false);
     setIsAccountPrivacy(false);
     setIsTerms(false);
+    setIsLogin(false);
+    setIsRegister(false);
+    setAuthErrorParam(null);
     try {
       history.pushState(null, '', '/');
     } catch {}
@@ -284,14 +383,14 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#000000] text-white selection:bg-[#FF5500] selection:text-black font-sans antialiased relative">
-      {/* 1. Fixed Header with logo, terminal changelog & language selector (hidden on CEO admin dashboard) */}
-      {!isAdmin && (
+      {/* 1. Fixed Header (hidden on CEO admin dashboard, login and register pages) */}
+      {!isAdmin && !isLogin && !isRegister && (
         <Header 
           currentLang={currentLang} 
           onLanguageChange={handleLanguageChange}
           onGoHome={handleGoHome}
           onOpenChangelog={handleOpenChangelog}
-          onOpenAuthModal={() => setIsAuthModalOpen(true)}
+          onOpenAuthModal={handleOpenLogin}
           onOpenAdmin={() => {
             setIsAdmin(true);
             try {
@@ -311,6 +410,17 @@ export const App: React.FC = () => {
             <AdminDashboard
               currentLang={currentLang}
               onGoHome={handleGoHome}
+            />
+          ) : isLogin ? (
+            <LoginPage
+              onGoHome={handleGoHome}
+              onNavigateRegister={handleOpenRegister}
+              initialError={authErrorParam}
+            />
+          ) : isRegister ? (
+            <RegisterPage
+              onGoHome={handleGoHome}
+              onNavigateLogin={handleOpenLogin}
             />
           ) : isAuthError ? (
             <div className="flex flex-col min-h-screen justify-between overflow-hidden">
@@ -366,8 +476,8 @@ export const App: React.FC = () => {
         </Suspense>
       </main>
 
-      {/* Footer (hidden on 404, auth error and admin dashboard for clean minimalist layout) */}
-      {!isNotFound && !isAuthError && !isAdmin && (
+      {/* Footer (hidden on 404, auth error, admin dashboard, login and register for clean minimalist layout) */}
+      {!isNotFound && !isAuthError && !isAdmin && !isLogin && !isRegister && (
         <Footer 
           currentLang={currentLang} 
           onOpenChangelog={handleOpenChangelog}

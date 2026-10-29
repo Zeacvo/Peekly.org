@@ -386,7 +386,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         if (res.status === 409) {
           const conflictMsg =
             data?.error ||
-            'Account with this email or username already exists. Please sign in instead.';
+            (data?.field === 'email'
+              ? 'Email already registered. Please sign in instead.'
+              : 'Username is already taken. Please choose another.');
           setError(conflictMsg);
           if (
             data?.field === 'nickname' ||

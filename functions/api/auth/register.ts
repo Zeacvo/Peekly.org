@@ -149,7 +149,7 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
       if (existingEmail) {
         return new Response(
           JSON.stringify({
-            error: 'Account with this email already exists. Please sign in instead.',
+            error: 'Email already registered. Please sign in instead.',
             field: 'email',
           }),
           {
@@ -167,7 +167,7 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
       if (existingNickname) {
         return new Response(
           JSON.stringify({
-            error: 'Account with this username already exists. Please choose another username or sign in.',
+            error: 'Username is already taken. Please choose another.',
             field: 'nickname',
           }),
           {
@@ -181,7 +181,7 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
         if (u.email === cleanEmail) {
           return new Response(
             JSON.stringify({
-              error: 'Account with this email already exists. Please sign in instead.',
+              error: 'Email already registered. Please sign in instead.',
               field: 'email',
             }),
             {
@@ -193,7 +193,7 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
         if (u.nickname.toLowerCase() === cleanNickname.toLowerCase()) {
           return new Response(
             JSON.stringify({
-              error: 'Account with this username already exists. Please choose another username or sign in.',
+              error: 'Username is already taken. Please choose another.',
               field: 'nickname',
             }),
             {
@@ -273,10 +273,13 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
       } catch (insertErr: unknown) {
         const errMsg = String(insertErr);
         if (errMsg.includes('UNIQUE') || errMsg.includes('constraint')) {
+          const isEmail = errMsg.includes('users.email') || !errMsg.includes('users.nickname');
           return new Response(
             JSON.stringify({
-              error: 'Account with this email or username already exists. Please sign in instead.',
-              field: 'email',
+              error: isEmail
+                ? 'Email already registered. Please sign in instead.'
+                : 'Username is already taken. Please choose another.',
+              field: isEmail ? 'email' : 'nickname',
             }),
             {
               status: 409,
@@ -331,6 +334,7 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
       JSON.stringify({
         success: true,
         user: clientSession,
+        redirect: '/',
       }),
       { status: 201, headers }
     );
