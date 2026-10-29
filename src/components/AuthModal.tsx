@@ -171,11 +171,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSocialAuth = (provider: 'google' | 'apple') => {
-    setError(null);
-    alert(
-      `${provider === 'google' ? 'Google' : 'Apple'} Sign-In is configured for production. Please use Email or FACEIT for instant verification.`
-    );
+  const handleGoogleSignIn = () => {
+    const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
+    const options = {
+      redirect_uri: `${window.location.origin}/api/auth/callback/google`,
+      client_id: '175792545120-g65mab5slga4lsoc5asdm8ruii9u15ia.apps.googleusercontent.com',
+      access_type: 'offline',
+      response_type: 'code',
+      prompt: 'consent',
+      scope: [
+        'https://www.googleapis.com/auth/userinfo.profile',
+        'https://www.googleapis.com/auth/userinfo.email',
+      ].join(' '),
+    };
+    const qs = new URLSearchParams(options);
+    window.location.assign(`${rootUrl}?${qs.toString()}`);
   };
 
   const handleContinueEmail = (e: React.FormEvent) => {
@@ -367,7 +377,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <div className="w-full flex flex-col gap-2.5">
                 <button
                   type="button"
-                  onClick={() => handleSocialAuth('google')}
+                  onClick={handleGoogleSignIn}
                   className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-sans text-xs font-semibold tracking-wide flex items-center justify-center gap-3 rounded-none transition cursor-pointer"
                 >
                   <GoogleLogo className="w-4 h-4" />
@@ -376,11 +386,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
                 <button
                   type="button"
-                  onClick={() => handleSocialAuth('apple')}
-                  className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-sans text-xs font-semibold tracking-wide flex items-center justify-center gap-3 rounded-none transition cursor-pointer"
+                  disabled
+                  aria-disabled="true"
+                  className="w-full h-11 bg-black border border-white/10 text-neutral-500 font-sans text-xs font-semibold tracking-wide flex items-center justify-between px-3.5 rounded-none opacity-50 cursor-not-allowed select-none"
+                  title="Sign in with Apple is coming soon"
                 >
-                  <AppleLogo className="w-4 h-4" />
-                  <span>Continue with Apple</span>
+                  <div className="flex items-center gap-3">
+                    <AppleLogo className="w-4 h-4 text-neutral-500" />
+                    <span>Continue with Apple</span>
+                  </div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400 bg-white/10 px-2 py-0.5 rounded-none">
+                    Coming Soon
+                  </span>
                 </button>
 
                 <a
@@ -582,7 +599,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div className="w-full flex flex-col gap-2.5 mb-3.5">
               <button
                 type="button"
-                onClick={() => handleSocialAuth('google')}
+                onClick={handleGoogleSignIn}
                 className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-sans text-xs font-semibold tracking-wide flex items-center justify-center gap-3 rounded-none transition cursor-pointer"
               >
                 <GoogleLogo className="w-4 h-4" />
@@ -591,11 +608,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
               <button
                 type="button"
-                onClick={() => handleSocialAuth('apple')}
-                className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-sans text-xs font-semibold tracking-wide flex items-center justify-center gap-3 rounded-none transition cursor-pointer"
+                disabled
+                aria-disabled="true"
+                className="w-full h-11 bg-black border border-white/10 text-neutral-500 font-sans text-xs font-semibold tracking-wide flex items-center justify-between px-3.5 rounded-none opacity-50 cursor-not-allowed select-none"
+                title="Sign in with Apple is coming soon"
               >
-                <AppleLogo className="w-4 h-4" />
-                <span>Continue with Apple</span>
+                <div className="flex items-center gap-3">
+                  <AppleLogo className="w-4 h-4 text-neutral-500" />
+                  <span>Continue with Apple</span>
+                </div>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400 bg-white/10 px-2 py-0.5 rounded-none">
+                  Coming Soon
+                </span>
               </button>
 
               <a

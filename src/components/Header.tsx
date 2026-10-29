@@ -90,6 +90,9 @@ export const Header: React.FC<HeaderProps> = ({
             localStorage.setItem('peekly_user', JSON.stringify(data.user));
             localStorage.setItem('peekly_auth', JSON.stringify(data.user));
           } catch {}
+          if (new URLSearchParams(window.location.search).get('auth') === 'success') {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
         }
       })
       .catch(() => {});

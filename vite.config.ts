@@ -12,6 +12,24 @@ import { onRequest as onRegisterRequest } from './functions/api/auth/register.ts
 import { onRequest as onAuthLoginRequest } from './functions/api/auth/login.ts';
 import { onRequest as onAuthMeRequest } from './functions/api/auth/me.ts';
 import { onRequest as onAuthLogoutRequest } from './functions/api/auth/logout.ts';
+import { onRequest as onGoogleCallbackRequest } from './functions/api/auth/callback/google.ts';
+
+function loadDevVars(): Record<string, string> {
+  const vars: Record<string, string> = {};
+  try {
+    const devVarsPath = path.resolve(import.meta.dirname, '.dev.vars');
+    if (fs.existsSync(devVarsPath)) {
+      const content = fs.readFileSync(devVarsPath, 'utf8');
+      for (const line of content.split('\n')) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) continue;
+        const [k, ...v] = trimmed.split('=');
+        if (k && v.length) vars[k.trim()] = v.join('=').trim();
+      }
+    }
+  } catch {}
+  return vars;
+}
 
 function spa404Plugin(): Plugin {
   return {
@@ -43,7 +61,8 @@ function faceitOAuthDevPlugin(): Plugin {
           url.pathname === '/api/auth/register' ||
           url.pathname === '/api/auth/login' ||
           url.pathname === '/api/auth/me' ||
-          url.pathname === '/api/auth/logout'
+          url.pathname === '/api/auth/logout' ||
+          url.pathname === '/api/auth/callback/google'
         ) {
           try {
             const fullUrl = `http://localhost:5173${req.url}`;
@@ -91,6 +110,8 @@ function faceitOAuthDevPlugin(): Plugin {
               response = await onAuthMeRequest({ request: webReq, env: {} });
             } else if (url.pathname === '/api/auth/logout') {
               response = await onAuthLogoutRequest({ request: webReq, env: {} });
+            } else if (url.pathname === '/api/auth/callback/google') {
+              response = await onGoogleCallbackRequest({ request: webReq, env: loadDevVars() });
             } else {
               response = await onCallbackRequest({ request: webReq });
             }
