@@ -3,20 +3,13 @@ import { PeeklyLogo } from './PeeklyLogo';
 
 export const FaceitLogo: React.FC<{ className?: string }> = ({ className = '' }) => (
   <svg
-    width="18"
-    height="14"
-    viewBox="0 0 24 18"
+    width="20"
+    height="15"
+    viewBox="0 0 100 75"
     fill="none"
     className={`shrink-0 ${className}`}
   >
-    <path
-      d="M23.998 0.771c-.066-.341-.336-.606-.677-.665-.341-.059-.684.088-.86.37L10.98 17.229c-.215.344-.06.797.311.947.117.047.24.068.361.063l11.669-.001c.379 0 .708-.261.792-.63L23.998.771z"
-      fill="#FF5500"
-    />
-    <path
-      d="M0 0.771c.066-.341.336-.606.677-.665.341-.059.684.088.86.37l5.228 8.375-3.87 5.76L0 .771z"
-      fill="#FF5500"
-    />
+    <path d="M0 37.5H75L100 0V75L0 37.5Z" fill="#FF5500" />
   </svg>
 );
 
@@ -188,7 +181,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         if (e.target === e.currentTarget) handleClose();
       }}
     >
-      <div className="w-full max-w-[440px] bg-[#0A0A0A] border border-white/10 p-8 sm:p-10 relative shadow-2xl rounded-none">
+      <div className="w-full max-w-[460px] bg-[#0A0A0A] border border-white/10 p-8 sm:p-10 relative shadow-2xl rounded-2xl">
         {/* Close Button */}
         <button
           type="button"
@@ -215,174 +208,188 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
 
         {error && (
-          <div className="my-3 p-2.5 bg-red-950/60 border border-red-500/40 text-red-300 text-xs font-mono text-center">
+          <div className="my-3 p-2.5 bg-red-950/60 border border-red-500/40 text-red-300 text-xs font-mono text-center rounded-lg">
             {error}
           </div>
         )}
 
         {/* VIEW 1: SIGN IN - STEP 1 (EMAIL) */}
         {view === 'login' && step === 1 && (
-          <form onSubmit={handleContinue} className="mt-3">
+          <div className="mt-3">
             <h2 className="text-xl font-bold text-white text-center mb-6 font-sans">
               Sign in to Peekly
             </h2>
 
-            <div className="border border-white/15 focus-within:border-white transition p-3 bg-black">
-              <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@example.com"
-                className="w-full bg-transparent text-white text-sm outline-none font-sans"
-                autoFocus
-                required
-              />
-            </div>
+            <form
+              onSubmit={handleContinue}
+              noValidate
+              className="w-full max-w-[380px] mx-auto flex flex-col gap-4"
+            >
+              {/* Apple ID Style Single Email Input */}
+              <div className="w-full border border-white/20 focus-within:border-white rounded-lg p-3.5 transition bg-black">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email"
+                  className="w-full bg-transparent text-white text-sm outline-none placeholder-neutral-500 font-sans"
+                  autoFocus
+                />
+              </div>
 
-            <div className="mt-3 mb-5 flex justify-start">
-              <button
-                type="button"
-                onClick={() => {
-                  setView('register');
-                  setError(null);
-                }}
-                className="text-xs text-neutral-400 hover:text-white flex items-center gap-1 font-mono cursor-pointer transition-colors"
-              >
-                Create Your Peekly Account ↗
-              </button>
-            </div>
-
-            {/* Privacy Disclaimer */}
-            <div className="my-6 text-center">
-              <PrivacyIcon />
-              <p className="text-[11px] text-neutral-500 font-sans leading-relaxed max-w-xs mx-auto">
-                Your Peekly Account information is used to allow you to sign in securely
-                and access your CS2 stats.{' '}
-                <a
-                  href="/privacy"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-neutral-400 hover:text-white underline"
+              {/* Link to Create Account */}
+              <div className="w-full flex justify-start -mt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setView('register');
+                    setError(null);
+                  }}
+                  className="text-xs text-neutral-400 hover:text-white font-mono cursor-pointer transition-colors text-left"
                 >
-                  See how your data is managed...
-                </a>
-              </p>
-            </div>
+                  Create Your Peekly Account ↗
+                </button>
+              </div>
 
-            {/* Action Buttons (without OR separator) */}
-            <div className="flex flex-col gap-3">
+              {/* Privacy Disclaimer */}
+              <div className="w-full text-center my-1">
+                <PrivacyIcon />
+                <p className="text-[11px] text-neutral-500 font-sans leading-relaxed max-w-[320px] mx-auto">
+                  Your Peekly Account information is used to allow you to sign in securely
+                  and access your CS2 stats.{' '}
+                  <a
+                    href="/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-neutral-400 hover:text-white underline"
+                  >
+                    See how your data is managed...
+                  </a>
+                </p>
+              </div>
+
+              {/* Action Buttons */}
               <button
                 type="submit"
-                className="w-full py-2.5 bg-white text-black font-bold text-xs uppercase tracking-wider hover:bg-neutral-200 transition cursor-pointer rounded-none"
+                disabled={!email.trim()}
+                className={`w-full h-11 rounded-lg font-mono font-bold text-xs uppercase tracking-wider transition ${
+                  !email.trim()
+                    ? 'bg-white/20 text-neutral-400 cursor-not-allowed border-none shadow-none'
+                    : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
+                }`}
               >
-                Continue
+                CONTINUE
               </button>
 
               <a
                 href="/api/auth/faceit/login"
-                className="w-full h-10 bg-black border border-white/20 hover:border-white/40 text-white font-mono font-bold text-xs flex items-center justify-center gap-2.5 transition cursor-pointer rounded-none uppercase tracking-wider"
+                className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-mono font-bold text-xs tracking-wider flex items-center justify-center gap-2.5 rounded-lg transition cursor-pointer"
               >
                 <FaceitLogo />
                 <span>SIGN IN WITH FACEIT</span>
               </a>
-            </div>
-          </form>
+            </form>
+          </div>
         )}
 
         {/* VIEW 1: SIGN IN - STEP 2 (PASSWORD) */}
         {view === 'login' && step === 2 && (
-          <form onSubmit={handleSignIn} className="mt-3">
+          <div className="mt-3">
             <h2 className="text-xl font-bold text-white text-center mb-6 font-sans">
               Sign in to Peekly
             </h2>
 
-            {/* Apple ID Style Stacked Field */}
-            <div className="border border-white/15 bg-black mb-3">
-              <div className="p-3 border-b border-white/10 flex items-center justify-between">
-                <div>
-                  <label className="block text-[10px] uppercase font-mono text-neutral-500 mb-0.5">
-                    Email
-                  </label>
-                  <div className="text-white text-sm font-sans truncate max-w-[280px]">
-                    {email}
+            <form
+              onSubmit={handleSignIn}
+              noValidate
+              className="w-full max-w-[380px] mx-auto flex flex-col gap-4"
+            >
+              {/* Apple ID Style Stacked Box */}
+              <div className="w-full">
+                {/* Upper Cell: Fixed Email with Edit toggle */}
+                <div className="w-full rounded-t-lg border border-white/20 border-b border-white/10 bg-black p-3.5 flex items-center justify-between">
+                  <div className="min-w-0 pr-2">
+                    <label className="block text-[10px] uppercase font-mono text-neutral-500 mb-0.5">
+                      Email
+                    </label>
+                    <div className="text-white text-sm font-sans truncate">
+                      {email}
+                    </div>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep(1);
+                      setError(null);
+                    }}
+                    className="text-xs font-mono text-neutral-400 hover:text-white cursor-pointer shrink-0"
+                  >
+                    Edit
+                  </button>
                 </div>
+
+                {/* Lower Cell: Password Input */}
+                <div className="w-full rounded-b-lg border border-white/20 border-t-0 focus-within:border-white bg-black p-3.5 transition">
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    className="w-full bg-transparent text-white text-sm outline-none placeholder-neutral-500 font-sans"
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              {/* Remember Me & Forgot Password Row */}
+              <div className="flex items-center justify-between text-xs font-mono w-full -mt-1">
+                <label className="flex items-center gap-2 text-neutral-400 hover:text-white cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="accent-white bg-black border border-white/20 w-3.5 h-3.5 rounded cursor-pointer"
+                  />
+                  <span>Remember me</span>
+                </label>
                 <button
                   type="button"
-                  onClick={() => {
-                    setStep(1);
-                    setError(null);
-                  }}
-                  className="text-xs font-mono text-neutral-400 hover:text-white cursor-pointer"
+                  onClick={() =>
+                    alert(`A password reset link will be sent to ${email}`)
+                  }
+                  className="text-neutral-400 hover:text-white cursor-pointer"
                 >
-                  Edit
+                  Forgot password? ↗
                 </button>
               </div>
 
-              <div className="p-3 focus-within:bg-white/[0.02]">
-                <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full bg-transparent text-white text-sm outline-none font-sans"
-                  autoFocus
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between text-xs font-mono mb-6">
-              <label className="flex items-center gap-2 text-neutral-400 hover:text-white cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="accent-white bg-black border border-white/20 w-3.5 h-3.5 rounded-none cursor-pointer"
-                />
-                <span>Remember me</span>
-              </label>
-              <button
-                type="button"
-                onClick={() =>
-                  alert(`A password reset link will be sent to ${email}`)
-                }
-                className="text-neutral-400 hover:text-white cursor-pointer"
-              >
-                Forgot password? ↗
-              </button>
-            </div>
-
-            {/* Action Buttons (without OR separator) */}
-            <div className="flex flex-col gap-3">
+              {/* Action Buttons */}
               <button
                 type="submit"
-                className="w-full py-2.5 bg-white text-black font-bold text-xs uppercase tracking-wider hover:bg-neutral-200 transition cursor-pointer rounded-none"
+                disabled={!password.trim()}
+                className={`w-full h-11 rounded-lg font-mono font-bold text-xs uppercase tracking-wider transition ${
+                  !password.trim()
+                    ? 'bg-white/20 text-neutral-400 cursor-not-allowed border-none shadow-none'
+                    : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
+                }`}
               >
                 SIGN IN
               </button>
 
               <a
                 href="/api/auth/faceit/login"
-                className="w-full h-10 bg-black border border-white/20 hover:border-white/40 text-white font-mono font-bold text-xs flex items-center justify-center gap-2.5 transition cursor-pointer rounded-none uppercase tracking-wider"
+                className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-mono font-bold text-xs tracking-wider flex items-center justify-center gap-2.5 rounded-lg transition cursor-pointer"
               >
                 <FaceitLogo />
                 <span>SIGN IN WITH FACEIT</span>
               </a>
-            </div>
-          </form>
+            </form>
+          </div>
         )}
 
         {/* VIEW 2: CREATE ACCOUNT (Apple ID Style) */}
         {view === 'register' && (
-          <form onSubmit={handleRegister} className="mt-3">
+          <div className="mt-3">
             <h2 className="text-xl font-bold text-white text-center mb-1 font-sans">
               Create Your Peekly Account
             </h2>
@@ -401,86 +408,89 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </button>
             </p>
 
-            <div className="border border-white/15 bg-black divide-y divide-white/10 mb-5">
-              <div className="p-3 focus-within:bg-white/[0.02]">
-                <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
-                  Nickname
-                </label>
-                <input
-                  type="text"
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
-                  placeholder="e.g. Zeacvo"
-                  className="w-full bg-transparent text-white text-sm outline-none font-sans"
-                  autoFocus
-                  required
-                />
-              </div>
-              <div className="p-3 focus-within:bg-white/[0.02]">
-                <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  className="w-full bg-transparent text-white text-sm outline-none font-sans"
-                  required
-                />
-              </div>
-              <div className="p-3 focus-within:bg-white/[0.02]">
-                <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 6 characters"
-                  className="w-full bg-transparent text-white text-sm outline-none font-sans"
-                  required
-                />
-              </div>
-              <div className="p-3 focus-within:bg-white/[0.02]">
-                <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
-                  Confirm Password
-                </label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Repeat your password"
-                  className="w-full bg-transparent text-white text-sm outline-none font-sans"
-                  required
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-2.5 bg-white text-black font-bold text-xs uppercase tracking-wider hover:bg-neutral-200 transition cursor-pointer rounded-none"
+            <form
+              onSubmit={handleRegister}
+              noValidate
+              className="w-full max-w-[380px] mx-auto flex flex-col gap-4"
             >
-              CONTINUE
-            </button>
+              <div className="w-full rounded-lg border border-white/20 bg-black divide-y divide-white/10 overflow-hidden focus-within:border-white transition">
+                <div className="p-3.5 focus-within:bg-white/[0.02]">
+                  <input
+                    type="text"
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    placeholder="Nickname"
+                    className="w-full bg-transparent text-white text-sm outline-none placeholder-neutral-500 font-sans"
+                    autoFocus
+                  />
+                </div>
+                <div className="p-3.5 focus-within:bg-white/[0.02]">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Email"
+                    className="w-full bg-transparent text-white text-sm outline-none placeholder-neutral-500 font-sans"
+                  />
+                </div>
+                <div className="p-3.5 focus-within:bg-white/[0.02]">
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    className="w-full bg-transparent text-white text-sm outline-none placeholder-neutral-500 font-sans"
+                  />
+                </div>
+                <div className="p-3.5 focus-within:bg-white/[0.02]">
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm Password"
+                    className="w-full bg-transparent text-white text-sm outline-none placeholder-neutral-500 font-sans"
+                  />
+                </div>
+              </div>
 
-            {/* Privacy Disclaimer */}
-            <div className="mt-6 text-center">
-              <PrivacyIcon />
-              <p className="text-[11px] text-neutral-500 font-sans leading-relaxed max-w-xs mx-auto">
-                Your Peekly Account information is used to allow you to sign in securely
-                and protect your account.{' '}
-                <a
-                  href="/privacy"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-neutral-400 hover:text-white underline"
-                >
-                  See how your data is managed...
-                </a>
-              </p>
-            </div>
-          </form>
+              <button
+                type="submit"
+                disabled={
+                  !nickname.trim() ||
+                  !email.trim() ||
+                  !password.trim() ||
+                  !confirmPassword.trim()
+                }
+                className={`w-full h-11 rounded-lg font-mono font-bold text-xs uppercase tracking-wider transition ${
+                  !nickname.trim() ||
+                  !email.trim() ||
+                  !password.trim() ||
+                  !confirmPassword.trim()
+                    ? 'bg-white/20 text-neutral-400 cursor-not-allowed border-none shadow-none'
+                    : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
+                }`}
+              >
+                CONTINUE
+              </button>
+
+              {/* Privacy Disclaimer */}
+              <div className="w-full text-center my-1">
+                <PrivacyIcon />
+                <p className="text-[11px] text-neutral-500 font-sans leading-relaxed max-w-[320px] mx-auto">
+                  Your Peekly Account information is used to allow you to sign in securely
+                  and protect your account.{' '}
+                  <a
+                    href="/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-neutral-400 hover:text-white underline"
+                  >
+                    See how your data is managed...
+                  </a>
+                </p>
+              </div>
+            </form>
+          </div>
         )}
       </div>
     </div>
