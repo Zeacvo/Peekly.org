@@ -28,11 +28,14 @@ const AuthErrorPage = lazy(() =>
 const AdminDashboard = lazy(() =>
   import('./pages/AdminDashboard').then((m) => ({ default: m.AdminDashboard }))
 );
+const AccountPrivacy = lazy(() =>
+  import('./pages/AccountPrivacy').then((m) => ({ default: m.AccountPrivacy }))
+);
 
 const checkRoutes = () => {
   try {
     if (typeof window === 'undefined') {
-      return { isAdmin: false, isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+      return { isAdmin: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
     const rawPath = window.location.pathname.toLowerCase();
     const path = rawPath.replace(/\/$/, '') || '/';
@@ -43,6 +46,7 @@ const checkRoutes = () => {
         isAdmin: true,
         isTerms: false,
         isPrivacy: false,
+        isAccountPrivacy: false,
         isChangelog: false,
         featureId: null,
         isNotFound: false,
@@ -57,6 +61,7 @@ const checkRoutes = () => {
         isAdmin: false,
         isTerms: false,
         isPrivacy: false,
+        isAccountPrivacy: false,
         isChangelog: false,
         featureId: null,
         isNotFound: false,
@@ -65,30 +70,39 @@ const checkRoutes = () => {
         authErrorMessage: searchParams.get('message') || 'Missing required authorization code parameter.',
       };
     }
+    if (
+      path === '/legal/account-privacy' ||
+      path === '/legal/account-privacy.html' ||
+      path === '/account-privacy' ||
+      hash === '#legal/account-privacy' ||
+      hash === '#account-privacy'
+    ) {
+      return { isAdmin: false, isTerms: false, isPrivacy: false, isAccountPrivacy: true, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+    }
     if (path === '/terms' || path === '/terms.html' || hash === '#terms') {
-      return { isAdmin: false, isTerms: true, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+      return { isAdmin: false, isTerms: true, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
     if (path === '/privacy' || hash === '#privacy') {
-      return { isAdmin: false, isTerms: false, isPrivacy: true, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+      return { isAdmin: false, isTerms: false, isPrivacy: true, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
     if (path === '/changelog' || hash === '#changelog') {
-      return { isAdmin: false, isTerms: false, isPrivacy: false, isChangelog: true, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+      return { isAdmin: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: true, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
     if (window.location.hash.startsWith('#feature/')) {
       const id = window.location.hash.replace('#feature/', '');
-      return { isAdmin: false, isTerms: false, isPrivacy: false, isChangelog: false, featureId: id, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+      return { isAdmin: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: id, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
     if (path === '/auth/extension-success') {
-      return { isAdmin: false, isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+      return { isAdmin: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
     if (path === '/') {
-      return { isAdmin: false, isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+      return { isAdmin: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
 
     // Any other path is treated as 404 Not Found
-    return { isAdmin: false, isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: true, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+    return { isAdmin: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: true, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
   } catch {
-    return { isAdmin: false, isTerms: false, isPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+    return { isAdmin: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
   }
 };
 
@@ -117,6 +131,7 @@ export const App: React.FC = () => {
   const [isChangelog, setIsChangelog] = useState<boolean>(() => checkRoutes().isChangelog);
   const [isPrivacy, setIsPrivacy] = useState<boolean>(() => checkRoutes().isPrivacy);
   const [isTerms, setIsTerms] = useState<boolean>(() => checkRoutes().isTerms);
+  const [isAccountPrivacy, setIsAccountPrivacy] = useState<boolean>(() => checkRoutes().isAccountPrivacy);
   const [isAdmin, setIsAdmin] = useState<boolean>(() => checkRoutes().isAdmin);
   const [isNotFound, setIsNotFound] = useState<boolean>(() => checkRoutes().isNotFound);
   const [isAuthError, setIsAuthError] = useState<boolean>(() => checkRoutes().isAuthError);
@@ -130,6 +145,7 @@ export const App: React.FC = () => {
       setIsAdmin(routes.isAdmin);
       setIsTerms(routes.isTerms);
       setIsPrivacy(routes.isPrivacy);
+      setIsAccountPrivacy(routes.isAccountPrivacy);
       setIsChangelog(routes.isChangelog);
       setActiveFeatureId(routes.featureId);
       setIsNotFound(routes.isNotFound);
@@ -156,6 +172,7 @@ export const App: React.FC = () => {
     setIsAdmin(false);
     setIsTerms(false);
     setIsPrivacy(false);
+    setIsAccountPrivacy(false);
     setIsChangelog(false);
     setActiveFeatureId(id);
     try {
@@ -166,6 +183,8 @@ export const App: React.FC = () => {
         path === '/terms' || 
         path === '/terms/' || 
         path === '/terms.html' || 
+        path === '/legal/account-privacy' ||
+        path === '/account-privacy' ||
         path === '/changelog' || 
         path === '/changelog/' ||
         isNotFound ||
@@ -189,6 +208,7 @@ export const App: React.FC = () => {
     setIsAdmin(false);
     setIsTerms(false);
     setIsPrivacy(false);
+    setIsAccountPrivacy(false);
     setIsChangelog(true);
     try {
       history.pushState(null, '', '/changelog');
@@ -204,6 +224,7 @@ export const App: React.FC = () => {
     setIsAuthError(false);
     setIsAdmin(false);
     setIsTerms(false);
+    setIsAccountPrivacy(false);
     setIsChangelog(false);
     setIsPrivacy(true);
     try {
@@ -221,6 +242,7 @@ export const App: React.FC = () => {
     setIsAdmin(false);
     setIsChangelog(false);
     setIsPrivacy(false);
+    setIsAccountPrivacy(false);
     setIsTerms(true);
     try {
       history.pushState(null, '', '/terms');
@@ -237,6 +259,7 @@ export const App: React.FC = () => {
     setIsAdmin(false);
     setIsChangelog(false);
     setIsPrivacy(false);
+    setIsAccountPrivacy(false);
     setIsTerms(false);
     try {
       history.pushState(null, '', '/');
@@ -301,6 +324,11 @@ export const App: React.FC = () => {
             <PrivacyPage 
               currentLang={currentLang}
               onBack={handleGoHome}
+            />
+          ) : isAccountPrivacy ? (
+            <AccountPrivacy 
+              currentLang={currentLang} 
+              onBack={handleGoHome} 
             />
           ) : isChangelog ? (
             <ChangelogPage 

@@ -16,13 +16,17 @@ export const FaceitLogo: React.FC<{ className?: string }> = ({ className = '' })
   </svg>
 );
 
-export const PrivacyIcon: React.FC<{ className?: string }> = ({ className = 'w-7 h-7' }) => (
+export const PrivacyIcon: React.FC<{ className?: string }> = ({
+  className = 'text-neutral-400 mb-2.5 shrink-0',
+}) => (
   <svg
-    className={`mx-auto mb-2 text-neutral-400 ${className}`}
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="currentColor"
+    className={className}
   >
-    <path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zm6 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-6 2c-3.11 0-6 1.57-6 4v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-1c0-2.43-2.89-4-6-4zm6 1c-.34 0-.67.03-.99.09.62.83.99 1.84.99 2.91v1h4a1 1 0 0 0 1-1v-1c0-1.87-2.13-3-5-3z" />
+    <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM12 5C13.66 5 15 6.34 15 8C15 9.66 13.66 11 12 11C10.34 11 9 9.66 9 8C9 6.34 10.34 5 12 5ZM12 19.9C9.47 18.84 7.4 16.64 6.8 14C7.86 13.36 9.8 13 12 13C14.2 13 16.14 13.36 17.2 14C16.6 16.64 14.53 18.84 12 19.9Z" />
   </svg>
 );
 
@@ -195,12 +199,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         if (e.target === e.currentTarget) handleClose();
       }}
     >
-      <div className="w-full max-w-[460px] bg-[#0A0A0A] border border-white/10 p-8 sm:p-10 relative shadow-2xl rounded-2xl">
+      <div className="w-full max-w-[460px] bg-black border border-white/15 p-8 relative shadow-2xl rounded-none">
         {/* Close Button */}
         <button
           type="button"
           onClick={handleClose}
-          className="absolute top-4 right-4 text-neutral-400 hover:text-white p-2 transition-colors cursor-pointer"
+          className="absolute top-4 right-4 text-neutral-400 hover:text-white p-2 transition-colors cursor-pointer rounded-none"
           aria-label="Close"
         >
           <svg
@@ -222,7 +226,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
 
         {error && (
-          <div className="my-3 p-2.5 bg-red-950/60 border border-red-500/40 text-red-300 text-xs font-mono text-center rounded-lg">
+          <div className="my-3 p-2.5 bg-red-950/60 border border-red-500/40 text-red-300 text-xs font-mono text-center rounded-none">
             {error}
           </div>
         )}
@@ -237,56 +241,54 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <form
               onSubmit={handleContinue}
               noValidate
-              className="w-full max-w-[380px] mx-auto flex flex-col gap-4"
+              className="w-full flex flex-col gap-4"
             >
-              {/* Apple ID Style Single Email Input */}
-              <div className="w-full border border-white/20 focus-within:border-white rounded-lg p-3.5 transition bg-black">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email"
-                  className="w-full bg-transparent text-white text-sm outline-none placeholder-neutral-500 font-sans"
-                  autoFocus
-                />
-              </div>
+              {/* Email Input */}
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                className="w-full h-11 bg-black border border-white/20 focus:border-white text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans"
+                autoFocus
+              />
 
               {/* Link to Create Account */}
-              <div className="w-full flex justify-start -mt-1">
+              <div className="w-full flex justify-start">
                 <button
                   type="button"
                   onClick={() => {
                     setView('register');
                     setError(null);
                   }}
-                  className="text-xs text-neutral-400 hover:text-white font-mono cursor-pointer transition-colors text-left"
+                  className="text-xs text-neutral-400 hover:text-white transition font-mono cursor-pointer text-left"
                 >
                   Create Your Peekly Account ↗
                 </button>
               </div>
 
-              {/* Privacy Disclaimer */}
-              <div className="w-full text-center my-1">
+              {/* Privacy Disclaimer Block */}
+              <div className="w-full flex flex-col items-center text-center my-1">
                 <PrivacyIcon />
-                <p className="text-[11px] text-neutral-500 font-sans leading-relaxed max-w-[320px] mx-auto">
+                <p className="text-[11px] text-neutral-500 font-sans leading-relaxed max-w-[340px] mx-auto">
                   Your Peekly Account information is used to allow you to sign in securely
                   and access your CS2 stats.{' '}
                   <a
-                    href="/privacy"
+                    href="/legal/account-privacy"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-neutral-400 hover:text-white underline"
+                    className="text-neutral-400 hover:text-white transition"
                   >
                     See how your data is managed...
                   </a>
                 </p>
               </div>
 
-              {/* Action Buttons */}
+              {/* Action Button */}
               <button
                 type="submit"
                 disabled={!email.trim()}
-                className={`w-full h-11 rounded-lg font-mono font-bold text-xs uppercase tracking-wider transition ${
+                className={`w-full h-11 rounded-none font-mono font-bold text-xs uppercase tracking-wider transition ${
                   !email.trim()
                     ? 'bg-white/20 text-neutral-400 cursor-not-allowed border-none shadow-none'
                     : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
@@ -295,9 +297,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 CONTINUE
               </button>
 
+              {/* FACEIT Button */}
               <a
                 href="/api/auth/faceit/login"
-                className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-mono font-bold text-xs tracking-wider flex items-center justify-center gap-2.5 rounded-lg transition cursor-pointer"
+                className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-mono font-bold text-xs tracking-wider flex items-center justify-center gap-2.5 rounded-none transition cursor-pointer"
               >
                 <FaceitLogo />
                 <span>SIGN IN WITH FACEIT</span>
@@ -316,19 +319,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <form
               onSubmit={handleSignIn}
               noValidate
-              className="w-full max-w-[380px] mx-auto flex flex-col gap-4"
+              className="w-full flex flex-col gap-4"
             >
-              {/* Apple ID Style Stacked Box */}
-              <div className="w-full">
+              <div className="w-full flex flex-col">
                 {/* Upper Cell: Fixed Email with Edit toggle */}
-                <div className="w-full rounded-t-lg border border-white/20 border-b border-white/10 bg-black p-3.5 flex items-center justify-between">
+                <div className="w-full h-11 border border-white/20 border-b-0 bg-black px-3.5 flex items-center justify-between rounded-none">
                   <div className="min-w-0 pr-2">
-                    <label className="block text-[10px] uppercase font-mono text-neutral-500 mb-0.5">
-                      Email
-                    </label>
-                    <div className="text-white text-sm font-sans truncate">
+                    <span className="text-[10px] uppercase font-mono text-neutral-500 mr-2">
+                      Email:
+                    </span>
+                    <span className="text-white text-sm font-sans truncate">
                       {email}
-                    </div>
+                    </span>
                   </div>
                   <button
                     type="button"
@@ -343,26 +345,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
 
                 {/* Lower Cell: Password Input */}
-                <div className="w-full rounded-b-lg border border-white/20 border-t-0 focus-within:border-white bg-black p-3.5 transition">
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                    className="w-full bg-transparent text-white text-sm outline-none placeholder-neutral-500 font-sans"
-                    autoFocus
-                  />
-                </div>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  className="w-full h-11 bg-black border border-white/20 focus:border-white text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans"
+                  autoFocus
+                />
               </div>
 
               {/* Remember Me & Forgot Password Row */}
-              <div className="flex items-center justify-between text-xs font-mono w-full -mt-1">
+              <div className="flex items-center justify-between text-xs font-mono w-full">
                 <label className="flex items-center gap-2 text-neutral-400 hover:text-white cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="accent-white bg-black border border-white/20 w-3.5 h-3.5 rounded cursor-pointer"
+                    className="accent-white bg-black border border-white/20 w-3.5 h-3.5 rounded-none cursor-pointer"
                   />
                   <span>Remember me</span>
                 </label>
@@ -381,7 +381,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="submit"
                 disabled={isLoading || !password.trim()}
-                className={`w-full h-11 rounded-lg font-mono font-bold text-xs uppercase tracking-wider transition ${
+                className={`w-full h-11 rounded-none font-mono font-bold text-xs uppercase tracking-wider transition ${
                   isLoading || !password.trim()
                     ? 'bg-white/20 text-neutral-400 cursor-not-allowed border-none shadow-none'
                     : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
@@ -392,7 +392,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
               <a
                 href="/api/auth/faceit/login"
-                className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-mono font-bold text-xs tracking-wider flex items-center justify-center gap-2.5 rounded-lg transition cursor-pointer"
+                className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-mono font-bold text-xs tracking-wider flex items-center justify-center gap-2.5 rounded-none transition cursor-pointer"
               >
                 <FaceitLogo />
                 <span>SIGN IN WITH FACEIT</span>
@@ -401,7 +401,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         )}
 
-        {/* VIEW 2: CREATE ACCOUNT (Apple ID Style) */}
+        {/* VIEW 2: CREATE ACCOUNT */}
         {view === 'register' && (
           <div className="mt-3">
             <h2 className="text-xl font-bold text-white text-center mb-1 font-sans">
@@ -416,7 +416,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   setStep(1);
                   setError(null);
                 }}
-                className="text-white underline ml-1 hover:text-neutral-200 cursor-pointer"
+                className="text-white hover:text-neutral-300 ml-1 cursor-pointer transition font-mono"
               >
                 Sign in ↗
               </button>
@@ -425,47 +425,37 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <form
               onSubmit={handleRegister}
               noValidate
-              className="w-full max-w-[380px] mx-auto flex flex-col gap-4"
+              className="w-full flex flex-col gap-3.5"
             >
-              <div className="w-full rounded-lg border border-white/20 bg-black divide-y divide-white/10 overflow-hidden focus-within:border-white transition">
-                <div className="p-3.5 focus-within:bg-white/[0.02]">
-                  <input
-                    type="text"
-                    value={nickname}
-                    onChange={(e) => setNickname(e.target.value)}
-                    placeholder="Nickname"
-                    className="w-full bg-transparent text-white text-sm outline-none placeholder-neutral-500 font-sans"
-                    autoFocus
-                  />
-                </div>
-                <div className="p-3.5 focus-within:bg-white/[0.02]">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email"
-                    className="w-full bg-transparent text-white text-sm outline-none placeholder-neutral-500 font-sans"
-                  />
-                </div>
-                <div className="p-3.5 focus-within:bg-white/[0.02]">
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                    className="w-full bg-transparent text-white text-sm outline-none placeholder-neutral-500 font-sans"
-                  />
-                </div>
-                <div className="p-3.5 focus-within:bg-white/[0.02]">
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm Password"
-                    className="w-full bg-transparent text-white text-sm outline-none placeholder-neutral-500 font-sans"
-                  />
-                </div>
-              </div>
+              <input
+                type="text"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                placeholder="Nickname"
+                className="w-full h-11 bg-black border border-white/20 focus:border-white text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans"
+                autoFocus
+              />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                className="w-full h-11 bg-black border border-white/20 focus:border-white text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans"
+              />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className="w-full h-11 bg-black border border-white/20 focus:border-white text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans"
+              />
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm Password"
+                className="w-full h-11 bg-black border border-white/20 focus:border-white text-white placeholder-neutral-500 px-3.5 text-sm outline-none rounded-none transition font-sans"
+              />
 
               <button
                 type="submit"
@@ -476,7 +466,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   !password.trim() ||
                   !confirmPassword.trim()
                 }
-                className={`w-full h-11 rounded-lg font-mono font-bold text-xs uppercase tracking-wider transition ${
+                className={`w-full h-11 rounded-none font-mono font-bold text-xs uppercase tracking-wider transition ${
                   isLoading ||
                   !nickname.trim() ||
                   !email.trim() ||
@@ -489,17 +479,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 {isLoading ? 'PLEASE WAIT...' : 'CREATE ACCOUNT'}
               </button>
 
-              {/* Privacy Disclaimer */}
-              <div className="w-full text-center my-1">
+              {/* Privacy Disclaimer Block */}
+              <div className="w-full flex flex-col items-center text-center my-1">
                 <PrivacyIcon />
-                <p className="text-[11px] text-neutral-500 font-sans leading-relaxed max-w-[320px] mx-auto">
+                <p className="text-[11px] text-neutral-500 font-sans leading-relaxed max-w-[340px] mx-auto">
                   Your Peekly Account information is used to allow you to sign in securely
                   and protect your account.{' '}
                   <a
-                    href="/privacy"
+                    href="/legal/account-privacy"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-neutral-400 hover:text-white underline"
+                    className="text-neutral-400 hover:text-white transition"
                   >
                     See how your data is managed...
                   </a>
