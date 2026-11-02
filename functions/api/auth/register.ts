@@ -291,11 +291,9 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
     }
 
     // 6. Send OTP verification code via Resend API
-    const fallbackKey = ['re', 'RdDicY83', 'FEhuWUyebUrpx6dfcVN4Xfz2'].join('_');
     const resendApiKey =
       (env?.RESEND_API_KEY as string | undefined) ||
-      (typeof process !== 'undefined' ? process.env?.RESEND_API_KEY : '') ||
-      fallbackKey;
+      (typeof process !== 'undefined' ? process.env?.RESEND_API_KEY : '');
 
     const emailHtml = `
       <div style="background:#000000;color:#ffffff;padding:32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:480px;margin:0 auto;border:1px solid rgba(255,255,255,0.15);">
@@ -308,19 +306,16 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
 
     console.log(`[Resend OTP Code for ${cleanEmail}]: ${code}`);
 
-    let emailSent = false;
-    let debugCode: string | undefined = undefined;
-
     if (resendApiKey) {
       try {
-        let resendRes = await fetch('https://api.resend.com/emails', {
+        const resendRes = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${resendApiKey}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'Peekly Auth <auth@peekly.org>',
+            from: 'Peekly <auth@peekly.org>',
             to: [cleanEmail],
             subject: `${code} is your Peekly verification code`,
             html: emailHtml,
@@ -336,44 +331,32 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
         }
         console.log('[Resend Response]:', resendRes.status, resendJson);
 
-        if (resendRes.ok) {
-          emailSent = true;
-        } else {
-          // Retry with onboarding@resend.dev in case custom domain is unverified
-          resendRes = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${resendApiKey}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              from: 'Peekly <onboarding@resend.dev>',
-              to: [cleanEmail],
-              subject: `${code} is your Peekly verification code`,
-              html: emailHtml,
-              text: `Your Peekly verification code is: ${code}`,
+        if (!resendRes.ok) {
+          console.error('[Resend Delivery Error]:', resendRes.status, resendJson);
+          return new Response(
+            JSON.stringify({
+              error:
+                'Failed to dispatch verification email. Please verify your address or try again later.',
             }),
-          });
-
-          try {
-            resendJson = await resendRes.json();
-          } catch {
-            resendJson = await resendRes.text();
-          }
-          console.log('[Resend Fallback Response]:', resendRes.status, resendJson);
-
-          if (resendRes.ok) {
-            emailSent = true;
-          }
+            {
+              status: 500,
+              headers: { 'Content-Type': 'application/json' },
+            }
+          );
         }
       } catch (e) {
         console.error('[Resend Exception]:', e);
+        return new Response(
+          JSON.stringify({
+            error:
+              'Failed to dispatch verification email. Please verify your address or try again later.',
+          }),
+          {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
       }
-    }
-
-    // Always provide debugCode if email delivery did not succeed or in dev/test fallback mode
-    if (!emailSent) {
-      debugCode = code;
     }
 
     return new Response(
@@ -381,7 +364,6 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
         success: true,
         requireVerification: true,
         email: cleanEmail,
-        ...(debugCode ? { debugCode } : {}),
       }),
       {
         status: 200,

@@ -104,7 +104,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [resendCountdown, setResendCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const [debugNotice, setDebugNotice] = useState<string | null>(null);
-  const [debugCode, setDebugCode] = useState<string | null>(null);
 
   // Form fields
   const [email, setEmail] = useState('');
@@ -184,7 +183,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setRegStep('form');
     setVerificationCode('');
     setDebugNotice(null);
-    setDebugCode(null);
   };
 
   useEffect(() => {
@@ -442,10 +440,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         setResendCountdown(60);
         setCanResend(false);
         setError(null);
-        if (data?.debugCode) {
-          setDebugCode(data.debugCode);
-          console.warn('[PEEKLY TEST OTP CODE]:', data.debugCode);
-        }
         setIsLoading(false);
         return;
       }
@@ -547,10 +541,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         setResendCountdown(60);
         setCanResend(false);
         setDebugNotice('A new verification code has been dispatched to your email.');
-        if (data?.debugCode) {
-          setDebugCode(data.debugCode);
-          console.warn('[PEEKLY TEST OTP CODE]:', data.debugCode);
-        }
       }
     } catch (err) {
       setError(`Failed to resend code: ${String(err)}`);
@@ -564,7 +554,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setError(null);
     setVerificationCode('');
     setDebugNotice(null);
-    setDebugCode(null);
   };
 
   return (
@@ -881,22 +870,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 placeholder="000000"
                 className="w-full h-14 bg-[#0F0F11] border border-white/20 focus:border-white text-white text-2xl font-mono tracking-[8px] text-center outline-none rounded-none transition-colors"
               />
-
-              {debugCode && (
-                <p className="text-[11px] text-neutral-500 font-mono -mt-1 text-center">
-                  Test mode code:{' '}
-                  <span
-                    className="text-white font-bold select-all cursor-pointer underline hover:text-[#FF5500] transition-colors"
-                    onClick={() => {
-                      setVerificationCode(debugCode);
-                      if (error) setError(null);
-                    }}
-                    title="Click to paste code"
-                  >
-                    {debugCode}
-                  </span>
-                </p>
-              )}
 
               <button
                 type="submit"
