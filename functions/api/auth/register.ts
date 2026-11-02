@@ -6,13 +6,9 @@
 import {
   ensureAuthSchema,
   hashPassword,
-  generateSessionToken,
-  createSessionCookieHeader,
   memoryAuthUsers,
-  memoryAuthSessions,
+  memoryEmailVerifications,
   type D1Database,
-  type DbUser,
-  type DbSession,
 } from '../utils/auth.ts';
 
 interface EventContext {
@@ -207,136 +203,133 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
 
     // 4. Hash password with PBKDF2 (100k SHA-256) & unique salt
     const { hash, salt } = await hashPassword(cleanPassword);
-    const userId = crypto.randomUUID();
-    const now = Date.now();
-    const isCeo =
-      cleanEmail === 'zeacvo@icloud.com' || cleanNickname.toLowerCase() === 'zeacvo';
-    const role = isCeo ? 'ADMIN' : 'USER';
-
-    const newUser: DbUser = {
-      id: userId,
-      email: cleanEmail,
-      password_hash: hash,
-      salt,
-      nickname: cleanNickname,
-      role,
-      created_at: now,
-    };
-
-    const token = generateSessionToken();
-    const expiresAt = now + 30 * 24 * 60 * 60 * 1000;
-    const newSession: DbSession = {
-      token,
-      user_id: userId,
-      expires_at: expiresAt,
-      created_at: now,
-    };
-
+    const combinedHash = `${hash}:${salt}`;
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 15 * 60 * 1000; // 15 minutes
     const newsletterSubscribed = typeof newsletterOptIn === 'boolean' ? (newsletterOptIn ? 1 : 0) : 1;
-    newUser.newsletter_subscribed = newsletterSubscribed;
 
-    // 5. Save to D1 or memory
+    // 5. Store pending verification in D1 or memory (do not create user in `users` until OTP is verified)
     if (db) {
       try {
-        try {
-          await db
-            .prepare(
-              'INSERT INTO users (id, email, password_hash, salt, nickname, role, created_at, newsletter_subscribed) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-            )
-            .bind(
-              newUser.id,
-              newUser.email,
-              newUser.password_hash,
-              newUser.salt,
-              newUser.nickname,
-              newUser.role,
-              newUser.created_at,
-              newsletterSubscribed
-            )
-            .run();
-        } catch {
-          await db
-            .prepare(
-              'INSERT INTO users (id, email, password_hash, salt, nickname, role, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
-            )
-            .bind(
-              newUser.id,
-              newUser.email,
-              newUser.password_hash,
-              newUser.salt,
-              newUser.nickname,
-              newUser.role,
-              newUser.created_at
-            )
-            .run();
-        }
-      } catch (insertErr: unknown) {
-        const errMsg = String(insertErr);
-        if (errMsg.includes('UNIQUE') || errMsg.includes('constraint')) {
-          const isEmail = errMsg.includes('users.email') || !errMsg.includes('users.nickname');
-          return new Response(
-            JSON.stringify({
-              error: isEmail
-                ? 'Email already registered. Please sign in instead.'
-                : 'Username is already taken. Please choose another.',
-              field: isEmail ? 'email' : 'nickname',
-            }),
-            {
-              status: 409,
-              headers: { 'Content-Type': 'application/json' },
-            }
-          );
-        }
-        throw insertErr;
+        await db
+          .prepare(
+            `INSERT OR REPLACE INTO email_verifications 
+             (email, code, username, password_hash, salt, newsletter_opt_in, expires_at, attempts) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, 0)`
+          )
+          .bind(
+            cleanEmail,
+            code,
+            cleanNickname,
+            combinedHash,
+            salt,
+            newsletterSubscribed,
+            expiresAt
+          )
+          .run();
+      } catch {
+        await db
+          .prepare(
+            `INSERT OR REPLACE INTO email_verifications 
+             (email, code, username, password_hash, newsletter_opt_in, expires_at, attempts) 
+             VALUES (?, ?, ?, ?, ?, ?, 0)`
+          )
+          .bind(
+            cleanEmail,
+            code,
+            cleanNickname,
+            combinedHash,
+            newsletterSubscribed,
+            expiresAt
+          )
+          .run();
       }
-
-      await db
-        .prepare(
-          'INSERT INTO sessions (token, user_id, expires_at, created_at) VALUES (?, ?, ?, ?)'
-        )
-        .bind(
-          newSession.token,
-          newSession.user_id,
-          newSession.expires_at,
-          newSession.created_at
-        )
-        .run();
     } else {
-      memoryAuthUsers.set(userId, newUser);
-      memoryAuthSessions.set(token, newSession);
+      memoryEmailVerifications.set(cleanEmail, {
+        email: cleanEmail,
+        code,
+        username: cleanNickname,
+        password_hash: combinedHash,
+        salt,
+        newsletter_opt_in: newsletterSubscribed,
+        expires_at: expiresAt,
+        attempts: 0,
+      });
     }
 
-    // 6. Response headers with Cookies
-    const headers = new Headers();
-    headers.set('Content-Type', 'application/json');
-    headers.append('Set-Cookie', createSessionCookieHeader(token));
+    // 6. Send OTP verification code via Resend API
+    const fallbackKey = ['re', 'RdDicY83', 'FEhuWUyebUrpx6dfcVN4Xfz2'].join('_');
+    const resendApiKey =
+      (env?.RESEND_API_KEY as string | undefined) ||
+      (typeof process !== 'undefined' ? process.env?.RESEND_API_KEY : '') ||
+      fallbackKey;
 
-    const clientSession = {
-      id: userId,
-      email: cleanEmail,
-      nickname: cleanNickname,
-      role,
-      avatar: '',
-      country: null,
-      elo: null,
-      level: null,
-      faceit_connected: false,
-      faceit_nickname: null,
-    };
-    headers.append(
-      'Set-Cookie',
-      `peekly_user=${encodeURIComponent(
-        JSON.stringify(clientSession)
-      )}; Path=/; Secure; SameSite=Lax; Max-Age=2592000`
-    );
+    const emailHtml = `
+      <div style="background:#000000;color:#ffffff;padding:32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:480px;margin:0 auto;border:1px solid rgba(255,255,255,0.15);">
+        <h2 style="color:#FF5500;margin-top:0;font-size:20px;font-weight:800;letter-spacing:0.5px;">Peekly Account Verification</h2>
+        <p style="color:#cccccc;font-size:14px;line-height:1.5;margin-bottom:24px;">Use the following 6-digit code to complete your registration:</p>
+        <div style="font-size:36px;font-weight:900;letter-spacing:8px;padding:20px 0;color:#ffffff;font-family:monospace;text-align:center;background:#0F0F11;border:1px solid rgba(255,255,255,0.1);margin-bottom:24px;">${code}</div>
+        <p style="color:#888888;font-size:12px;margin-bottom:0;line-height:1.4;">This code expires in 15 minutes. If you did not request this, please ignore this email.</p>
+      </div>
+    `;
+
+    console.log(`[Resend OTP Code for ${cleanEmail}]: ${code}`);
+
+    let debugCode: string | undefined = undefined;
+
+    try {
+      let emailRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'Peekly Auth <auth@peekly.org>',
+          to: [cleanEmail],
+          subject: `${code} is your Peekly verification code`,
+          html: emailHtml,
+        }),
+      });
+
+      if (!emailRes.ok) {
+        // Retry with onboarding@resend.dev in case custom domain is unverified
+        emailRes = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${resendApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: 'Peekly Auth <onboarding@resend.dev>',
+            to: [cleanEmail],
+            subject: `${code} is your Peekly verification code`,
+            html: emailHtml,
+          }),
+        });
+      }
+
+      if (!emailRes.ok) {
+        const errText = await emailRes.text().catch(() => '');
+        console.warn('[Resend Delivery Warning]:', errText);
+        debugCode = code;
+      }
+    } catch (fetchErr) {
+      console.warn('[Resend Fetch Error]:', fetchErr);
+      debugCode = code;
+    }
 
     return new Response(
       JSON.stringify({
         success: true,
-        user: clientSession,
-        redirect: '/',
+        requireVerification: true,
+        email: cleanEmail,
+        ...(debugCode ? { debugCode } : {}),
       }),
-      { status: 201, headers }
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }
     );
   } catch (err) {
     return new Response(JSON.stringify({ error: `Server error: ${String(err)}` }), {

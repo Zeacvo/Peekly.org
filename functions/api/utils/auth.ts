@@ -37,6 +37,17 @@ export interface DbVerificationCode {
   created_at: number;
 }
 
+export interface DbEmailVerification {
+  email: string;
+  code: string;
+  username: string;
+  password_hash: string;
+  salt?: string;
+  newsletter_opt_in: number;
+  expires_at: number;
+  attempts: number;
+}
+
 export interface D1Database {
   exec: (sql: string) => Promise<unknown>;
   prepare: (sql: string) => {
@@ -52,6 +63,7 @@ export interface D1Database {
 export const memoryAuthUsers = new Map<string, DbUser>();
 export const memoryAuthSessions = new Map<string, DbSession>();
 export const memoryVerificationCodes = new Map<string, DbVerificationCode>();
+export const memoryEmailVerifications = new Map<string, DbEmailVerification>();
 
 export const isValidEmail = (email: string): boolean =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
@@ -131,10 +143,25 @@ export async function ensureAuthSchema(db?: D1Database): Promise<void> {
         created_at INTEGER NOT NULL
       );
 
+      CREATE TABLE IF NOT EXISTS email_verifications (
+        email TEXT PRIMARY KEY,
+        code TEXT NOT NULL,
+        username TEXT NOT NULL,
+        password_hash TEXT NOT NULL,
+        salt TEXT,
+        newsletter_opt_in INTEGER DEFAULT 1,
+        expires_at INTEGER NOT NULL,
+        attempts INTEGER DEFAULT 0
+      );
+
       CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
       CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token);
       CREATE INDEX IF NOT EXISTS idx_verification_email ON verification_codes(email);
+      CREATE INDEX IF NOT EXISTS idx_email_verifications_email ON email_verifications(email);
     `);
+    try {
+      await db.exec('ALTER TABLE email_verifications ADD COLUMN salt TEXT;');
+    } catch {}
     try {
       await db.exec('ALTER TABLE users ADD COLUMN newsletter_subscribed INTEGER DEFAULT 1;');
     } catch {}

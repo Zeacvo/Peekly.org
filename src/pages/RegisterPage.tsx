@@ -14,6 +14,12 @@ interface RegisterPageProps {
 }
 
 export const RegisterPage: React.FC<RegisterPageProps> = ({ onGoHome, onNavigateLogin }) => {
+  const [step, setStep] = useState<'form' | 'verify'>('form');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [resendCountdown, setResendCountdown] = useState(60);
+  const [canResend, setCanResend] = useState(false);
+  const [debugNotice, setDebugNotice] = useState<string | null>(null);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -123,6 +129,20 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onGoHome, onNavigate
     };
   }, []);
 
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    if (step === 'verify' && resendCountdown > 0) {
+      timer = setTimeout(() => {
+        setResendCountdown((c) => c - 1);
+      }, 1000);
+    } else if (resendCountdown === 0) {
+      setCanResend(true);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [step, resendCountdown]);
+
   const handleGoogleSignIn = (e?: React.MouseEvent) => {
     e?.preventDefault();
     e?.stopPropagation();
@@ -229,6 +249,18 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onGoHome, onNavigate
         return;
       }
 
+      if (data?.requireVerification) {
+        setStep('verify');
+        setResendCountdown(60);
+        setCanResend(false);
+        setError(null);
+        if (data?.debugCode) {
+          console.log(`[Peekly Dev OTP Code]: ${data.debugCode}`);
+        }
+        setIsLoading(false);
+        return;
+      }
+
       const sessionData = data.user;
       try {
         localStorage.setItem('peekly_auth', JSON.stringify(sessionData));
@@ -253,6 +285,95 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onGoHome, onNavigate
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleVerifySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanCode = verificationCode.trim();
+    if (cleanCode.length !== 6) {
+      setError('Enter the 6-digit verification code.');
+      return;
+    }
+
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const res = await fetch('/api/auth/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          code: cleanCode,
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        setError(data?.error || 'Invalid or expired verification code.');
+        setIsLoading(false);
+        return;
+      }
+
+      const sessionData = data.user;
+      try {
+        localStorage.setItem('peekly_auth', JSON.stringify(sessionData));
+        localStorage.setItem('peekly_user', JSON.stringify(sessionData));
+        window.dispatchEvent(new Event('storage'));
+      } catch {}
+
+      if (onGoHome) {
+        onGoHome();
+      } else {
+        window.location.href = data?.redirect || '/';
+      }
+    } catch (err) {
+      setError(`Connection error: ${String(err)}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (!canResend || isLoading) return;
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nickname: nickname.trim(),
+          email: email.trim().toLowerCase(),
+          password,
+          turnstileToken: turnstileToken || 'mock-turnstile-token',
+          newsletterOptIn,
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        setError(data?.error || 'Failed to resend code.');
+      } else {
+        setResendCountdown(60);
+        setCanResend(false);
+        setDebugNotice('A new verification code has been dispatched to your email.');
+      }
+    } catch (err) {
+      setError(`Failed to resend code: ${String(err)}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleBackToEdit = () => {
+    setStep('form');
+    setError(null);
+    setVerificationCode('');
+    setDebugNotice(null);
   };
 
   const navigateToLogin = (e?: React.MouseEvent) => {
@@ -301,7 +422,83 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onGoHome, onNavigate
           </a>
         </div>
 
-        {/* Title & Subtitle */}
+        {step === 'verify' ? (
+          <div className="w-full flex flex-col">
+            <h1 className="text-2xl font-black text-white text-center font-sans tracking-tight mb-1">
+              Verify Your Email
+            </h1>
+            <p className="text-xs text-neutral-400 text-center mb-6 font-mono leading-relaxed">
+              We sent a 6-digit code to{' '}
+              <span className="text-white font-semibold">{email.trim().toLowerCase()}</span>
+            </p>
+
+            {error && (
+              <div className="w-full mb-4 p-2.5 bg-red-950/80 border border-[#FF1744] text-[#FF1744] text-xs font-mono text-left rounded-none flex items-start gap-2">
+                <ExclamationIcon className="w-4 h-4 shrink-0 text-[#FF1744] mt-0.5" />
+                <span className="leading-snug">{error}</span>
+              </div>
+            )}
+
+            {debugNotice && (
+              <div className="w-full mb-4 p-2.5 bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-mono text-center rounded-none">
+                {debugNotice}
+              </div>
+            )}
+
+            <form onSubmit={handleVerifySubmit} noValidate className="w-full flex flex-col gap-4">
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                value={verificationCode}
+                onChange={(e) => {
+                  setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6));
+                  if (error) setError(null);
+                }}
+                autoFocus
+                placeholder="000000"
+                className="w-full h-14 bg-[#0F0F11] border border-white/20 focus:border-white text-white text-2xl font-mono tracking-[8px] text-center outline-none rounded-none transition-colors"
+              />
+
+              <button
+                type="submit"
+                disabled={isLoading || verificationCode.trim().length !== 6}
+                className={`w-full h-11 rounded-none font-mono font-bold text-xs uppercase tracking-wider transition ${
+                  isLoading || verificationCode.trim().length !== 6
+                    ? 'opacity-40 cursor-not-allowed bg-white/20 text-neutral-400 border-none shadow-none'
+                    : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
+                }`}
+              >
+                {isLoading ? 'VERIFYING...' : 'VERIFY & CONTINUE'}
+              </button>
+
+              <div className="flex items-center justify-between text-xs font-mono mt-2 text-neutral-400">
+                <button
+                  type="button"
+                  onClick={handleResendCode}
+                  disabled={!canResend || isLoading}
+                  className={`transition ${
+                    canResend
+                      ? 'text-white hover:text-[#FF5500] cursor-pointer underline'
+                      : 'text-neutral-500 cursor-not-allowed'
+                  }`}
+                >
+                  {canResend ? 'Resend code' : `Resend code in ${resendCountdown}s`}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleBackToEdit}
+                  className="text-neutral-400 hover:text-white transition cursor-pointer underline"
+                >
+                  Back to edit details
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : (
+          <>
+            {/* Title & Subtitle */}
         <h1 className="text-2xl font-black text-white text-center font-sans tracking-tight mb-1">
           Create Your Peekly Account
         </h1>
@@ -615,6 +812,8 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onGoHome, onNavigate
             </p>
           </div>
         </form>
+        </>
+        )}
       </div>
     </div>
   );
