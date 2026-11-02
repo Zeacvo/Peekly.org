@@ -48,15 +48,16 @@ export interface DbEmailVerification {
   attempts: number;
 }
 
+export interface D1PreparedStatement {
+  bind: (...args: unknown[]) => D1PreparedStatement;
+  first: <T = unknown>() => Promise<T | null>;
+  all: <T = unknown>() => Promise<{ results?: T[] }>;
+  run: () => Promise<{ success: boolean }>;
+}
+
 export interface D1Database {
   exec: (sql: string) => Promise<unknown>;
-  prepare: (sql: string) => {
-    bind: (...args: unknown[]) => {
-      first: <T = unknown>() => Promise<T | null>;
-      all: <T = unknown>() => Promise<{ results?: T[] }>;
-      run: () => Promise<{ success: boolean }>;
-    };
-  };
+  prepare: (sql: string) => D1PreparedStatement;
 }
 
 // In-memory fallback stores for development when D1 is not attached
@@ -114,8 +115,8 @@ let schemaInitialized = false;
 export async function ensureAuthSchema(db?: D1Database): Promise<void> {
   if (!db || schemaInitialized) return;
   try {
-    await db.exec(`
-      CREATE TABLE IF NOT EXISTS users (
+    const statements = [
+      `CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
         email TEXT UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
@@ -123,17 +124,15 @@ export async function ensureAuthSchema(db?: D1Database): Promise<void> {
         nickname TEXT NOT NULL,
         role TEXT DEFAULT 'USER',
         created_at INTEGER NOT NULL
-      );
-
-      CREATE TABLE IF NOT EXISTS sessions (
+      )`,
+      `CREATE TABLE IF NOT EXISTS sessions (
         token TEXT PRIMARY KEY,
         user_id TEXT NOT NULL,
         expires_at INTEGER NOT NULL,
         created_at INTEGER NOT NULL,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-      );
-
-      CREATE TABLE IF NOT EXISTS verification_codes (
+      )`,
+      `CREATE TABLE IF NOT EXISTS verification_codes (
         email TEXT PRIMARY KEY,
         code TEXT NOT NULL,
         nickname TEXT NOT NULL,
@@ -141,9 +140,8 @@ export async function ensureAuthSchema(db?: D1Database): Promise<void> {
         salt TEXT NOT NULL,
         expires_at INTEGER NOT NULL,
         created_at INTEGER NOT NULL
-      );
-
-      CREATE TABLE IF NOT EXISTS email_verifications (
+      )`,
+      `CREATE TABLE IF NOT EXISTS email_verifications (
         email TEXT PRIMARY KEY,
         code TEXT NOT NULL,
         username TEXT NOT NULL,
@@ -152,37 +150,46 @@ export async function ensureAuthSchema(db?: D1Database): Promise<void> {
         newsletter_opt_in INTEGER DEFAULT 1,
         expires_at INTEGER NOT NULL,
         attempts INTEGER DEFAULT 0
-      );
+      )`,
+      `CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
+      `CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token)`,
+      `CREATE INDEX IF NOT EXISTS idx_verification_email ON verification_codes(email)`,
+      `CREATE INDEX IF NOT EXISTS idx_email_verifications_email ON email_verifications(email)`,
+    ];
 
-      CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-      CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token);
-      CREATE INDEX IF NOT EXISTS idx_verification_email ON verification_codes(email);
-      CREATE INDEX IF NOT EXISTS idx_email_verifications_email ON email_verifications(email);
-    `);
-    try {
-      await db.exec('ALTER TABLE email_verifications ADD COLUMN salt TEXT;');
-    } catch {}
-    try {
-      await db.exec('ALTER TABLE users ADD COLUMN newsletter_subscribed INTEGER DEFAULT 1;');
-    } catch {}
-    try {
-      await db.exec('ALTER TABLE users ADD COLUMN avatar_url TEXT;');
-    } catch {}
-    try {
-      await db.exec('ALTER TABLE users ADD COLUMN faceit_id TEXT;');
-    } catch {}
-    try {
-      await db.exec('ALTER TABLE users ADD COLUMN faceit_nickname TEXT;');
-    } catch {}
-    try {
-      await db.exec('ALTER TABLE users ADD COLUMN country TEXT;');
-    } catch {}
-    try {
-      await db.exec('ALTER TABLE users ADD COLUMN level INTEGER;');
-    } catch {}
-    try {
-      await db.exec('ALTER TABLE users ADD COLUMN elo INTEGER;');
-    } catch {}
+    for (const sql of statements) {
+      try {
+        if (typeof db.prepare === 'function') {
+          await db.prepare(sql).run();
+        } else if (typeof db.exec === 'function') {
+          await db.exec(sql);
+        }
+      } catch (stmtErr) {
+        console.warn('[D1] Statement init note:', sql.slice(0, 40), stmtErr);
+      }
+    }
+
+    const alters = [
+      'ALTER TABLE email_verifications ADD COLUMN salt TEXT',
+      'ALTER TABLE users ADD COLUMN newsletter_subscribed INTEGER DEFAULT 1',
+      'ALTER TABLE users ADD COLUMN avatar_url TEXT',
+      'ALTER TABLE users ADD COLUMN faceit_id TEXT',
+      'ALTER TABLE users ADD COLUMN faceit_nickname TEXT',
+      'ALTER TABLE users ADD COLUMN country TEXT',
+      'ALTER TABLE users ADD COLUMN level INTEGER',
+      'ALTER TABLE users ADD COLUMN elo INTEGER',
+    ];
+
+    for (const alterSql of alters) {
+      try {
+        if (typeof db.prepare === 'function') {
+          await db.prepare(alterSql).run();
+        } else if (typeof db.exec === 'function') {
+          await db.exec(alterSql);
+        }
+      } catch {}
+    }
+
     schemaInitialized = true;
   } catch (err) {
     console.warn('[D1] Schema init warning:', err);

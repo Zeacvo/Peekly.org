@@ -228,21 +228,54 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
           )
           .run();
       } catch {
-        await db
-          .prepare(
-            `INSERT OR REPLACE INTO email_verifications 
-             (email, code, username, password_hash, newsletter_opt_in, expires_at, attempts) 
-             VALUES (?, ?, ?, ?, ?, ?, 0)`
-          )
-          .bind(
-            cleanEmail,
-            code,
-            cleanNickname,
-            combinedHash,
-            newsletterSubscribed,
-            expiresAt
-          )
-          .run();
+        try {
+          await db
+            .prepare(
+              `CREATE TABLE IF NOT EXISTS email_verifications (
+                email TEXT PRIMARY KEY,
+                code TEXT NOT NULL,
+                username TEXT NOT NULL,
+                password_hash TEXT NOT NULL,
+                salt TEXT,
+                newsletter_opt_in INTEGER DEFAULT 1,
+                expires_at INTEGER NOT NULL,
+                attempts INTEGER DEFAULT 0
+              )`
+            )
+            .run();
+          await db
+            .prepare(
+              `INSERT OR REPLACE INTO email_verifications 
+               (email, code, username, password_hash, salt, newsletter_opt_in, expires_at, attempts) 
+               VALUES (?, ?, ?, ?, ?, ?, ?, 0)`
+            )
+            .bind(
+              cleanEmail,
+              code,
+              cleanNickname,
+              combinedHash,
+              salt,
+              newsletterSubscribed,
+              expiresAt
+            )
+            .run();
+        } catch {
+          await db
+            .prepare(
+              `INSERT OR REPLACE INTO email_verifications 
+               (email, code, username, password_hash, newsletter_opt_in, expires_at, attempts) 
+               VALUES (?, ?, ?, ?, ?, ?, 0)`
+            )
+            .bind(
+              cleanEmail,
+              code,
+              cleanNickname,
+              combinedHash,
+              newsletterSubscribed,
+              expiresAt
+            )
+            .run();
+        }
       }
     } else {
       memoryEmailVerifications.set(cleanEmail, {
