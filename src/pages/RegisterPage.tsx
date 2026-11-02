@@ -19,6 +19,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onGoHome, onNavigate
   const [resendCountdown, setResendCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const [debugNotice, setDebugNotice] = useState<string | null>(null);
+  const [debugCode, setDebugCode] = useState<string | null>(null);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -255,7 +256,8 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onGoHome, onNavigate
         setCanResend(false);
         setError(null);
         if (data?.debugCode) {
-          console.log(`[Peekly Dev OTP Code]: ${data.debugCode}`);
+          setDebugCode(data.debugCode);
+          console.warn('[PEEKLY TEST OTP CODE]:', data.debugCode);
         }
         setIsLoading(false);
         return;
@@ -361,6 +363,10 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onGoHome, onNavigate
         setResendCountdown(60);
         setCanResend(false);
         setDebugNotice('A new verification code has been dispatched to your email.');
+        if (data?.debugCode) {
+          setDebugCode(data.debugCode);
+          console.warn('[PEEKLY TEST OTP CODE]:', data.debugCode);
+        }
       }
     } catch (err) {
       setError(`Failed to resend code: ${String(err)}`);
@@ -374,6 +380,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onGoHome, onNavigate
     setError(null);
     setVerificationCode('');
     setDebugNotice(null);
+    setDebugCode(null);
   };
 
   const navigateToLogin = (e?: React.MouseEvent) => {
@@ -460,6 +467,22 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onGoHome, onNavigate
                 placeholder="000000"
                 className="w-full h-14 bg-[#0F0F11] border border-white/20 focus:border-white text-white text-2xl font-mono tracking-[8px] text-center outline-none rounded-none transition-colors"
               />
+
+              {debugCode && (
+                <p className="text-[11px] text-neutral-500 font-mono -mt-1 text-center">
+                  Test mode code:{' '}
+                  <span
+                    className="text-white font-bold select-all cursor-pointer underline hover:text-[#FF5500] transition-colors"
+                    onClick={() => {
+                      setVerificationCode(debugCode);
+                      if (error) setError(null);
+                    }}
+                    title="Click to paste code"
+                  >
+                    {debugCode}
+                  </span>
+                </p>
+              )}
 
               <button
                 type="submit"

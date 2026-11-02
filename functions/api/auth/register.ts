@@ -308,47 +308,71 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
 
     console.log(`[Resend OTP Code for ${cleanEmail}]: ${code}`);
 
+    let emailSent = false;
     let debugCode: string | undefined = undefined;
 
-    try {
-      let emailRes = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${resendApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'Peekly Auth <auth@peekly.org>',
-          to: [cleanEmail],
-          subject: `${code} is your Peekly verification code`,
-          html: emailHtml,
-        }),
-      });
-
-      if (!emailRes.ok) {
-        // Retry with onboarding@resend.dev in case custom domain is unverified
-        emailRes = await fetch('https://api.resend.com/emails', {
+    if (resendApiKey) {
+      try {
+        let resendRes = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${resendApiKey}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'Peekly Auth <onboarding@resend.dev>',
+            from: 'Peekly Auth <auth@peekly.org>',
             to: [cleanEmail],
             subject: `${code} is your Peekly verification code`,
             html: emailHtml,
+            text: `Your Peekly verification code is: ${code}`,
           }),
         });
-      }
 
-      if (!emailRes.ok) {
-        const errText = await emailRes.text().catch(() => '');
-        console.warn('[Resend Delivery Warning]:', errText);
-        debugCode = code;
+        let resendJson: unknown = null;
+        try {
+          resendJson = await resendRes.json();
+        } catch {
+          resendJson = await resendRes.text();
+        }
+        console.log('[Resend Response]:', resendRes.status, resendJson);
+
+        if (resendRes.ok) {
+          emailSent = true;
+        } else {
+          // Retry with onboarding@resend.dev in case custom domain is unverified
+          resendRes = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${resendApiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: 'Peekly <onboarding@resend.dev>',
+              to: [cleanEmail],
+              subject: `${code} is your Peekly verification code`,
+              html: emailHtml,
+              text: `Your Peekly verification code is: ${code}`,
+            }),
+          });
+
+          try {
+            resendJson = await resendRes.json();
+          } catch {
+            resendJson = await resendRes.text();
+          }
+          console.log('[Resend Fallback Response]:', resendRes.status, resendJson);
+
+          if (resendRes.ok) {
+            emailSent = true;
+          }
+        }
+      } catch (e) {
+        console.error('[Resend Exception]:', e);
       }
-    } catch (fetchErr) {
-      console.warn('[Resend Fetch Error]:', fetchErr);
+    }
+
+    // Always provide debugCode if email delivery did not succeed or in dev/test fallback mode
+    if (!emailSent) {
       debugCode = code;
     }
 
