@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, User, ShieldAlert } from 'lucide-react';
 import { LanguageIcon } from './LanguageIcon';
 import { PeeklyLogo } from './PeeklyLogo';
 import { FaceitLogo } from './AuthModal';
@@ -12,6 +12,7 @@ interface HeaderProps {
   onLanguageChange: (lang: Language) => void;
   onGoHome?: () => void;
   onOpenChangelog?: () => void;
+  onOpenProfile?: () => void;
   onOpenAdmin?: () => void;
   onOpenAuthModal?: () => void;
 }
@@ -73,6 +74,7 @@ export const Header: React.FC<HeaderProps> = ({
   onLanguageChange,
   onGoHome,
   onOpenChangelog,
+  onOpenProfile,
   onOpenAdmin,
   onOpenAuthModal,
 }) => {
@@ -127,14 +129,16 @@ export const Header: React.FC<HeaderProps> = ({
       document.cookie = 'peekly_user=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0;';
     } catch {}
     setUserSession(null);
-    window.location.href = '/';
+    if (onGoHome) onGoHome();
+    else window.location.href = '/';
   };
 
   const isCeo =
     userSession?.nickname?.toLowerCase() === 'zeacvo' ||
     userSession?.email?.toLowerCase() === 'zeacvo@icloud.com' ||
-    userSession?.role === 'ceo' ||
-    userSession?.role === 'admin';
+    userSession?.role?.toLowerCase() === 'ceo' ||
+    userSession?.role?.toLowerCase() === 'admin' ||
+    userSession?.role?.toLowerCase() === 'owner';
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -376,28 +380,65 @@ export const Header: React.FC<HeaderProps> = ({
                   ) : (
                     <a
                       href="/api/auth/faceit/login"
-                      className="w-full h-9 bg-[#FF5500] hover:bg-[#e04b00] text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 rounded-none transition cursor-pointer"
+                      className="w-full h-10 rounded-none btn-header-install font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer no-underline shadow-md"
                     >
                       <FaceitLogo className="w-3.5 h-3.5" />
                       <span>Link FACEIT Account</span>
                     </a>
                   )}
 
-                  {/* Admin Dashboard (if CEO / Admin) */}
-                  {isCeo && (
+                  {/* Navigation Links */}
+                  <div className="flex flex-col gap-1 pt-1">
+                    {/* My Profile */}
                     <button
                       type="button"
                       onClick={() => {
                         setUserDropdownOpen(false);
-                        if (onOpenAdmin) onOpenAdmin();
-                        else window.location.href = '/admin';
+                        if (onOpenProfile) onOpenProfile();
+                        else {
+                          try {
+                            history.pushState(null, '', '/profile');
+                            window.dispatchEvent(new PopStateEvent('popstate'));
+                          } catch {
+                            window.location.href = '/profile';
+                          }
+                        }
                       }}
-                      className="w-full text-left py-1 text-xs font-mono text-neutral-300 hover:text-[#FF5500] flex items-center justify-between transition-colors cursor-pointer bg-transparent border-none p-0"
+                      className="w-full text-left py-2 px-2.5 text-xs font-mono text-neutral-300 hover:text-white hover:bg-white/[0.06] border border-transparent hover:border-white/15 flex items-center justify-between transition-colors cursor-pointer"
                     >
-                      <span>Admin Dashboard</span>
-                      <span>↗</span>
+                      <span className="flex items-center gap-2 font-bold uppercase tracking-wider">
+                        <User className="w-3.5 h-3.5 text-neutral-400" />
+                        <span>My Profile</span>
+                      </span>
+                      <span className="text-neutral-500 font-mono text-[10px]">/profile</span>
                     </button>
-                  )}
+
+                    {/* Admin Console (if CEO / Admin / Owner) */}
+                    {isCeo && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUserDropdownOpen(false);
+                          if (onOpenAdmin) onOpenAdmin();
+                          else {
+                            try {
+                              history.pushState(null, '', '/admin');
+                              window.dispatchEvent(new PopStateEvent('popstate'));
+                            } catch {
+                              window.location.href = '/admin';
+                            }
+                          }
+                        }}
+                        className="w-full text-left py-2 px-2.5 text-xs font-mono text-[#FF5500] hover:text-[#ff7733] hover:bg-[#FF5500]/[0.08] border border-[#FF5500]/20 hover:border-[#FF5500]/40 flex items-center justify-between transition-colors cursor-pointer"
+                      >
+                        <span className="flex items-center gap-2 font-bold uppercase tracking-wider">
+                          <ShieldAlert className="w-3.5 h-3.5 text-[#FF5500]" />
+                          <span>Admin Console</span>
+                        </span>
+                        <span className="text-[#FF5500]/70 font-mono text-[10px]">/admin ↗</span>
+                      </button>
+                    )}
+                  </div>
 
                   {/* Divider */}
                   <div className="border-t border-white/10" />

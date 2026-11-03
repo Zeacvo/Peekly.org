@@ -704,11 +704,24 @@ export async function onRequest(context: EventContext): Promise<Response> {
     const isCeo =
       nickname.toLowerCase() === 'zeacvo' || userEmail.toLowerCase() === 'zeacvo@icloud.com';
 
-    const targetUrl = isCeo
-      ? new URL('/admin', context.request.url).toString()
-      : new URL('/', context.request.url).toString();
+    // Redirect to profile page on successful authentication
+    const targetUrl = new URL('/profile', context.request.url).toString();
 
-    const sessionData = { nickname, email: userEmail, guid: userRecord.guid };
+    const sessionData = {
+      id: userRecord.guid,
+      guid: userRecord.guid,
+      nickname,
+      email: userEmail,
+      avatar: userRecord.avatar,
+      country: userRecord.country,
+      elo: userRecord.elo,
+      level: userRecord.level,
+      faceit_connected: true,
+      faceit_nickname: nickname,
+      role: isCeo ? 'OWNER' : 'USER',
+      created_at: userRecord.created_at,
+      plan: 'FREE',
+    };
     const cookieValue = encodeURIComponent(JSON.stringify(sessionData));
 
     const headers = new Headers();
@@ -721,6 +734,39 @@ export async function onRequest(context: EventContext): Promise<Response> {
       'Set-Cookie',
       `peekly_user=${cookieValue}; Path=/; Secure; SameSite=Lax; Max-Age=2592000`
     );
+
+    // Also establish Cloudflare D1 session if available
+    if (context.env?.DB) {
+      try {
+        const d1 = context.env.DB as {
+          prepare?: (sql: string) => {
+            bind: (...args: unknown[]) => {
+              first: <T = unknown>() => Promise<T | null>;
+              run: () => Promise<unknown>;
+            };
+          };
+        };
+        if (d1?.prepare) {
+          const sessionToken = `ses_${crypto.randomUUID().replace(/-/g, '')}`;
+          const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000;
+          const userRow = await d1
+            .prepare('SELECT id FROM users WHERE email = ? OR faceit_id = ?')
+            .bind(userEmail.toLowerCase(), userRecord.guid)
+            .first<{ id: string }>();
+          const userId = userRow?.id || userRecord.guid;
+          await d1
+            .prepare('INSERT INTO sessions (token, user_id, expires_at, created_at) VALUES (?, ?, ?, ?)')
+            .bind(sessionToken, userId, expiresAt, Date.now())
+            .run();
+          headers.append(
+            'Set-Cookie',
+            `peekly_session=${sessionToken}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000`
+          );
+        }
+      } catch (sesErr) {
+        console.warn('[Session] D1 session creation warning:', sesErr);
+      }
+    }
 
     return new Response(null, {
       status: 302,

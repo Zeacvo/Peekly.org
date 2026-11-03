@@ -689,28 +689,39 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
 
                         {/* Col 3: CS2 ELO & Level Badge */}
                         <td className="py-3.5 px-5">
-                          <div className="flex items-center gap-2.5">
-                            <div
-                              className="px-1.5 py-0.5 bg-white/10 border border-white/20 font-mono font-bold text-xs text-white"
-                              title={`FACEIT Level ${player.level}`}
-                            >
-                              LVL {player.level}
+                          {player.is_faceit_linked && (player.elo || 0) > 0 ? (
+                            <div className="flex items-center gap-2.5">
+                              <div
+                                className="px-1.5 py-0.5 bg-white/10 border border-white/20 font-mono font-bold text-xs text-white"
+                                title={`FACEIT Level ${player.level}`}
+                              >
+                                LVL {player.level}
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-mono text-sm font-bold text-white">
+                                  {player.elo.toLocaleString()}
+                                </span>
+                                <span className="text-[10px] font-mono text-neutral-500">CS2 Matchmaking</span>
+                              </div>
                             </div>
-                            <div className="flex flex-col">
-                              <span className="font-mono text-sm font-bold text-white">
-                                {player.elo.toLocaleString()}
-                              </span>
-                              <span className="text-[10px] font-mono text-neutral-500">CS2 Matchmaking</span>
+                          ) : (
+                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-neutral-900 border border-neutral-700 text-neutral-400 font-mono text-[11px] font-bold tracking-wider">
+                              <span className="w-1.5 h-1.5 rounded-full bg-neutral-500 animate-pulse" />
+                              <span>PENDING / NOT LINKED</span>
                             </div>
-                          </div>
+                          )}
                         </td>
 
                         {/* Col 4: Country (Flag image + uppercase code, no duplicate text) */}
                         <td className="py-3.5 px-5">
-                          <div className="flex items-center gap-2 font-mono text-xs">
-                            <CountryFlag countryCode={player.country} />
-                            <span className="font-bold text-white uppercase">{player.country}</span>
-                          </div>
+                          {player.country && player.country !== '—' ? (
+                            <div className="flex items-center gap-2 font-mono text-xs">
+                              <CountryFlag countryCode={player.country} />
+                              <span className="font-bold text-white uppercase">{player.country}</span>
+                            </div>
+                          ) : (
+                            <span className="text-neutral-500 font-mono text-xs">—</span>
+                          )}
                         </td>
 
                         {/* Col 5: Registration & Activity */}
