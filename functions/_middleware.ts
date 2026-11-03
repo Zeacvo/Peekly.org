@@ -16,8 +16,8 @@ export const onRequest = async (context: {
 }): Promise<Response> => {
   const url = new URL(context.request.url);
 
-  // Do not rewrite API routes
-  if (url.pathname.startsWith('/api/')) {
+  // Do not rewrite API routes or static assets
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/assets/')) {
     return context.next();
   }
 

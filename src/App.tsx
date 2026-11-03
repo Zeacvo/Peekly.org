@@ -4,6 +4,7 @@ import { Hero } from './components/Hero';
 import { Features } from './components/Features';
 import { Footer } from './components/Footer';
 import { AuthModal } from './components/AuthModal';
+import { ProfilePage } from './pages/ProfilePage';
 import { getSafeInitialLanguage, saveLanguagePreference } from './translations';
 import type { Language } from './translations';
 
@@ -36,9 +37,6 @@ const LoginPage = lazy(() =>
 );
 const RegisterPage = lazy(() =>
   import('./pages/RegisterPage').then((m) => ({ default: m.RegisterPage }))
-);
-const ProfilePage = lazy(() =>
-  import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage }))
 );
 
 const checkRoutes = () => {
