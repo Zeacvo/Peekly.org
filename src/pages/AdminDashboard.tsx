@@ -6,6 +6,7 @@ import { PeeklyLogo } from '../components/PeeklyLogo';
 interface AdminDashboardProps {
   currentLang?: Language;
   onGoHome: () => void;
+  onNavigateProfile?: (guid: string) => void;
 }
 
 const CountryFlag: React.FC<{ countryCode: string; className?: string }> = ({
@@ -123,7 +124,7 @@ function getInitialAuth(): { isAuthed: boolean; nickname: string; email: string 
   return { isAuthed: false, nickname: '', email: '' };
 }
 
-export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavigateProfile }) => {
   const [initialAuth] = useState(getInitialAuth);
   const [isAuthorized, setIsAuthorized] = useState<boolean>(initialAuth.isAuthed);
   const [currentUser, setCurrentUser] = useState<{ nickname: string; email: string }>({
@@ -135,6 +136,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
   const [users, setUsers] = useState<PlayerUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Checkbox selection and deletion states
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    ids: string[];
+    isBulk: boolean;
+    targetNickname?: string;
+  }>({ isOpen: false, ids: [], isBulk: false });
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [actionSuccessMsg, setActionSuccessMsg] = useState<string | null>(null);
 
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
@@ -292,6 +304,88 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  };
+
+  // User deletion & selection helpers
+  const isSelectable = (player: PlayerUser) => {
+    const nick = player.nickname.toLowerCase();
+    const mail = player.email.toLowerCase();
+    return nick !== 'zeacvo' && mail !== 'zeacvo@icloud.com' && !nick.includes('zeacvo');
+  };
+
+  const selectableFiltered = useMemo(
+    () => filteredUsers.filter(isSelectable),
+    [filteredUsers]
+  );
+
+  const isAllSelected =
+    selectableFiltered.length > 0 &&
+    selectableFiltered.every((p) => selectedIds.includes(p.guid));
+
+  const isSomeSelected =
+    selectableFiltered.some((p) => selectedIds.includes(p.guid)) && !isAllSelected;
+
+  const handleToggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(selectableFiltered.map((p) => p.guid));
+    }
+  };
+
+  const handleToggleRow = (guid: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(guid) ? prev.filter((id) => id !== guid) : [...prev, guid]
+    );
+  };
+
+  const handleRequestSingleDelete = (player: PlayerUser) => {
+    if (!isSelectable(player)) return;
+    setDeleteModal({
+      isOpen: true,
+      ids: [player.guid],
+      isBulk: false,
+      targetNickname: player.nickname,
+    });
+  };
+
+  const handleRequestBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+    setDeleteModal({
+      isOpen: true,
+      ids: selectedIds,
+      isBulk: true,
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (deleteModal.ids.length === 0) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch('/api/admin/users/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-User': currentUser.nickname || 'Zeacvo',
+        },
+        body: JSON.stringify({ userIds: deleteModal.ids }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert(data.error || 'Failed to delete user(s)');
+      } else {
+        const deletedCount = data.deletedCount || deleteModal.ids.length;
+        setUsers((prev) => prev.filter((u) => !deleteModal.ids.includes(u.guid)));
+        setSelectedIds((prev) => prev.filter((id) => !deleteModal.ids.includes(id)));
+        setDeleteModal({ isOpen: false, ids: [], isBulk: false });
+        setActionSuccessMsg(`Успешно удалено: ${deletedCount} пользователей.`);
+        setTimeout(() => setActionSuccessMsg(null), 4000);
+      }
+    } catch (err) {
+      alert(`Ошибка удаления: ${String(err)}`);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -567,24 +661,37 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-white/10 bg-black text-xs font-mono text-neutral-400 uppercase tracking-wider">
+                  <th className="py-3 px-4 w-10 text-center">
+                    <input
+                      type="checkbox"
+                      checked={isAllSelected}
+                      ref={(el) => {
+                        if (el) el.indeterminate = isSomeSelected;
+                      }}
+                      onChange={handleToggleSelectAll}
+                      className="w-4 h-4 bg-black border border-white/30 checked:bg-[#FF5500] checked:border-[#FF5500] rounded-none cursor-pointer accent-[#FF5500]"
+                      title="Выбрать всех"
+                    />
+                  </th>
                   <th className="py-3 px-5">PLAYER</th>
                   <th className="py-3 px-5">EMAIL</th>
                   <th className="py-3 px-5">CS2 ELO & LEVEL</th>
                   <th className="py-3 px-5">COUNTRY</th>
                   <th className="py-3 px-5">REGISTRATION & ACTIVITY</th>
                   <th className="py-3 px-5 text-right">PLAN</th>
+                  <th className="py-3 px-5 text-right">ACTIONS</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-900 text-sm">
                 {isLoading && users.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-neutral-500 font-mono text-xs">
+                    <td colSpan={8} className="py-12 text-center text-neutral-500 font-mono text-xs">
                       Loading player records from database...
                     </td>
                   </tr>
                 ) : filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-neutral-500 font-mono text-xs">
+                    <td colSpan={8} className="py-12 text-center text-neutral-500 font-mono text-xs">
                       No players found matching current query or filters.
                     </td>
                   </tr>
@@ -593,12 +700,29 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
                     const isCeo =
                       player.nickname.toLowerCase() === 'zeacvo' ||
                       player.email.toLowerCase() === 'zeacvo@icloud.com';
+                    const canSelect = isSelectable(player);
                     return (
                       <tr
                         key={player.guid}
-                        className="hover:bg-white/[0.03] transition-colors group"
+                        className={`hover:bg-white/[0.03] transition-colors group ${
+                          selectedIds.includes(player.guid) ? 'bg-[#FF5500]/[0.04]' : ''
+                        }`}
                       >
-                        {/* Col 1: Player (Avatar + Nickname + CEO Badge + GUID) */}
+                        {/* Col 0: Checkbox */}
+                        <td className="py-3.5 px-4 w-10 text-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(player.guid)}
+                            disabled={!canSelect}
+                            onChange={() => handleToggleRow(player.guid)}
+                            className={`w-4 h-4 bg-black border border-white/30 checked:bg-[#FF5500] checked:border-[#FF5500] rounded-none accent-[#FF5500] ${
+                              !canSelect ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'
+                            }`}
+                            title={!canSelect ? 'Владелец защищён от удаления' : 'Выбрать пользователя'}
+                          />
+                        </td>
+
+                        {/* Col 1: Player (Avatar + Clickable Nickname to Profile + CEO Badge + GUID) */}
                         <td className="py-3.5 px-5">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-none bg-[#141414] border border-white/10 overflow-hidden shrink-0 flex items-center justify-center">
@@ -628,26 +752,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
                             <div className="flex flex-col">
                               <div className="flex items-center gap-2">
                                 <a
-                                  href={`https://www.faceit.com/en/players/${encodeURIComponent(player.nickname)}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="font-bold text-white hover:text-neutral-300 transition-colors flex items-center gap-1.5"
-                                  title="View on FACEIT"
+                                  href={`/profile?id=${encodeURIComponent(player.guid)}`}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    if (onNavigateProfile) {
+                                      onNavigateProfile(player.guid);
+                                    } else {
+                                      window.location.href = `/profile?id=${encodeURIComponent(player.guid)}`;
+                                    }
+                                  }}
+                                  className="font-bold text-white hover:text-[#FF5500] transition-colors flex items-center gap-1 group/nick cursor-pointer"
+                                  title={`Открыть профиль ${player.nickname}`}
                                 >
                                   <span>{player.nickname}</span>
-                                  <svg
-                                    width="10"
-                                    height="10"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    className="opacity-0 group-hover:opacity-100 transition-opacity"
-                                  >
-                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                                    <polyline points="15 3 21 3 21 9" />
-                                    <line x1="10" y1="14" x2="21" y2="3" />
-                                  </svg>
+                                  <span className="text-[#FF5500] text-xs opacity-0 group-hover/nick:opacity-100 transition-opacity">
+                                    ↗
+                                  </span>
                                 </a>
                                 {isCeo && (
                                   <span className="border border-white/20 text-neutral-300 text-[10px] font-mono px-1.5 py-0.5 rounded-none font-semibold uppercase tracking-wider">
@@ -712,7 +832,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
                           )}
                         </td>
 
-                        {/* Col 4: Country (Flag image + uppercase code, no duplicate text) */}
+                        {/* Col 4: Country */}
                         <td className="py-3.5 px-5">
                           {player.country && player.country !== '—' ? (
                             <div className="flex items-center gap-2 font-mono text-xs">
@@ -744,6 +864,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
                             {player.plan}
                           </span>
                         </td>
+
+                        {/* Col 7: Actions (Single Delete) */}
+                        <td className="py-3.5 px-5 text-right">
+                          {canSelect ? (
+                            <button
+                              type="button"
+                              onClick={() => handleRequestSingleDelete(player)}
+                              className="p-1.5 bg-transparent border border-white/10 hover:border-red-500/60 hover:bg-red-950/20 text-neutral-400 hover:text-red-400 transition-all cursor-pointer rounded-none inline-flex items-center justify-center"
+                              title={`Удалить ${player.nickname}`}
+                            >
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <polyline points="3 6 5 6 21 6" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                              </svg>
+                            </button>
+                          ) : (
+                            <span className="text-[10px] font-mono text-neutral-600">—</span>
+                          )}
+                        </td>
                       </tr>
                     );
                   })
@@ -769,6 +908,95 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome }) => {
             </div>
           </div>
         </section>
+
+        {/* Floating Action Bar for Bulk Deletion */}
+        {selectedIds.length > 0 && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#0A0A0E] border border-white/20 px-6 py-3.5 shadow-2xl flex items-center gap-5 sm:gap-6 animate-in fade-in slide-in-from-bottom duration-200">
+            <div className="flex items-center gap-2 font-mono text-xs">
+              <span className="w-2 h-2 rounded-full bg-[#FF5500] animate-pulse" />
+              <span className="text-neutral-400">Выбрано:</span>
+              <span className="font-bold text-white px-2 py-0.5 bg-white/10">
+                {selectedIds.length}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleRequestBulkDelete}
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-mono text-xs font-bold uppercase transition-colors cursor-pointer rounded-none flex items-center gap-2 shadow-lg"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+              <span>УДАЛИТЬ ВЫБРАННЫЕ ({selectedIds.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSelectedIds([])}
+              className="text-xs font-mono text-neutral-400 hover:text-white uppercase transition-colors cursor-pointer"
+            >
+              Снять выделение
+            </button>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {deleteModal.isOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
+            <div className="w-full max-w-md bg-[#000000] border border-red-600/50 p-6 relative">
+              <h3 className="text-sm font-mono font-bold text-red-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                <span>Подтверждение удаления</span>
+              </h3>
+
+              <p className="text-xs font-mono text-neutral-300 leading-relaxed mb-6">
+                {deleteModal.isBulk
+                  ? `Вы действительно хотите безвозвратно удалить ${deleteModal.ids.length} выбранных аккаунтов из базы Cloudflare D1? Все связанные сессии и данные будут стёрты.`
+                  : `Вы действительно хотите удалить профиль "${deleteModal.targetNickname}" из базы Cloudflare D1?`}
+              </p>
+
+              <div className="flex items-center justify-end gap-3 font-mono text-xs">
+                <button
+                  type="button"
+                  onClick={() => setDeleteModal({ isOpen: false, ids: [], isBulk: false })}
+                  disabled={isDeleting}
+                  className="px-4 py-2 border border-white/20 text-neutral-400 hover:text-white uppercase cursor-pointer rounded-none"
+                >
+                  Отмена
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDelete}
+                  disabled={isDeleting}
+                  className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold uppercase transition-colors cursor-pointer rounded-none flex items-center gap-2"
+                >
+                  {isDeleting ? (
+                    <>
+                      <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Удаление...</span>
+                    </>
+                  ) : (
+                    <span>УДАЛИТЬ</span>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Action Success Toast */}
+        {actionSuccessMsg && (
+          <div className="fixed bottom-6 right-6 z-50 bg-black/90 border border-emerald-500 text-emerald-300 px-4 py-3 font-mono text-xs shadow-2xl flex items-center gap-2">
+            <span>✓</span>
+            <span>{actionSuccessMsg}</span>
+          </div>
+        )}
       </main>
     </div>
   );

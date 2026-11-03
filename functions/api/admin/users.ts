@@ -4,7 +4,7 @@
  * Strictly restricted to nickname === 'Zeacvo' or email === 'zeacvo@icloud.com'.
  */
 
-import { getAllPlayers, computeStats, type PlayerUser, type AdminStats } from '../storage/usersDb.ts';
+import { getAllPlayers, computeStats, deletePlayersByIds, type PlayerUser, type AdminStats } from '../storage/usersDb.ts';
 
 interface EventContext {
   request: Request;
@@ -130,12 +130,59 @@ export const onRequestGet = async (context: EventContext): Promise<Response> => 
   });
 };
 
+export const onRequestDelete = async (context: EventContext): Promise<Response> => {
+  const auth = isAuthorizedCeo(context.request);
+  if (!auth.authorized) {
+    return new Response(
+      JSON.stringify({ error: 'Forbidden: Access restricted to CEO (Zeacvo).' }),
+      {
+        status: 403,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      }
+    );
+  }
+
+  try {
+    const body = (await context.request.json().catch(() => ({}))) as {
+      userIds?: string[];
+      userId?: string;
+    };
+    let ids: string[] = [];
+    if (Array.isArray(body.userIds)) ids = body.userIds.filter(Boolean);
+    else if (body.userId) ids = [body.userId];
+
+    if (ids.length === 0) {
+      return new Response(JSON.stringify({ error: 'Missing userIds' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      });
+    }
+
+    const deletedCount = await deletePlayersByIds(context.env, ids);
+    return new Response(JSON.stringify({ success: true, deletedCount }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: String(err) }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    });
+  }
+};
+
 export const onRequest = async (context: EventContext): Promise<Response> => {
   if (context.request.method === 'OPTIONS') {
     return onRequestOptions();
   }
   if (context.request.method === 'GET') {
     return onRequestGet(context);
+  }
+  if (context.request.method === 'DELETE' || context.request.method === 'POST') {
+    return onRequestDelete(context);
   }
   return new Response(JSON.stringify({ error: 'Method not allowed' }), {
     status: 405,

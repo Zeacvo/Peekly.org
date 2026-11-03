@@ -391,7 +391,7 @@ export const App: React.FC = () => {
     } catch {}
   };
 
-  const handleOpenProfile = () => {
+  const handleOpenProfile = (guid?: string) => {
     setActiveFeatureId(null);
     setIsNotFound(false);
     setIsAuthError(false);
@@ -404,7 +404,7 @@ export const App: React.FC = () => {
     setIsRegister(false);
     setIsProfile(true);
     try {
-      history.pushState(null, '', '/profile');
+      history.pushState(null, '', guid ? `/profile?id=${encodeURIComponent(guid)}` : '/profile');
     } catch {}
     try {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -434,8 +434,8 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#000000] text-white selection:bg-[#FF5500] selection:text-black font-sans antialiased relative">
-      {/* 1. Fixed Header (hidden on CEO admin dashboard, profile, login and register pages) */}
-      {!isAdmin && !isProfile && !isLogin && !isRegister && (
+      {/* 1. Fixed Header (hidden on CEO admin dashboard, login and register pages) */}
+      {!isAdmin && !isLogin && !isRegister && (
         <Header 
           currentLang={currentLang} 
           onLanguageChange={handleLanguageChange}
@@ -463,6 +463,7 @@ export const App: React.FC = () => {
             <AdminDashboard
               currentLang={currentLang}
               onGoHome={handleGoHome}
+              onNavigateProfile={handleOpenProfile}
             />
           ) : isProfile ? (
             <ProfilePage
@@ -544,8 +545,8 @@ export const App: React.FC = () => {
         </Suspense>
       </main>
 
-      {/* Footer (hidden on 404, auth error, admin dashboard, profile, login and register for clean minimalist layout) */}
-      {!isNotFound && !isAuthError && !isAdmin && !isProfile && !isLogin && !isRegister && (
+      {/* Footer (hidden on 404, auth error, admin dashboard, login and register for clean minimalist layout) */}
+      {!isNotFound && !isAuthError && !isAdmin && !isLogin && !isRegister && (
         <Footer 
           currentLang={currentLang} 
           onOpenChangelog={handleOpenChangelog}

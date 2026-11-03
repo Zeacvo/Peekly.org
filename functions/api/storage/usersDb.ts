@@ -362,3 +362,77 @@ export function computeStats(players: PlayerUser[]): AdminStats {
     active24h: active24h || (totalPlayers > 0 ? 1 : 0),
   };
 }
+
+export async function deletePlayersByIds(
+  env: Record<string, unknown> | undefined,
+  ids: string[]
+): Promise<number> {
+  const d1 = env?.DB as {
+    prepare?: (sql: string) => {
+      bind: (...args: unknown[]) => {
+        run: () => Promise<unknown>;
+      };
+    };
+  } | undefined;
+
+  let count = 0;
+  // Filter out any attempt to delete the CEO / Owner
+  const safeIds = ids.filter((id) => {
+    const val = String(id || '').trim().toLowerCase();
+    return val !== 'zeacvo' && val !== 'zeacvo@icloud.com' && !val.includes('zeacvo');
+  });
+
+  if (safeIds.length === 0) return 0;
+
+  for (const id of safeIds) {
+    // Delete from memoryUsers
+    for (const [key, user] of memoryUsers.entries()) {
+      if (
+        user.guid === id ||
+        user.email.toLowerCase() === id.toLowerCase() ||
+        user.nickname.toLowerCase() === id.toLowerCase()
+      ) {
+        memoryUsers.delete(key);
+      }
+    }
+
+    if (d1?.prepare) {
+      try {
+        await d1
+          .prepare(
+            'DELETE FROM sessions WHERE user_id = ? OR user_id IN (SELECT id FROM users WHERE id = ? OR faceit_id = ? OR email = ?)'
+          )
+          .bind(id, id, id, id)
+          .run();
+
+        await d1
+          .prepare('DELETE FROM users WHERE id = ? OR faceit_id = ? OR email = ?')
+          .bind(id, id, id)
+          .run();
+        count++;
+      } catch (err) {
+        console.warn('[D1] Error deleting user:', id, err);
+      }
+    } else {
+      count++;
+    }
+  }
+
+  return count;
+}
+
+export async function getPlayerById(
+  env: Record<string, unknown> | undefined,
+  idOrGuid: string
+): Promise<PlayerUser | null> {
+  const all = await getAllPlayers(env);
+  const target = idOrGuid.trim().toLowerCase();
+  return (
+    all.find(
+      (p) =>
+        p.guid.toLowerCase() === target ||
+        p.email.toLowerCase() === target ||
+        p.nickname.toLowerCase() === target
+    ) || null
+  );
+}
