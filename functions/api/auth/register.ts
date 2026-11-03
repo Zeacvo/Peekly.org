@@ -295,14 +295,84 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
       (env?.RESEND_API_KEY as string | undefined) ||
       (typeof process !== 'undefined' ? process.env?.RESEND_API_KEY : '');
 
-    const emailHtml = `
-      <div style="background:#000000;color:#ffffff;padding:32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:480px;margin:0 auto;border:1px solid rgba(255,255,255,0.15);">
-        <h2 style="color:#FF5500;margin-top:0;font-size:20px;font-weight:800;letter-spacing:0.5px;">Peekly Account Verification</h2>
-        <p style="color:#cccccc;font-size:14px;line-height:1.5;margin-bottom:24px;">Use the following 6-digit code to complete your registration:</p>
-        <div style="font-size:36px;font-weight:900;letter-spacing:8px;padding:20px 0;color:#ffffff;font-family:monospace;text-align:center;background:#0F0F11;border:1px solid rgba(255,255,255,0.1);margin-bottom:24px;">${code}</div>
-        <p style="color:#888888;font-size:12px;margin-bottom:0;line-height:1.4;">This code expires in 15 minutes. If you did not request this, please ignore this email.</p>
-      </div>
-    `;
+    const emailHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peekly Verification Code</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #050507; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #050507; padding: 40px 15px;">
+    <tr>
+      <td align="center">
+        <!-- Main Card -->
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 480px; background-color: #0A0A0E; border: 1px solid #1E1E24; border-radius: 4px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+          
+          <!-- Top Accent Line -->
+          <tr>
+            <td height="3" style="background-color: #FF5500;"></td>
+          </tr>
+
+          <!-- Header / Brand -->
+          <tr>
+            <td align="center" style="padding: 32px 32px 24px 32px; border-bottom: 1px solid #14141A;">
+              <table border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td align="center" style="vertical-align: middle;">
+                    <img src="https://peekly.org/icon-192.png" width="36" height="36" alt="Peekly" style="display: block; border-radius: 6px; border: 1px solid #2A2A30;" onerror="this.style.display='none'">
+                  </td>
+                  <td style="padding-left: 12px; vertical-align: middle;">
+                    <span style="font-size: 19px; font-weight: 800; letter-spacing: 3px; color: #FFFFFF; text-transform: uppercase;">PEEKLY</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Content Body -->
+          <tr>
+            <td style="padding: 32px 32px 24px 32px; text-align: center;">
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 2px; color: #FF5500; text-transform: uppercase; margin-bottom: 8px;">
+                SECURITY AUTHENTICATION
+              </div>
+              <h1 style="margin: 0 0 12px 0; font-size: 22px; font-weight: 700; color: #FFFFFF; letter-spacing: -0.5px;">
+                Verify Your Account
+              </h1>
+              <p style="margin: 0 0 28px 0; font-size: 13px; line-height: 20px; color: #8F909A;">
+                Enter the one-time verification code below to complete your registration and activate tactical CS2 analytics.
+              </p>
+
+              <!-- Code Box -->
+              <div style="background-color: #040406; border: 1px solid #26262E; border-radius: 2px; padding: 22px 10px; margin: 0 auto 24px auto;">
+                <span style="font-family: 'Courier New', Courier, monospace; font-size: 38px; font-weight: 800; letter-spacing: 14px; color: #FFFFFF; padding-left: 14px; display: inline-block;">
+                  ${code}
+                </span>
+              </div>
+
+              <!-- Expiry Note -->
+              <p style="margin: 0; font-size: 11px; color: #5F6068; line-height: 16px;">
+                This code expires in <strong style="color: #8F909A;">15 minutes</strong>.<br>
+                If you did not request this verification, you can safely ignore this email.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 20px 32px; background-color: #070709; border-top: 1px solid #14141A; text-align: center;">
+              <p style="margin: 0; font-size: 10px; letter-spacing: 1px; color: #404149; text-transform: uppercase;">
+                PEEKLY &bull; TACTICAL FACEIT CS2 INTELLIGENCE
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
 
     console.log(`[Resend OTP Code for ${cleanEmail}]: ${code}`);
 
