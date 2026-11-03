@@ -566,7 +566,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         if (e.target === e.currentTarget) handleClose();
       }}
     >
-      <div className="w-full max-w-[420px] max-h-[92vh] overflow-y-auto bg-black border border-white/15 p-7 sm:p-8 relative shadow-2xl rounded-none">
+      <div
+        className={`w-full max-w-[420px] max-h-[92vh] overflow-y-auto bg-black ${
+          view === 'register' && regStep === 'verify'
+            ? 'border border-[#1a1a1f] p-8 sm:p-10'
+            : 'border border-white/15 p-7 sm:p-8'
+        } relative shadow-2xl rounded-none`}
+      >
         {/* Close Button */}
         <button
           type="button"
@@ -588,7 +594,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </button>
 
         {/* Center Logo */}
-        <div className="flex justify-center mb-1">
+        <div
+          className={`flex justify-center ${
+            view === 'register' && regStep === 'verify' ? 'mb-6' : 'mb-1'
+          }`}
+        >
           <PeeklyLogo size={36} className="text-white h-9 w-auto" />
         </div>
 
@@ -833,29 +843,29 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             VIEW 2: CREATE ACCOUNT (WITH TURNSTILE HUMAN VERIFICATION)
            ========================================================================= */}
         {view === 'register' && regStep === 'verify' && (
-          <div className="mt-3">
-            <h2 className="text-xl font-bold text-white text-center mb-1 font-sans">
+          <div className="w-full flex flex-col">
+            <h2 className="text-2xl font-bold text-white text-center font-sans tracking-tight mb-2">
               Verify Your Email
             </h2>
-            <p className="text-xs text-neutral-400 text-center mb-5 font-mono leading-relaxed">
+            <p className="text-sm text-[#8F9098] text-center mb-8 font-sans leading-relaxed">
               We sent a 6-digit code to{' '}
-              <span className="text-white font-semibold">{email.trim().toLowerCase()}</span>
+              <span className="text-white font-medium">{email.trim().toLowerCase()}</span>
             </p>
 
             {error && (
-              <div className="w-full mb-4 p-2.5 bg-red-950/80 border border-[#FF1744] text-[#FF1744] text-xs font-mono text-left rounded-none flex items-start gap-2">
+              <div className="w-full mb-5 p-2.5 bg-red-950/80 border border-[#FF1744] text-[#FF1744] text-xs font-mono text-left rounded-none flex items-start gap-2">
                 <ExclamationIcon className="w-4 h-4 shrink-0 text-[#FF1744] mt-0.5" />
                 <span className="leading-snug">{error}</span>
               </div>
             )}
 
             {debugNotice && (
-              <div className="w-full mb-4 p-2.5 bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-mono text-center rounded-none">
+              <div className="w-full mb-5 p-2.5 bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-mono text-center rounded-none">
                 {debugNotice}
               </div>
             )}
 
-            <form onSubmit={handleVerifySubmit} noValidate className="w-full flex flex-col gap-4">
+            <form onSubmit={handleVerifySubmit} noValidate className="w-full flex flex-col">
               <input
                 type="text"
                 inputMode="numeric"
@@ -868,30 +878,30 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 }}
                 autoFocus
                 placeholder="000000"
-                className="w-full h-14 bg-[#0F0F11] border border-white/20 focus:border-white text-white text-2xl font-mono tracking-[8px] text-center outline-none rounded-none transition-colors"
+                className="w-full h-[58px] bg-[#0F0F11] border border-white focus:border-white focus:outline-none focus:ring-0 text-white placeholder:text-[#3a3a42] text-xl sm:text-2xl font-mono font-semibold tracking-[12px] sm:tracking-[16px] pl-[12px] sm:pl-[16px] text-center rounded-none transition-colors"
               />
 
               <button
                 type="submit"
                 disabled={isLoading || verificationCode.trim().length !== 6}
-                className={`w-full h-11 rounded-none font-mono font-bold text-xs uppercase tracking-wider transition ${
+                className={`w-full h-[50px] mt-4 rounded-none font-mono font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center ${
                   isLoading || verificationCode.trim().length !== 6
-                    ? 'opacity-40 cursor-not-allowed bg-white/20 text-neutral-400 border-none shadow-none'
-                    : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
+                    ? 'bg-[#151518] text-[#404048] cursor-not-allowed border-none'
+                    : 'bg-white text-black hover:bg-neutral-200 cursor-pointer border-none'
                 }`}
               >
                 {isLoading ? 'VERIFYING...' : 'VERIFY & CONTINUE'}
               </button>
 
-              <div className="flex items-center justify-between text-xs font-mono mt-2 text-neutral-400">
+              <div className="flex items-center justify-between mt-6 text-xs font-mono">
                 <button
                   type="button"
                   onClick={handleResendCode}
                   disabled={!canResend || isLoading}
-                  className={`transition ${
+                  className={`transition underline ${
                     canResend
-                      ? 'text-white hover:text-[#FF5500] cursor-pointer underline'
-                      : 'text-neutral-500 cursor-not-allowed'
+                      ? 'text-white hover:text-neutral-300 cursor-pointer'
+                      : 'text-[#666666] cursor-not-allowed'
                   }`}
                 >
                   {canResend ? 'Resend code' : `Resend code in ${resendCountdown}s`}
@@ -899,7 +909,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <button
                   type="button"
                   onClick={handleBackToEdit}
-                  className="text-neutral-400 hover:text-white transition cursor-pointer underline"
+                  className="text-[#8F9098] hover:text-white underline transition cursor-pointer"
                 >
                   Back to edit details
                 </button>
