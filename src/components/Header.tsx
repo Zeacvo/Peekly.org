@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { LanguageIcon } from './LanguageIcon';
 import { PeeklyLogo } from './PeeklyLogo';
-import { FaceitLogo } from './AuthModal';
 import { DefaultUserAvatar } from './DefaultUserAvatar';
 import { translations, SUPPORTED_LANGUAGES } from '../translations';
 import type { Language } from '../translations';
@@ -350,27 +349,6 @@ export const Header: React.FC<HeaderProps> = ({
                       )}
                     </div>
                   </div>
-
-                  {/* FACEIT Integration: compact strict badge or full-width button */}
-                  {userSession.faceit_connected || userSession.faceit_nickname ? (
-                    <div className="border border-[#1A1A1F] bg-white/[0.03] px-3.5 py-2.5 flex items-center justify-between text-xs">
-                      <span className="flex items-center gap-2 text-[#929292]">
-                        <FaceitLogo className="w-3.5 h-3.5 text-[#929292]" />
-                        <span className="text-white font-medium">FACEIT</span>
-                      </span>
-                      <span className="text-white font-bold truncate max-w-[130px]">
-                        {userSession.faceit_nickname || 'Connected'}
-                      </span>
-                    </div>
-                  ) : (
-                    <a
-                      href="/api/auth/faceit/login"
-                      className="btn-brand-interactive h-10 gap-2 no-underline"
-                    >
-                      <FaceitLogo className="w-3.5 h-3.5 shrink-0" />
-                      <span>{isRu ? 'ПРИВЯЗАТЬ FACEIT' : 'LINK FACEIT ACCOUNT'}</span>
-                    </a>
-                  )}
 
                   {/* Divider */}
                   <div className="border-t border-[#1A1A1F] my-0.5" />
