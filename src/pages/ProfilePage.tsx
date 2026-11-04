@@ -132,17 +132,43 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       .catch(() => {});
   }, []);
 
+  const [locationSearch, setLocationSearch] = useState(() =>
+    typeof window !== 'undefined' ? window.location.search : ''
+  );
+
+  // Listen for browser navigation (back/forward)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handlePopState = () => {
+      setLocationSearch(window.location.search);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   // Inspect query params for public view: /profile?id=... or /profile?userId=...
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
-    const queryId = params.get('id') || params.get('userId');
+    let queryId = params.get('id') || params.get('userId') || params.get('guid');
+
+    // Also support /profile/:usernameOrId
+    if (!queryId) {
+      const pathMatch = window.location.pathname.match(/^\/profile\/([^/?#]+)/);
+      if (pathMatch) {
+        queryId = decodeURIComponent(pathMatch[1]);
+      }
+    }
 
     if (queryId && queryId.trim()) {
       const cleanId = queryId.trim();
       const currentId = currentUser?.id || currentUser?.guid || currentUser?.nickname;
 
-      if (currentId && (currentId === cleanId || currentUser?.nickname?.toLowerCase() === cleanId.toLowerCase())) {
+      if (
+        currentId &&
+        (currentId.toLowerCase() === cleanId.toLowerCase() ||
+          currentUser?.nickname?.toLowerCase() === cleanId.toLowerCase())
+      ) {
         // Viewing own profile
         setIsViewOnly(false);
         setTargetUser(null);
@@ -176,7 +202,25 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       setIsViewOnly(false);
       setTargetUser(null);
     }
-  }, [currentUser]);
+  }, [currentUser, locationSearch]);
+
+  // Dynamic Profile URL Auto-Sync:
+  // When an authenticated user visits /profile without an id in URL, auto-populate ?id=<USER_ID>
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const effectiveId = currentUser?.id || currentUser?.guid;
+    if (effectiveId && !isViewOnly) {
+      const searchParams = new URLSearchParams(window.location.search);
+      const currentId = searchParams.get('id') || searchParams.get('userId') || searchParams.get('guid');
+
+      if (!currentId) {
+        searchParams.set('id', effectiveId);
+        const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
+        window.history.replaceState({ path: newUrl }, '', newUrl);
+        setLocationSearch(searchParams.toString() ? `?${searchParams.toString()}` : '');
+      }
+    }
+  }, [currentUser, isViewOnly]);
 
   // Display user: either targetUser (if public view) or currentUser
   const displayUser: UserProfile | null = isViewOnly ? targetUser : currentUser;

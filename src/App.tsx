@@ -65,7 +65,14 @@ const checkRoutes = () => {
         authErrorMessage: '',
       };
     }
-    if (path === '/profile' || path === '/profile.html' || hash === '#profile') {
+    if (
+      path === '/profile' ||
+      path === '/profile.html' ||
+      path.startsWith('/profile/') ||
+      hash === '#profile' ||
+      hash.startsWith('#profile?') ||
+      hash.startsWith('#profile/')
+    ) {
       return {
         isAdmin: false,
         isProfile: true,

@@ -12,7 +12,7 @@ interface HeaderProps {
   onLanguageChange: (lang: Language) => void;
   onGoHome?: () => void;
   onOpenChangelog?: () => void;
-  onOpenProfile?: () => void;
+  onOpenProfile?: (guid?: string) => void;
   onOpenAdmin?: () => void;
   onOpenAuthModal?: () => void;
 }
@@ -377,13 +377,15 @@ export const Header: React.FC<HeaderProps> = ({
                       type="button"
                       onClick={() => {
                         setUserDropdownOpen(false);
-                        if (onOpenProfile) onOpenProfile();
+                        const profileId = userSession.id;
+                        if (onOpenProfile) onOpenProfile(profileId);
                         else {
                           try {
-                            history.pushState(null, '', '/profile');
+                            const targetUrl = profileId ? `/profile?id=${encodeURIComponent(profileId)}` : '/profile';
+                            history.pushState(null, '', targetUrl);
                             window.dispatchEvent(new PopStateEvent('popstate'));
                           } catch {
-                            window.location.href = '/profile';
+                            window.location.href = profileId ? `/profile?id=${encodeURIComponent(profileId)}` : '/profile';
                           }
                         }
                       }}
