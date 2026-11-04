@@ -642,8 +642,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               {/* FACEIT Integration Block */}
               <div className="border-t border-[#1A1A1F] pt-5">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#FFFFFF]">
-                    <FaceitLogo className="w-4 h-4" />
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white">
+                    <FaceitLogo className="w-4 h-4 text-white" />
                     <span>FACEIT CS2</span>
                   </div>
                   {isFaceitLinked ? (
