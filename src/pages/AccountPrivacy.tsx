@@ -67,7 +67,7 @@ export const AccountPrivacy: React.FC<AccountPrivacyProps> = ({ currentLang, onB
   return (
     <div
       dir={isRtl ? 'rtl' : 'ltr'}
-      className="pt-[calc(5rem+env(safe-area-inset-top,0px))] sm:pt-24 pb-16 w-full max-w-6xl mx-auto px-4 sm:px-6 flex flex-col items-stretch z-10 animate-apple-reveal font-sans"
+      className="pt-[calc(5rem+env(safe-area-inset-top,0px))] sm:pt-24 pb-16 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-stretch z-10 animate-apple-reveal font-sans"
     >
       {/* 1. Back Navigation Button */}
       <div className={`w-full flex ${isRtl ? 'justify-end' : 'justify-start'} mb-8`}>

@@ -60,7 +60,7 @@ export const Footer: React.FC<FooterProps> = ({
 
   return (
     <footer className="w-full bg-[#000000] border-t border-white/10 relative z-10 mt-auto py-8 sm:py-10">
-      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-start md:items-end justify-between gap-6 text-xs text-neutral-500">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-start md:items-end justify-between gap-6 text-xs text-neutral-500">
         
         {/* Left Column: Logo & Legal Disclaimer */}
         <div className="flex flex-col items-start text-left max-w-md gap-3">

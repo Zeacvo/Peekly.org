@@ -170,8 +170,8 @@ export const Header: React.FC<HeaderProps> = ({
   const currentLangObj = SUPPORTED_LANGUAGES.find((l) => l.code === currentLang) || SUPPORTED_LANGUAGES[0];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 min-h-[64px] sm:min-h-[80px] bg-black/90 backdrop-blur-md border-b border-white/10 pt-[env(safe-area-inset-top)] transition-all">
-      <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6 h-16 sm:h-20 min-h-[64px] sm:min-h-[80px] flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-50 min-h-[64px] sm:min-h-[80px] bg-black/80 backdrop-blur-md border-b border-[#1A1A1F] pt-[env(safe-area-inset-top)] transition-all">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 min-h-[64px] sm:min-h-[80px] flex items-center justify-between">
         {/* Left: Brand Logo */}
         <div
           onClick={() => {

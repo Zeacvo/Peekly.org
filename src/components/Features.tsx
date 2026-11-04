@@ -552,7 +552,7 @@ export const Features: React.FC<FeaturesProps> = ({ currentLang, onSelectFeature
 
   return (
     <>
-      <section id="features" className="relative pt-4 sm:pt-6 pb-20 sm:pb-24 w-full max-w-6xl mx-auto px-4 sm:px-6 z-10">
+      <section id="features" className="relative pt-4 sm:pt-6 pb-20 sm:pb-24 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
         
         {/* Centered Clean Section Title */}
         <div className="text-center mb-6 sm:mb-8">

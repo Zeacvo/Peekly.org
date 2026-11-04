@@ -3,7 +3,7 @@ import { BROWSERS } from '../constants/browsers';
 
 export const HeroCtaButtons: React.FC = () => {
   return (
-    <div className="flex flex-nowrap items-center justify-start lg:justify-center gap-2 sm:gap-2.5 max-w-7xl mx-auto w-full px-2 mt-2 sm:mt-3 overflow-x-auto lg:overflow-visible py-2 scrollbar-none">
+    <div className="flex flex-nowrap items-center justify-start lg:justify-center gap-2 sm:gap-2.5 w-full mt-2 sm:mt-3 overflow-x-auto lg:overflow-visible py-2 scrollbar-none">
       {BROWSERS.map((browser) => (
         <a
           key={browser.id}
