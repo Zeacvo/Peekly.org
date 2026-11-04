@@ -173,6 +173,91 @@ button, a, [role="button"], .cursor-pointer {
   fill: #000000 !important;
 }
 
+/* Full-Width Interactive Brand Buttons (User Dropdown & Tactical CTAs) */
+.btn-brand-interactive {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  border: 1px solid #FFFFFF !important;
+  border-radius: 2px !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  transition: all 0.15s ease-in-out !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+}
+
+.btn-brand-interactive:hover {
+  background-color: #FF5500 !important;
+  color: #000000 !important;
+  border-color: #FFFFFF !important;
+  box-shadow: 0 0 16px rgba(255, 85, 0, 0.5) !important;
+}
+
+.btn-brand-interactive svg,
+.btn-brand-interactive path,
+.btn-brand-interactive circle,
+.btn-brand-interactive rect {
+  color: #000000 !important;
+  fill: currentColor !important;
+  transition: color 0.15s ease-in-out, fill 0.15s ease-in-out !important;
+}
+
+.btn-brand-interactive:hover svg,
+.btn-brand-interactive:hover path,
+.btn-brand-interactive:hover circle,
+.btn-brand-interactive:hover rect {
+  color: #000000 !important;
+  fill: #000000 !important;
+}
+
+/* Sign Out Button - Muted Brutalist Style */
+.btn-brand-signout {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: transparent !important;
+  color: #8F9098 !important;
+  border: 1px solid #222228 !important;
+  border-radius: 2px !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  transition: all 0.15s ease-in-out !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+}
+
+.btn-brand-signout:hover {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  color: #FFFFFF !important;
+  border-color: #FFFFFF !important;
+}
+
+.btn-brand-signout svg,
+.btn-brand-signout path,
+.btn-brand-signout circle,
+.btn-brand-signout rect {
+  color: #8F9098 !important;
+  transition: color 0.15s ease-in-out !important;
+}
+
+.btn-brand-signout:hover svg,
+.btn-brand-signout:hover path,
+.btn-brand-signout:hover circle,
+.btn-brand-signout:hover rect {
+  color: #FFFFFF !important;
+}
+
 /* Calm Soft Breathing for Online Indicator Dot (3.5s cycle) */
 @keyframes softBreath {
   0%, 100% {

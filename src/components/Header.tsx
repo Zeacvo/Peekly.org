@@ -87,6 +87,7 @@ export const Header: React.FC<HeaderProps> = ({
   const userDropdownRef = useRef<HTMLDivElement>(null);
 
   const t = translations[currentLang] || translations.en;
+  const isRu = currentLang === 'ru';
 
   useEffect(() => {
     const syncUser = () => {
@@ -320,7 +321,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <div
                   role="menu"
                   aria-label="User Account Options"
-                  className="absolute right-0 top-full mt-2 w-72 bg-[#0D0D0D] border border-white/15 rounded-none shadow-2xl p-4 flex flex-col gap-3.5 z-50 animate-fade-in"
+                  className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-[#0D0D0D] border border-[#1A1A1F] rounded-none shadow-2xl p-4 flex flex-col gap-3.5 z-50 animate-fade-in"
                 >
                   {/* Profile Header */}
                   <div className="flex items-center gap-3">
@@ -354,41 +355,32 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                   </div>
 
-                  {/* Plan Badge */}
-                  <div className="border border-white/10 bg-white/[0.03] px-3 py-2 flex items-center justify-between text-xs font-mono">
-                    <span className="text-neutral-400">Plan</span>
-                    <span className="text-white font-semibold">Peekly Free Tier (Early Beta)</span>
-                  </div>
-
-                  {/* Extension Status */}
-                  <div className="border border-white/10 bg-white/[0.03] px-3 py-2 flex items-center justify-between text-xs font-mono">
-                    <span className="text-neutral-400">Extension</span>
-                    <span className="text-neutral-300">Not Linked</span>
-                  </div>
-
-                  {/* FACEIT Integration */}
+                  {/* FACEIT Integration: compact strict badge or full-width button */}
                   {userSession.faceit_connected || userSession.faceit_nickname ? (
-                    <div className="border border-white/10 bg-white/[0.03] px-3 py-2 flex items-center justify-between text-xs font-mono">
-                      <span className="flex items-center gap-1.5 text-neutral-400">
+                    <div className="border border-[#1A1A1F] bg-white/[0.03] px-3.5 py-2.5 flex items-center justify-between text-xs font-mono">
+                      <span className="flex items-center gap-2 text-neutral-400">
                         <FaceitLogo className="w-3.5 h-3.5" />
-                        <span>FACEIT</span>
+                        <span className="text-white font-medium">FACEIT</span>
                       </span>
-                      <span className="text-[#FF5500] font-semibold truncate max-w-[120px]">
+                      <span className="text-[#FF5500] font-bold truncate max-w-[130px]">
                         {userSession.faceit_nickname || 'Connected'}
                       </span>
                     </div>
                   ) : (
                     <a
                       href="/api/auth/faceit/login"
-                      className="w-full h-10 rounded-none btn-header-install font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer no-underline shadow-md"
+                      className="btn-brand-interactive h-10 gap-2 no-underline"
                     >
-                      <FaceitLogo className="w-3.5 h-3.5" />
-                      <span>Link FACEIT Account</span>
+                      <FaceitLogo className="w-3.5 h-3.5 shrink-0" />
+                      <span>{isRu ? 'ПРИВЯЗАТЬ FACEIT' : 'LINK FACEIT ACCOUNT'}</span>
                     </a>
                   )}
 
-                  {/* Navigation Links */}
-                  <div className="flex flex-col gap-1 pt-1">
+                  {/* Divider */}
+                  <div className="border-t border-[#1A1A1F] my-0.5" />
+
+                  {/* Navigation Links: Full-Width Brand Interactive Buttons */}
+                  <div className="flex flex-col gap-2">
                     {/* My Profile */}
                     <button
                       type="button"
@@ -404,13 +396,10 @@ export const Header: React.FC<HeaderProps> = ({
                           }
                         }
                       }}
-                      className="w-full text-left py-2 px-2.5 text-xs font-mono text-neutral-300 hover:text-white hover:bg-white/[0.06] border border-transparent hover:border-white/15 flex items-center justify-between transition-colors cursor-pointer"
+                      className="btn-brand-interactive h-10 gap-2"
                     >
-                      <span className="flex items-center gap-2 font-bold uppercase tracking-wider">
-                        <User className="w-3.5 h-3.5 text-neutral-400" />
-                        <span>My Profile</span>
-                      </span>
-                      <span className="text-neutral-500 font-mono text-[10px]">/profile</span>
+                      <User className="w-3.5 h-3.5 shrink-0" />
+                      <span>{isRu ? 'МОЙ ПРОФИЛЬ' : 'MY PROFILE'}</span>
                     </button>
 
                     {/* Admin Console (if CEO / Admin / Owner) */}
@@ -429,19 +418,13 @@ export const Header: React.FC<HeaderProps> = ({
                             }
                           }
                         }}
-                        className="w-full text-left py-2 px-2.5 text-xs font-mono text-[#FF5500] hover:text-[#ff7733] hover:bg-[#FF5500]/[0.08] border border-[#FF5500]/20 hover:border-[#FF5500]/40 flex items-center justify-between transition-colors cursor-pointer"
+                        className="btn-brand-interactive h-10 gap-2"
                       >
-                        <span className="flex items-center gap-2 font-bold uppercase tracking-wider">
-                          <ShieldAlert className="w-3.5 h-3.5 text-[#FF5500]" />
-                          <span>Admin Console</span>
-                        </span>
-                        <span className="text-[#FF5500]/70 font-mono text-[10px]">/admin ↗</span>
+                        <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
+                        <span>{isRu ? 'КОНСОЛЬ АДМИНИСТРАТОРА ↗' : 'ADMIN CONSOLE ↗'}</span>
                       </button>
                     )}
                   </div>
-
-                  {/* Divider */}
-                  <div className="border-t border-white/10" />
 
                   {/* Sign Out Button */}
                   <button
@@ -450,9 +433,9 @@ export const Header: React.FC<HeaderProps> = ({
                       setUserDropdownOpen(false);
                       handleLogout();
                     }}
-                    className="w-full h-8 bg-transparent border border-white/20 hover:border-red-500/50 hover:text-red-400 text-neutral-400 font-mono text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                    className="btn-brand-signout h-10"
                   >
-                    Sign Out
+                    <span>{isRu ? 'ВЫЙТИ ИЗ АККАУНТА' : 'SIGN OUT'}</span>
                   </button>
                 </div>
               )}
