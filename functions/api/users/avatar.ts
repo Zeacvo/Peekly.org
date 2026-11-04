@@ -1,6 +1,6 @@
 /**
- * Cloudflare Pages Function: POST /api/users/avatar
- * Handles direct avatar upload (base64 or URL) and saves it to Cloudflare D1 / session.
+ * Cloudflare Pages Function: /api/users/avatar
+ * Handles direct avatar upload (POST) and avatar reset/deletion to default (DELETE / POST null).
  */
 
 import {
@@ -24,95 +24,173 @@ export const onRequestOptions = async (): Promise<Response> => {
     status: 204,
     headers: {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Admin-User',
       'Access-Control-Max-Age': '86400',
     },
   });
 };
 
-export const onRequestPost = async (context: EventContext): Promise<Response> => {
-  try {
-    const { request, env } = context;
-    const db = env?.DB;
+async function getAuthenticatedUser(context: EventContext): Promise<{
+  userId: string;
+  currentUser: { id: string; nickname: string; email: string; avatar_url?: string | null; role: string };
+} | null> {
+  const { request, env } = context;
+  const db = env?.DB;
+  if (db) {
+    await ensureAuthSchema(db);
+  }
+
+  const cookies = parseCookies(request.headers.get('Cookie'));
+  const sessionToken = cookies['peekly_session'];
+  const adminUserHeader = request.headers.get('X-Admin-User');
+
+  let userId: string | null = null;
+  let currentUser: {
+    id: string;
+    nickname: string;
+    email: string;
+    avatar_url?: string | null;
+    role: string;
+  } | null = null;
+
+  if (sessionToken) {
     if (db) {
-      await ensureAuthSchema(db);
-    }
+      currentUser = await db
+        .prepare(
+          `SELECT u.id, u.nickname, u.email, u.avatar_url, u.role
+           FROM sessions s
+           JOIN users u ON s.user_id = u.id
+           WHERE s.token = ? AND s.expires_at > ?`
+        )
+        .bind(sessionToken, Date.now())
+        .first<{
+          id: string;
+          nickname: string;
+          email: string;
+          avatar_url?: string | null;
+          role: string;
+        }>();
 
-    const cookies = parseCookies(request.headers.get('Cookie'));
-    const sessionToken = cookies['peekly_session'];
-    const adminUserHeader = request.headers.get('X-Admin-User');
-
-    let userId: string | null = null;
-    let currentUser: {
-      id: string;
-      nickname: string;
-      email: string;
-      avatar_url?: string | null;
-      role: string;
-    } | null = null;
-
-    if (sessionToken) {
-      if (db) {
-        currentUser = await db
-          .prepare(
-            `SELECT u.id, u.nickname, u.email, u.avatar_url, u.role
-             FROM sessions s
-             JOIN users u ON s.user_id = u.id
-             WHERE s.token = ? AND s.expires_at > ?`
-          )
-          .bind(sessionToken, Date.now())
-          .first<{
-            id: string;
-            nickname: string;
-            email: string;
-            avatar_url?: string | null;
-            role: string;
-          }>();
-
-        if (currentUser) userId = currentUser.id;
-      } else {
-        const session = memoryAuthSessions.get(sessionToken);
-        if (session && session.expires_at > Date.now()) {
-          const u = memoryAuthUsers.get(session.user_id);
-          if (u) {
-            userId = u.id;
-            currentUser = {
-              id: u.id,
-              nickname: u.nickname,
-              email: u.email,
-              avatar_url: u.avatar_url,
-              role: u.role,
-            };
-          }
+      if (currentUser) userId = currentUser.id;
+    } else {
+      const session = memoryAuthSessions.get(sessionToken);
+      if (session && session.expires_at > Date.now()) {
+        const u = memoryAuthUsers.get(session.user_id);
+        if (u) {
+          userId = u.id;
+          currentUser = {
+            id: u.id,
+            nickname: u.nickname,
+            email: u.email,
+            avatar_url: u.avatar_url,
+            role: u.role,
+          };
         }
       }
     }
+  }
 
-    // Fallback: If admin/owner header provided
-    if (!currentUser && adminUserHeader && adminUserHeader.trim().toLowerCase() === 'zeacvo') {
-      if (db) {
-        currentUser = await db
-          .prepare('SELECT id, nickname, email, avatar_url, role FROM users WHERE LOWER(nickname) = ?')
-          .bind('zeacvo')
-          .first<{ id: string; nickname: string; email: string; avatar_url?: string | null; role: string }>();
-        if (currentUser) userId = currentUser.id;
+  // Fallback: If admin/owner header provided
+  if (!currentUser && adminUserHeader && adminUserHeader.trim().toLowerCase() === 'zeacvo') {
+    if (db) {
+      currentUser = await db
+        .prepare('SELECT id, nickname, email, avatar_url, role FROM users WHERE LOWER(nickname) = ?')
+        .bind('zeacvo')
+        .first<{ id: string; nickname: string; email: string; avatar_url?: string | null; role: string }>();
+      if (currentUser) userId = currentUser.id;
+    } else {
+      for (const u of memoryAuthUsers.values()) {
+        if (u.nickname.toLowerCase() === 'zeacvo') {
+          userId = u.id;
+          currentUser = {
+            id: u.id,
+            nickname: u.nickname,
+            email: u.email,
+            avatar_url: u.avatar_url,
+            role: u.role,
+          };
+          break;
+        }
       }
     }
+  }
 
-    if (!userId || !currentUser) {
+  if (!userId || !currentUser) return null;
+  return { userId, currentUser };
+}
+
+export const onRequestDelete = async (context: EventContext): Promise<Response> => {
+  try {
+    const auth = await getAuthenticatedUser(context);
+    if (!auth) {
       return new Response(JSON.stringify({ error: 'Session expired or unauthorized' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
       });
     }
 
-    let avatarData = '';
+    const { userId } = auth;
+    const db = context.env?.DB;
 
+    if (db) {
+      await db
+        .prepare('UPDATE users SET avatar_url = NULL WHERE id = ?')
+        .bind(userId)
+        .run();
+    }
+
+    const memUser = memoryAuthUsers.get(userId);
+    if (memUser) {
+      memUser.avatar_url = null;
+    }
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        avatar: null,
+        avatar_url: null,
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      }
+    );
+  } catch (err) {
+    return new Response(
+      JSON.stringify({ error: `Server error: ${(err as Error).message}` }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      }
+    );
+  }
+};
+
+export const onRequestPost = async (context: EventContext): Promise<Response> => {
+  try {
+    const auth = await getAuthenticatedUser(context);
+    if (!auth) {
+      return new Response(JSON.stringify({ error: 'Session expired or unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      });
+    }
+
+    const { userId } = auth;
+    const { request, env } = context;
+    const db = env?.DB;
+
+    let avatarData: string | null = '';
     const contentType = request.headers.get('content-type') || '';
+
     if (contentType.includes('application/json')) {
-      const body = (await request.json().catch(() => ({}))) as { avatar?: string; avatar_url?: string };
-      avatarData = (body.avatar || body.avatar_url || '').trim();
+      const body = (await request.json().catch(() => ({}))) as { avatar?: string | null; avatar_url?: string | null };
+      if (body.avatar === null || body.avatar_url === null || body.avatar === '' || body.avatar_url === '') {
+        avatarData = null;
+      } else {
+        avatarData = (body.avatar || body.avatar_url || '').trim();
+      }
     } else if (contentType.includes('multipart/form-data')) {
       const formData = await request.formData();
       const file = formData.get('file') || formData.get('avatar');
@@ -126,14 +204,32 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
       }
     }
 
-    if (!avatarData) {
-      return new Response(JSON.stringify({ error: 'Missing avatar data' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      });
+    // If avatarData is null or empty, reset to default
+    if (avatarData === null || avatarData === '') {
+      if (db) {
+        await db
+          .prepare('UPDATE users SET avatar_url = NULL WHERE id = ?')
+          .bind(userId)
+          .run();
+      }
+      const memUser = memoryAuthUsers.get(userId);
+      if (memUser) {
+        memUser.avatar_url = null;
+      }
+      return new Response(
+        JSON.stringify({
+          success: true,
+          avatar: null,
+          avatar_url: null,
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        }
+      );
     }
 
-    // Validate size (max 3MB string)
+    // Validate size (max 4MB string)
     if (avatarData.length > 4 * 1024 * 1024) {
       return new Response(JSON.stringify({ error: 'Avatar file is too large (max 2MB).' }), {
         status: 400,

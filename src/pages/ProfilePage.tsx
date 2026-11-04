@@ -68,6 +68,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   onOpenAdmin,
 }) => {
   const t = profileTranslations[currentLang] || profileTranslations.en;
+  const isRu = currentLang === 'ru';
 
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(getStoredUser);
   const [targetUser, setTargetUser] = useState<UserProfile | null>(null);
@@ -361,6 +362,59 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     reader.readAsDataURL(file);
   };
 
+  const handleResetAvatar = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      // 1. Immediately update local state in ProfilePage
+      setCurrentUser((prev) => (prev ? { ...prev, avatar: '', avatar_url: '' } : prev));
+      setAvatarError(false);
+
+      // 2. Immediately update localStorage for synchronous UI update
+      try {
+        const stored = localStorage.getItem('peekly_user') || localStorage.getItem('peekly_auth');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          parsed.avatar = '';
+          parsed.avatar_url = '';
+          localStorage.setItem('peekly_user', JSON.stringify(parsed));
+          localStorage.setItem('peekly_auth', JSON.stringify(parsed));
+        }
+        window.dispatchEvent(new Event('peekly_user_updated'));
+        window.dispatchEvent(new Event('storage'));
+      } catch {}
+
+      // 3. Send DELETE request to clear avatar in Cloudflare D1
+      setIsSubmitting(true);
+      const res = await fetch('/api/users/avatar', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-User': currentUser?.nickname || 'Zeacvo',
+        },
+      });
+
+      if (!res.ok) {
+        // Fallback: POST with avatar: null
+        await fetch('/api/users/avatar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Admin-User': currentUser?.nickname || 'Zeacvo',
+          },
+          body: JSON.stringify({ avatar: null, avatar_url: null }),
+        });
+      }
+
+      showNotification(isRu ? 'Аватар сброшен до стандартного' : 'Avatar reset to default');
+    } catch (err) {
+      console.error('Failed to reset avatar', err);
+      showNotification('Failed to reset avatar', true);
+    } finally {
+      setIsSubmitting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   const handleSendEmailOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEmail.trim()) return;
@@ -593,49 +647,72 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             <div className="bg-[#090909] border border-[#1A1A1F] p-6 relative overflow-hidden">
               {/* Persona Header: Avatar + Nickname + Status */}
               <div className="flex items-start gap-4 mb-5">
-                {/* Avatar with hover pencil overlay */}
-                <div className="relative group shrink-0">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileUpload}
-                    accept="image/png, image/jpeg, image/webp"
-                    className="hidden"
-                  />
-                  <div
-                    onClick={() => {
-                      if (!isViewOnly) fileInputRef.current?.click();
-                    }}
-                    className={`w-20 h-20 rounded-none border border-[#222228] bg-[#000000] overflow-hidden flex items-center justify-center ${
-                      !isViewOnly ? 'cursor-pointer' : ''
-                    }`}
-                  >
-                    {(displayUser?.avatar || displayUser?.avatar_url) &&
+                {/* Avatar with hover pencil overlay & reset action */}
+                {(() => {
+                  const hasCustomAvatar = Boolean(
+                    (displayUser?.avatar || displayUser?.avatar_url) &&
                     !avatarError &&
-                    !(displayUser?.avatar || displayUser?.avatar_url)?.includes('default_avatar.png') ? (
-                      <img
-                        src={displayUser.avatar || displayUser.avatar_url}
-                        alt={displayUser.nickname}
-                        className="w-full h-full object-cover"
-                        onError={() => setAvatarError(true)}
-                      />
-                    ) : (
-                      <DefaultUserAvatar size={48} className="w-12 h-12 text-white" />
-                    )}
-                  </div>
+                    !(displayUser?.avatar || displayUser?.avatar_url)?.includes('default_avatar.png')
+                  );
 
-                  {/* Hover Pencil Overlay for uploading avatar (only if viewing own profile) */}
-                  {!isViewOnly && (
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer border border-[#FFFFFF] rounded-none"
-                      title={t.changeAvatar}
-                    >
-                      <Edit2 className="w-5 h-5 text-white" />
-                    </button>
-                  )}
-                </div>
+                  return (
+                    <div className="flex flex-col items-center shrink-0">
+                      <div className="relative group">
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleFileUpload}
+                          accept="image/png, image/jpeg, image/webp"
+                          className="hidden"
+                        />
+                        <div
+                          onClick={() => {
+                            if (!isViewOnly) fileInputRef.current?.click();
+                          }}
+                          className={`w-20 h-20 rounded-none border border-[#222228] bg-[#000000] overflow-hidden flex items-center justify-center ${
+                            !isViewOnly ? 'cursor-pointer' : ''
+                          }`}
+                        >
+                          {hasCustomAvatar && displayUser ? (
+                            <img
+                              src={displayUser.avatar || displayUser.avatar_url || ''}
+                              alt={displayUser.nickname || 'User'}
+                              className="w-full h-full object-cover"
+                              onError={() => setAvatarError(true)}
+                            />
+                          ) : (
+                            <DefaultUserAvatar size={48} className="w-12 h-12 text-white" />
+                          )}
+                        </div>
+
+                        {/* Hover Pencil Overlay for uploading avatar (only if viewing own profile) */}
+                        {!isViewOnly && (
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer border border-[#FFFFFF] rounded-none"
+                            title={t.changeAvatar}
+                          >
+                            <Edit2 className="w-5 h-5 text-white" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Reset Avatar button: visible only when custom avatar is active and viewing own profile */}
+                      {hasCustomAvatar && !isViewOnly && (
+                        <button
+                          type="button"
+                          onClick={handleResetAvatar}
+                          className="mt-2 text-[11px] font-mono text-[#929292] hover:text-[#FFFFFF] uppercase tracking-wider transition-colors flex items-center gap-1 cursor-pointer bg-transparent border-none p-0 focus:outline-none"
+                          title={isRu ? 'Сбросить аватар до стандартного' : 'Reset avatar to default'}
+                        >
+                          <span>✕</span>
+                          <span>{t.removeAvatar || (isRu ? 'Удалить фото' : 'Remove photo')}</span>
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Nickname, Badges, Member Since */}
                 <div className="flex-1 min-w-0">

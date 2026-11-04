@@ -16,6 +16,7 @@ export interface ProfileTranslation {
   freeBadge: string;
   adminConsole: string;
   changeAvatar: string;
+  removeAvatar?: string;
   avatarModalTitle: string;
   avatarUrlLabel: string;
   avatarSave: string;
@@ -94,6 +95,7 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     freeBadge: 'FREE TIER',
     adminConsole: 'КОНСОЛЬ АДМІНІСТРАТОРА ↗',
     changeAvatar: 'Змінити аватар',
+    removeAvatar: 'Видалити фото',
     avatarModalTitle: 'Посилання на аватар',
     avatarUrlLabel: 'URL зображення (HTTPS):',
     avatarSave: 'Зберегти аватар',
@@ -166,6 +168,7 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     freeBadge: 'FREE TIER',
     adminConsole: 'КОНСОЛЬ АДМИНИСТРАТОРА ↗',
     changeAvatar: 'Изменить аватар',
+    removeAvatar: 'Удалить фото',
     avatarModalTitle: 'Ссылка на аватар',
     avatarUrlLabel: 'URL изображения (HTTPS):',
     avatarSave: 'Сохранить аватар',
@@ -238,6 +241,7 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     freeBadge: 'FREE TIER',
     adminConsole: 'ADMIN CONSOLE ↗',
     changeAvatar: 'Change Avatar',
+    removeAvatar: 'Remove photo',
     avatarModalTitle: 'Avatar URL',
     avatarUrlLabel: 'Direct Image URL (HTTPS):',
     avatarSave: 'Save Avatar',
