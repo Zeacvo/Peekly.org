@@ -2,6 +2,12 @@
 @import "tailwindcss";
 
 @theme {
+  --color-brand-bg: #000000;
+  --color-brand-card: #090909;
+  --color-brand-border: #1A1A1F;
+  --color-brand-text: #FFFFFF;
+  --color-brand-muted: #929292;
+  --color-brand-accent: #FF5500;
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
