@@ -169,12 +169,15 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="fixed top-0 left-0 right-0 z-50 min-h-[64px] sm:min-h-[80px] bg-black/80 backdrop-blur-md border-b border-[#1A1A1F] pt-[env(safe-area-inset-top)] transition-all">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 min-h-[64px] sm:min-h-[80px] flex items-center justify-between">
         {/* Left: Brand Logo */}
-        <div
-          onClick={() => {
+        <a
+          href="/"
+          onClick={(e) => {
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            e.preventDefault();
             if (onGoHome) onGoHome();
             else window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          className="flex items-center gap-2.5 h-12 group cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0"
+          className="header-logo flex items-center gap-2.5 h-12 group cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0"
           role="button"
           tabIndex={0}
           onKeyDown={(e) => {
@@ -193,7 +196,7 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="font-sans text-xl sm:text-2xl md:text-3xl font-black tracking-wider text-white leading-none select-none">
             PEEKLY
           </span>
-        </div>
+        </a>
 
         {/* Right: Navigation, Auth & Install CTA */}
         <div className="flex items-center gap-3 sm:gap-4 md:gap-5 shrink-0">
@@ -265,6 +268,7 @@ export const Header: React.FC<HeaderProps> = ({
                 })}
               </div>
             )}
+            <span className="sr-only" aria-hidden="true" />
           </div>
 
           {/* User Profile Trigger & Dropdown */}
@@ -409,6 +413,7 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
                 </div>
               )}
+              <span className="sr-only" aria-hidden="true" />
             </div>
           ) : (
             <button

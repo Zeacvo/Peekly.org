@@ -189,6 +189,7 @@ button, a, [role="button"], .cursor-pointer {
   background-color: #FF5500 !important;
   color: #000000 !important;
   border-color: #FFFFFF !important;
+  box-shadow: 0 0 16px rgba(255, 85, 0, 0.45) !important;
 }
 
 .btn-chrome-action:hover svg,
