@@ -3,7 +3,7 @@
 
 @theme {
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Mono", Menlo, Monaco, Consolas, monospace;
+  --font-mono: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 :root {
@@ -25,6 +25,10 @@ html, body, #root {
   overflow-x: hidden;
 }
 
+* {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
 body, button, input, select, textarea {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
   -webkit-font-smoothing: antialiased;
@@ -32,7 +36,7 @@ body, button, input, select, textarea {
 }
 
 /* Brutalist Strict Square Reset - Zero Rounded Corners */
-button, input, select, textarea, .btn-brand, .btn-brand-interactive, .btn-action-interactive, .btn-header-install, .btn-chrome-action, .btn-brand-signout {
+button, input, select, textarea, .btn-brand, .btn-brand-interactive, .btn-action-interactive, .btn-action-secondary, .btn-header-install, .btn-chrome-action, .btn-brand-signout {
   border-radius: 0px !important;
 }
 
@@ -312,6 +316,45 @@ button, a, [role="button"], .cursor-pointer {
 .btn-action-interactive:hover path {
   color: #000000 !important;
   fill: #000000 !important;
+}
+
+/* Secondary Muted Action Buttons on Profile & Dashboards (Brutalist Gray Outline) */
+.btn-action-secondary {
+  height: 38px !important;
+  padding: 0 16px !important;
+  background-color: transparent !important;
+  color: #8F9098 !important;
+  border: 1px solid #222228 !important;
+  border-radius: 0px !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  transition: all 0.15s ease-in-out !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+}
+
+.btn-action-secondary:hover {
+  color: #FFFFFF !important;
+  border-color: #FFFFFF !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.btn-action-secondary svg,
+.btn-action-secondary path {
+  color: #8F9098 !important;
+  transition: color 0.15s ease-in-out !important;
+}
+
+.btn-action-secondary:hover svg,
+.btn-action-secondary:hover path {
+  color: #FFFFFF !important;
 }
 
 /* Calm Soft Breathing for Online Indicator Dot (3.5s cycle) */

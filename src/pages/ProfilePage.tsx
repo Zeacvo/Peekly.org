@@ -246,6 +246,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             parsed.nickname = newNickname.trim();
             localStorage.setItem('peekly_user', JSON.stringify(parsed));
           }
+          window.dispatchEvent(new Event('peekly_user_updated'));
+          window.dispatchEvent(new Event('storage'));
         } catch {}
         setIsNicknameModalOpen(false);
         showNotification(t.successUpdated);
@@ -289,6 +291,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           localStorage.setItem('peekly_user', JSON.stringify(parsed));
           localStorage.setItem('peekly_auth', JSON.stringify(parsed));
         }
+        window.dispatchEvent(new Event('peekly_user_updated'));
+        window.dispatchEvent(new Event('storage'));
       } catch {}
 
       setIsSubmitting(true);
@@ -476,7 +480,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     return (
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 pt-36 text-center text-white">
         <Loader2 className="w-8 h-8 mx-auto animate-spin text-[#FF5500] mb-4" />
-        <p className="font-mono text-xs uppercase tracking-wider text-neutral-400">
+        <p className="text-xs uppercase tracking-wider text-neutral-400">
           {t.checkingAuth}
         </p>
       </div>
@@ -487,14 +491,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     return (
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 pt-36 text-center text-white">
         <AlertTriangle className="w-10 h-10 mx-auto text-[#FF5500] mb-4" />
-        <h2 className="text-xl font-mono font-bold uppercase mb-2">{t.userNotFound}</h2>
-        <p className="text-neutral-400 text-sm font-mono mb-6">
+        <h2 className="text-xl font-bold uppercase mb-2">{t.userNotFound}</h2>
+        <p className="text-neutral-400 text-sm mb-6">
           The requested profile identifier does not exist or has been removed.
         </p>
         <button
           type="button"
           onClick={onGoHome}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-black font-mono text-xs font-bold uppercase hover:bg-[#FF5500] transition-colors rounded-none"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-black text-xs font-bold uppercase hover:bg-neutral-200 transition-colors rounded-none"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>{t.backHome}</span>
@@ -508,16 +512,16 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       {/* Toast Notification */}
       {statusMessage && (
         <div
-          className={`fixed bottom-6 right-6 z-50 px-4 py-3 border font-mono text-xs shadow-2xl flex items-center gap-2.5 transition-all ${
+          className={`fixed bottom-6 right-6 z-50 px-4 py-3 border text-xs shadow-2xl flex items-center gap-2.5 transition-all ${
             statusMessage.isError
               ? 'bg-red-950/90 border-red-500 text-red-200'
-              : 'bg-black/90 border-emerald-500 text-emerald-300'
+              : 'bg-black/90 border-white/30 text-white'
           }`}
         >
           {statusMessage.isError ? (
             <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
           ) : (
-            <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+            <Check className="w-4 h-4 text-white shrink-0" />
           )}
           <span>{statusMessage.text}</span>
         </div>
@@ -527,14 +531,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pt-28">
         {/* Public View Header Banner (if viewing other user) */}
         {isViewOnly && (
-          <div className="bg-[#0A0A0E] border border-[#1A1A1F] p-4 sm:p-5 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="bg-[#0A0A0A] border border-[#1A1A1F] p-4 sm:p-5 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#FF5500] animate-pulse shrink-0" />
+              <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse shrink-0" />
               <div>
-                <h2 className="font-mono text-xs font-black tracking-widest uppercase text-white">
+                <h2 className="text-xs font-black tracking-widest uppercase text-white">
                   {t.publicProfileTitle}
                 </h2>
-                <p className="text-xs font-mono text-neutral-400 mt-0.5">
+                <p className="text-xs text-neutral-400 mt-0.5">
                   {t.viewOnlyNotice}
                 </p>
               </div>
@@ -542,7 +546,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             <button
               type="button"
               onClick={onGoHome}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 border border-white/20 hover:border-white text-xs font-mono font-bold uppercase text-neutral-300 hover:text-white transition-colors rounded-none shrink-0"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 border border-white/20 hover:border-white text-xs font-bold uppercase text-neutral-300 hover:text-white transition-colors rounded-none shrink-0"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>{t.backHome}</span>
@@ -556,7 +560,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           {/* LEFT COLUMN (lg:col-span-4): Persona Card */}
           {/* ========================================================= */}
           <div className={`${isViewOnly ? 'lg:col-span-5' : 'lg:col-span-4'} space-y-6`}>
-            <div className="bg-[#0A0A0E] border border-[#1A1A1F] p-6 relative overflow-hidden">
+            <div className="bg-[#0A0A0A] border border-[#1A1A1F] p-6 relative overflow-hidden">
               {/* Persona Header: Avatar + Nickname + Status */}
               <div className="flex items-start gap-4 mb-5">
                 {/* Avatar with hover pencil overlay */}
@@ -595,7 +599,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer border border-[#FF5500] rounded-none"
+                      className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer border border-[#FFFFFF] rounded-none"
                       title={t.changeAvatar}
                     >
                       <Edit2 className="w-5 h-5 text-white" />
@@ -605,28 +609,28 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
                 {/* Nickname, Badges, Member Since */}
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-xl font-bold font-mono text-white truncate uppercase mb-1">
+                  <h1 className="text-xl font-bold text-white truncate uppercase mb-1">
                     {displayUser?.nickname || 'Player'}
                   </h1>
 
                   <div className="flex flex-wrap items-center gap-2 mb-2">
                     {isOwner ? (
-                      <span className="bg-[#000000] border border-[#FF5500] text-[#FF5500] font-mono text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider rounded-none">
+                      <span className="bg-[#141416] border border-[#333338] text-[#FFFFFF] text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider rounded-none">
                         {t.ownerBadge}
                       </span>
                     ) : (
-                      <span className="bg-[#000000] border border-[#222228] text-[#8F9098] font-mono text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider rounded-none">
+                      <span className="bg-[#000000] border border-[#222228] text-[#8F9098] text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider rounded-none">
                         {t.freeBadge}
                       </span>
                     )}
 
-                    <div className="flex items-center gap-1.5 text-emerald-400 font-mono text-xs">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <div className="flex items-center gap-1.5 text-[#8F9098] text-xs">
+                      <span className="w-2 h-2 rounded-full bg-[#8F9098]" />
                       <span>{t.online}</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-xs font-mono text-[#8F9098]">
+                  <div className="flex items-center gap-1.5 text-xs text-[#8F9098]">
                     <Calendar className="w-3.5 h-3.5 text-[#8F9098] shrink-0" />
                     <span>
                       {t.memberSince} {registrationDate}
@@ -638,24 +642,24 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               {/* FACEIT Integration Block */}
               <div className="border-t border-[#1A1A1F] pt-5">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-wider text-neutral-300">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-neutral-300">
                     <FaceitLogo className="w-4 h-4" />
                     <span>FACEIT CS2</span>
                   </div>
                   {isFaceitLinked ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold">
-                      <Check className="w-3 h-3" />
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#0F0F11] border border-[#222228] text-[#8F9098] text-[10px] font-bold">
+                      <Check className="w-3 h-3 text-[#8F9098]" />
                       <span>{t.verified}</span>
                     </span>
                   ) : (
-                    <span className="px-2 py-0.5 bg-neutral-900 border border-neutral-700 text-neutral-400 font-mono text-[10px] font-bold">
+                    <span className="px-2 py-0.5 bg-[#0F0F11] border border-[#222228] text-[#8F9098] text-[10px] font-bold">
                       {t.notLinked}
                     </span>
                   )}
                 </div>
 
                 {isFaceitLinked ? (
-                  <div className="space-y-3 font-mono">
+                  <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div className="p-2.5 bg-black border border-white/10">
                         <span className="text-[10px] uppercase text-neutral-500 font-bold block mb-0.5">
@@ -688,7 +692,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[#FF5500] hover:text-white transition-colors"
+                        className="inline-flex items-center gap-1 text-[#8F9098] hover:text-[#FFFFFF] transition-colors"
                       >
                         <span>{t.viewOnFaceit}</span>
                         <ExternalLink className="w-3 h-3" />
@@ -697,13 +701,13 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   </div>
                 ) : (
                   <div className="text-center py-2">
-                    <p className="text-xs font-mono text-neutral-400 mb-4 leading-relaxed">
+                    <p className="text-xs text-neutral-400 mb-4 leading-relaxed">
                       {t.faceitNotConnected}
                     </p>
                     {!isViewOnly && (
                       <a
                         href="/api/auth/faceit/login"
-                        className="w-full h-9 border border-white/20 bg-white/5 hover:bg-white hover:text-black font-mono text-xs font-bold uppercase flex items-center justify-center gap-2 transition-colors"
+                        className="w-full h-9 border border-white/20 bg-white/5 hover:bg-white hover:text-black text-xs font-bold uppercase flex items-center justify-center gap-2 transition-colors"
                       >
                         <FaceitLogo className="w-3.5 h-3.5" />
                         <span>{t.connectFaceit}</span>
@@ -718,7 +722,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 <button
                   type="button"
                   onClick={onOpenAdmin}
-                  className="btn-action-interactive w-full h-10 mt-6"
+                  className="btn-action-secondary w-full mt-6"
                 >
                   <span>{t.adminConsole}</span>
                 </button>
@@ -732,14 +736,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           {!isViewOnly ? (
             <div className="lg:col-span-8 space-y-6">
               {/* Card 1: Account Credentials */}
-              <div className="bg-[#0A0A0E] border border-[#222228] p-6">
+              <div className="bg-[#0A0A0A] border border-[#1A1A1F] p-6">
                 <div className="mb-5 pb-3 border-b border-[#1A1A1F]">
-                  <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-white">
                     {t.credentialsTitle}
                   </h2>
                 </div>
 
-                <div className="space-y-4 font-mono">
+                <div className="space-y-4">
                   {/* Nickname row */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3">
                     <div>
@@ -756,7 +760,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         setNewNickname(currentUser?.nickname || '');
                         setIsNicknameModalOpen(true);
                       }}
-                      className="btn-action-interactive h-10 px-5 shrink-0"
+                      className="btn-action-secondary shrink-0"
                     >
                       {t.changeNickname}
                     </button>
@@ -772,8 +776,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         <span className="text-sm font-medium text-white break-all">
                           {currentUser?.email || '—'}
                         </span>
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold">
-                          <Check className="w-3 h-3" />
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-[#0F0F11] border border-[#222228] text-[#8F9098] text-[10px] font-bold">
+                          <Check className="w-3 h-3 text-[#8F9098]" />
                           <span>{t.verified}</span>
                         </span>
                         {currentUser?.email && (
@@ -784,7 +788,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                             title="Copy email"
                           >
                             {copiedEmail ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-400" />
+                              <Check className="w-3.5 h-3.5 text-[#8F9098]" />
                             ) : (
                               <Copy className="w-3.5 h-3.5" />
                             )}
@@ -801,7 +805,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         setEmailTestCode(null);
                         setIsEmailModalOpen(true);
                       }}
-                      className="btn-action-interactive h-10 px-5 shrink-0"
+                      className="btn-action-secondary shrink-0"
                     >
                       {t.changeEmail}
                     </button>
@@ -810,15 +814,15 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               </div>
 
               {/* Card 2: Password & Security */}
-              <div className="bg-[#0A0A0E] border border-[#222228] p-6">
+              <div className="bg-[#0A0A0A] border border-[#1A1A1F] p-6">
                 <div className="mb-5 pb-3 border-b border-[#1A1A1F]">
-                  <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
                     <KeyRound className="w-3.5 h-3.5 text-[#8F9098]" />
                     <span>{t.securityTitle}</span>
                   </h2>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3 font-mono">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3">
                   <div>
                     <span className="text-[10px] uppercase text-[#8F9098] font-bold tracking-wider block mb-1">
                       {t.passwordLabel}
@@ -835,7 +839,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       setConfirmPassword('');
                       setIsPasswordModalOpen(true);
                     }}
-                    className="btn-action-interactive h-10 px-5 shrink-0"
+                    className="btn-action-secondary shrink-0"
                   >
                     {t.changePassword}
                   </button>
@@ -843,17 +847,17 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               </div>
 
               {/* Card 3: Active Sessions */}
-              <div className="bg-[#0A0A0E] border border-[#222228] p-6">
+              <div className="bg-[#0A0A0A] border border-[#1A1A1F] p-6">
                 <div className="mb-5 pb-3 border-b border-[#1A1A1F]">
-                  <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
                     <Laptop className="w-3.5 h-3.5 text-[#8F9098]" />
                     <span>{t.sessionsTitle}</span>
                   </h2>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3 font-mono mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <div className="w-2 h-2 rounded-full bg-[#8F9098]" />
                     <div>
                       <span className="text-sm font-bold text-white block">
                         {t.currentDevice}
@@ -869,10 +873,10 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   type="button"
                   onClick={handleTerminateOtherSessions}
                   disabled={isSubmitting}
-                  className="btn-action-interactive h-10 px-5"
+                  className="btn-action-secondary"
                 >
                   {isSubmitting ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1 text-black" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1 text-[#8F9098]" />
                   ) : null}
                   <span>{t.terminateOtherSessions}</span>
                 </button>
@@ -882,11 +886,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               {!isCurrentOwner && (
                 <div className="bg-red-950/10 border border-red-900/30 p-6">
                   <div className="mb-4">
-                    <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-red-400 flex items-center gap-2">
+                    <h2 className="text-xs font-bold uppercase tracking-wider text-red-400 flex items-center gap-2">
                       <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
                       <span>{t.dangerZoneTitle}</span>
                     </h2>
-                    <p className="text-xs font-mono text-[#8F9098] mt-1 leading-relaxed">
+                    <p className="text-xs text-[#8F9098] mt-1 leading-relaxed">
                       {t.deleteAccountWarning}
                     </p>
                   </div>
@@ -904,14 +908,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           ) : (
             /* Public View Summary Card */
             <div className="lg:col-span-7 space-y-6">
-              <div className="bg-[#0A0A0E] border border-[#222228] p-6">
+              <div className="bg-[#0A0A0A] border border-[#1A1A1F] p-6">
                 <div className="mb-5 pb-3 border-b border-[#1A1A1F]">
-                  <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-white">
                     {t.publicProfileTitle}
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div className="p-4 bg-[#000000] border border-[#1A1A1F]">
                     <span className="text-[10px] uppercase text-[#8F9098] font-bold block mb-1">
                       {t.region}
@@ -925,7 +929,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     <span className="text-[10px] uppercase text-[#8F9098] font-bold block mb-1">
                       {t.profileId}
                     </span>
-                    <span className="text-[#FF5500] font-bold">
+                    <span className="text-[#8F9098] font-bold">
                       {isOwner ? t.ownerBadge : t.freeBadge}
                     </span>
                   </div>
@@ -949,12 +953,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             >
               <X className="w-4 h-4" />
             </button>
-            <h3 className="text-base font-mono font-bold text-white uppercase mb-4">
+            <h3 className="text-base font-bold text-white uppercase mb-4">
               {t.changeNickname}
             </h3>
             <form onSubmit={handleUpdateNickname} className="space-y-4">
               <div>
-                <label className="text-[10px] font-mono uppercase text-neutral-400 font-bold block mb-1.5">
+                <label className="text-[10px] uppercase text-neutral-400 font-bold block mb-1.5">
                   {t.newNickname}
                 </label>
                 <input
@@ -964,21 +968,21 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   pattern="^[a-zA-Z0-9_-]{3,20}$"
                   required
                   placeholder="NewNickname"
-                  className="w-full h-10 px-3 bg-[#0F0F11] border border-white/20 focus:border-white text-white font-mono text-sm focus:outline-none rounded-none"
+                  className="w-full h-10 px-3 bg-[#0F0F11] border border-white/20 focus:border-white text-white text-sm focus:outline-none rounded-none"
                 />
               </div>
               <div className="flex items-center justify-end gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setIsNicknameModalOpen(false)}
-                  className="px-4 py-2 border border-white/20 text-neutral-400 hover:text-white font-mono text-xs uppercase cursor-pointer rounded-none"
+                  className="px-4 py-2 border border-[#222228] text-[#8F9098] hover:text-white hover:border-white text-xs uppercase cursor-pointer rounded-none"
                 >
                   {t.cancel}
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 bg-white text-black font-mono text-xs font-bold uppercase hover:bg-[#FF5500] transition-colors cursor-pointer rounded-none"
+                  className="px-5 py-2 bg-white text-black text-xs font-bold uppercase hover:bg-neutral-200 transition-colors cursor-pointer rounded-none"
                 >
                   {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1" /> : null}
                   <span>{t.save}</span>
@@ -1002,14 +1006,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             >
               <X className="w-4 h-4" />
             </button>
-            <h3 className="text-base font-mono font-bold text-white uppercase mb-4">
+            <h3 className="text-base font-bold text-white uppercase mb-4">
               {t.changeEmail}
             </h3>
 
             {emailStep === 'input' ? (
               <form onSubmit={handleSendEmailOtp} className="space-y-4">
                 <div>
-                  <label className="text-[10px] font-mono uppercase text-neutral-400 font-bold block mb-1.5">
+                  <label className="text-[10px] uppercase text-neutral-400 font-bold block mb-1.5">
                     {t.newEmail}
                   </label>
                   <input
@@ -1018,21 +1022,21 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     onChange={(e) => setNewEmail(e.target.value)}
                     required
                     placeholder="name@domain.com"
-                    className="w-full h-10 px-3 bg-[#0F0F11] border border-white/20 focus:border-white text-white font-mono text-sm focus:outline-none rounded-none"
+                    className="w-full h-10 px-3 bg-[#0F0F11] border border-white/20 focus:border-white text-white text-sm focus:outline-none rounded-none"
                   />
                 </div>
                 <div className="flex items-center justify-end gap-3 pt-2">
                   <button
                     type="button"
                     onClick={() => setIsEmailModalOpen(false)}
-                    className="px-4 py-2 border border-white/20 text-neutral-400 hover:text-white font-mono text-xs uppercase cursor-pointer rounded-none"
+                    className="px-4 py-2 border border-[#222228] text-[#8F9098] hover:text-white hover:border-white text-xs uppercase cursor-pointer rounded-none"
                   >
                     {t.cancel}
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-5 py-2 bg-white text-black font-mono text-xs font-bold uppercase hover:bg-[#FF5500] transition-colors cursor-pointer rounded-none"
+                    className="px-5 py-2 bg-white text-black text-xs font-bold uppercase hover:bg-neutral-200 transition-colors cursor-pointer rounded-none"
                   >
                     {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1" /> : null}
                     <span>{t.sendCode}</span>
@@ -1041,18 +1045,18 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               </form>
             ) : (
               <form onSubmit={handleVerifyEmailOtp} className="space-y-4">
-                <p className="text-xs font-mono text-neutral-400">
+                <p className="text-xs text-neutral-400">
                   {t.codeSentTo} <strong className="text-white">{newEmail}</strong>
                 </p>
 
                 {emailTestCode && (
-                  <div className="p-2.5 bg-neutral-900 border border-white/10 text-xs font-mono text-neutral-300">
-                    Test Mode OTP: <strong className="text-[#FF5500]">{emailTestCode}</strong>
+                  <div className="p-2.5 bg-neutral-900 border border-white/10 text-xs text-neutral-300">
+                    Test Mode OTP: <strong className="text-white">{emailTestCode}</strong>
                   </div>
                 )}
 
                 <div>
-                  <label className="text-[10px] font-mono uppercase text-neutral-400 font-bold block mb-1.5">
+                  <label className="text-[10px] uppercase text-neutral-400 font-bold block mb-1.5">
                     {t.verificationCode}
                   </label>
                   <input
@@ -1062,7 +1066,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, ''))}
                     required
                     placeholder="000000"
-                    className="w-full h-12 text-center text-xl font-mono font-bold tracking-[8px] bg-[#0F0F11] border border-white text-white focus:outline-none rounded-none"
+                    className="w-full h-12 text-center text-xl font-bold tracking-[8px] bg-[#0F0F11] border border-white text-white focus:outline-none rounded-none"
                   />
                 </div>
 
@@ -1070,7 +1074,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   <button
                     type="button"
                     onClick={() => setEmailStep('input')}
-                    className="text-xs font-mono text-neutral-400 hover:text-white underline cursor-pointer"
+                    className="text-xs text-[#8F9098] hover:text-white underline cursor-pointer"
                   >
                     Back
                   </button>
@@ -1078,14 +1082,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsEmailModalOpen(false)}
-                      className="px-4 py-2 border border-white/20 text-neutral-400 hover:text-white font-mono text-xs uppercase cursor-pointer rounded-none"
+                      className="px-4 py-2 border border-[#222228] text-[#8F9098] hover:text-white hover:border-white text-xs uppercase cursor-pointer rounded-none"
                     >
                       {t.cancel}
                     </button>
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="px-5 py-2 bg-white text-black font-mono text-xs font-bold uppercase hover:bg-[#FF5500] transition-colors cursor-pointer rounded-none"
+                      className="px-5 py-2 bg-white text-black text-xs font-bold uppercase hover:bg-neutral-200 transition-colors cursor-pointer rounded-none"
                     >
                       {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1" /> : null}
                       <span>{t.verifyAndSave}</span>
@@ -1099,7 +1103,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       )}
 
       {/* ========================================================= */}
-      {/* MODAL 4: Change Password */}
+      {/* MODAL 3: Change Password */}
       {/* ========================================================= */}
       {isPasswordModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -1111,12 +1115,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             >
               <X className="w-4 h-4" />
             </button>
-            <h3 className="text-base font-mono font-bold text-white uppercase mb-4">
+            <h3 className="text-base font-bold text-white uppercase mb-4">
               {t.changePassword}
             </h3>
             <form onSubmit={handleChangePassword} className="space-y-4">
               <div>
-                <label className="text-[10px] font-mono uppercase text-neutral-400 font-bold block mb-1.5">
+                <label className="text-[10px] uppercase text-neutral-400 font-bold block mb-1.5">
                   {t.oldPassword}
                 </label>
                 <input
@@ -1124,12 +1128,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   value={oldPassword}
                   onChange={(e) => setOldPassword(e.target.value)}
                   required
-                  className="w-full h-10 px-3 bg-[#0F0F11] border border-white/20 focus:border-white text-white font-mono text-sm focus:outline-none rounded-none"
+                  className="w-full h-10 px-3 bg-[#0F0F11] border border-white/20 focus:border-white text-white text-sm focus:outline-none rounded-none"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] font-mono uppercase text-neutral-400 font-bold block mb-1.5">
+                <label className="text-[10px] uppercase text-neutral-400 font-bold block mb-1.5">
                   {t.newPassword}
                 </label>
                 <input
@@ -1138,12 +1142,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
-                  className="w-full h-10 px-3 bg-[#0F0F11] border border-white/20 focus:border-white text-white font-mono text-sm focus:outline-none rounded-none"
+                  className="w-full h-10 px-3 bg-[#0F0F11] border border-white/20 focus:border-white text-white text-sm focus:outline-none rounded-none"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] font-mono uppercase text-neutral-400 font-bold block mb-1.5">
+                <label className="text-[10px] uppercase text-neutral-400 font-bold block mb-1.5">
                   {t.confirmNewPassword}
                 </label>
                 <input
@@ -1152,7 +1156,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  className="w-full h-10 px-3 bg-[#0F0F11] border border-white/20 focus:border-white text-white font-mono text-sm focus:outline-none rounded-none"
+                  className="w-full h-10 px-3 bg-[#0F0F11] border border-white/20 focus:border-white text-white text-sm focus:outline-none rounded-none"
                 />
               </div>
 
@@ -1160,14 +1164,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsPasswordModalOpen(false)}
-                  className="px-4 py-2 border border-white/20 text-neutral-400 hover:text-white font-mono text-xs uppercase cursor-pointer rounded-none"
+                  className="px-4 py-2 border border-[#222228] text-[#8F9098] hover:text-white hover:border-white text-xs uppercase cursor-pointer rounded-none"
                 >
                   {t.cancel}
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 bg-white text-black font-mono text-xs font-bold uppercase hover:bg-[#FF5500] transition-colors cursor-pointer rounded-none"
+                  className="px-5 py-2 bg-white text-black text-xs font-bold uppercase hover:bg-neutral-200 transition-colors cursor-pointer rounded-none"
                 >
                   {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1" /> : null}
                   <span>{t.save}</span>
@@ -1179,7 +1183,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       )}
 
       {/* ========================================================= */}
-      {/* MODAL 5: Delete Account Confirmation */}
+      {/* MODAL 4: Delete Account Confirmation */}
       {/* ========================================================= */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
@@ -1191,26 +1195,26 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             >
               <X className="w-4 h-4" />
             </button>
-            <div className="flex items-center gap-2 text-red-500 font-mono font-bold text-sm uppercase mb-3">
+            <div className="flex items-center gap-2 text-red-500 font-bold text-sm uppercase mb-3">
               <AlertTriangle className="w-5 h-5" />
               <span>{t.deleteAccount}</span>
             </div>
-            <p className="text-xs font-mono text-neutral-300 leading-relaxed mb-6">
+            <p className="text-xs text-neutral-300 leading-relaxed mb-6">
               {t.deleteAccountConfirm}
             </p>
             <div className="flex items-center justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setIsDeleteModalOpen(false)}
-                className="px-4 py-2 border border-white/20 text-neutral-400 hover:text-white font-mono text-xs uppercase cursor-pointer rounded-none"
+                className="px-4 py-2 border border-[#222228] text-[#8F9098] hover:text-white hover:border-white text-xs uppercase cursor-pointer rounded-none"
               >
                 {t.cancel}
               </button>
               <button
                 type="button"
-                disabled={isSubmitting}
                 onClick={handleDeleteAccount}
-                className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-mono text-xs font-bold uppercase transition-colors cursor-pointer rounded-none"
+                disabled={isSubmitting}
+                className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold uppercase transition-colors cursor-pointer rounded-none"
               >
                 {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1" /> : null}
                 <span>{t.deleteAccount}</span>

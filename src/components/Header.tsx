@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, User, ShieldAlert } from 'lucide-react';
+import { ChevronDown, User } from 'lucide-react';
 import { LanguageIcon } from './LanguageIcon';
 import { PeeklyLogo } from './PeeklyLogo';
 import { FaceitLogo } from './AuthModal';
@@ -75,7 +75,7 @@ export const Header: React.FC<HeaderProps> = ({
   onGoHome,
   onOpenChangelog,
   onOpenProfile,
-  onOpenAdmin,
+  onOpenAdmin: _onOpenAdmin,
   onOpenAuthModal,
 }) => {
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
@@ -114,9 +114,11 @@ export const Header: React.FC<HeaderProps> = ({
 
     window.addEventListener('storage', syncUser);
     window.addEventListener('focus', syncUser);
+    window.addEventListener('peekly_user_updated', syncUser);
     return () => {
       window.removeEventListener('storage', syncUser);
       window.removeEventListener('focus', syncUser);
+      window.removeEventListener('peekly_user_updated', syncUser);
     };
   }, []);
 
@@ -133,13 +135,6 @@ export const Header: React.FC<HeaderProps> = ({
     if (onGoHome) onGoHome();
     else window.location.href = '/';
   };
-
-  const isCeo =
-    userSession?.nickname?.toLowerCase() === 'zeacvo' ||
-    userSession?.email?.toLowerCase() === 'zeacvo@icloud.com' ||
-    userSession?.role?.toLowerCase() === 'ceo' ||
-    userSession?.role?.toLowerCase() === 'admin' ||
-    userSession?.role?.toLowerCase() === 'owner';
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -283,8 +278,8 @@ export const Header: React.FC<HeaderProps> = ({
                 aria-label="User account menu"
                 className="group flex items-center gap-2 h-10 px-3 bg-[#0A0A0E] hover:bg-white/[0.06] border border-[#222228] hover:border-white text-xs transition-all rounded-none cursor-pointer focus-visible:ring-1 focus-visible:ring-white shrink-0"
               >
-                {/* Avatar / Monogram */}
-                <div className="w-6 h-6 rounded-none bg-[#1F1F23] border border-white/20 overflow-hidden shrink-0 flex items-center justify-center">
+                {/* Avatar / Icon */}
+                <div className="w-6 h-6 rounded-none bg-[#000000] border border-[#222228] overflow-hidden shrink-0 flex items-center justify-center">
                   {(userSession.avatar || userSession.picture) &&
                   !(userSession.avatar || userSession.picture)?.includes('default_avatar.png') ? (
                     <img
@@ -297,9 +292,7 @@ export const Header: React.FC<HeaderProps> = ({
                       }}
                     />
                   ) : (
-                    <span className="font-mono font-bold text-white text-[11px] select-none leading-none">
-                      {(userSession.nickname || userSession.email || 'U')[0].toUpperCase()}
-                    </span>
+                    <User className="w-3.5 h-3.5 text-[#FFFFFF]" />
                   )}
                 </div>
 
@@ -321,11 +314,11 @@ export const Header: React.FC<HeaderProps> = ({
                 <div
                   role="menu"
                   aria-label="User Account Options"
-                  className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-[#0D0D0D] border border-[#1A1A1F] rounded-none shadow-2xl p-4 flex flex-col gap-3.5 z-50 animate-fade-in"
+                  className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-[#0A0A0A] border border-[#1A1A1F] rounded-none shadow-2xl p-4 flex flex-col gap-3.5 z-50 animate-fade-in"
                 >
                   {/* Profile Header */}
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-none bg-[#1F1F23] border border-white/20 overflow-hidden shrink-0 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-none bg-[#000000] border border-[#222228] overflow-hidden shrink-0 flex items-center justify-center">
                       {(userSession.avatar || userSession.picture) &&
                       !(userSession.avatar || userSession.picture)?.includes('default_avatar.png') ? (
                         <img
@@ -338,9 +331,7 @@ export const Header: React.FC<HeaderProps> = ({
                           }}
                         />
                       ) : (
-                        <span className="font-mono font-bold text-white text-base select-none">
-                          {(userSession.nickname || userSession.email || 'U')[0].toUpperCase()}
-                        </span>
+                        <User className="w-5 h-5 text-[#FFFFFF]" />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -348,7 +339,7 @@ export const Header: React.FC<HeaderProps> = ({
                         {userSession.nickname}
                       </div>
                       {userSession.email && (
-                        <div className="font-mono text-xs text-neutral-400 truncate leading-snug">
+                        <div className="text-xs text-[#8F9098] truncate leading-snug">
                           {userSession.email}
                         </div>
                       )}
@@ -357,7 +348,7 @@ export const Header: React.FC<HeaderProps> = ({
 
                   {/* FACEIT Integration: compact strict badge or full-width button */}
                   {userSession.faceit_connected || userSession.faceit_nickname ? (
-                    <div className="border border-[#1A1A1F] bg-white/[0.03] px-3.5 py-2.5 flex items-center justify-between text-xs font-mono">
+                    <div className="border border-[#1A1A1F] bg-white/[0.03] px-3.5 py-2.5 flex items-center justify-between text-xs">
                       <span className="flex items-center gap-2 text-neutral-400">
                         <FaceitLogo className="w-3.5 h-3.5" />
                         <span className="text-white font-medium">FACEIT</span>
@@ -379,9 +370,9 @@ export const Header: React.FC<HeaderProps> = ({
                   {/* Divider */}
                   <div className="border-t border-[#1A1A1F] my-0.5" />
 
-                  {/* Navigation Links: Full-Width Brand Interactive Buttons */}
+                  {/* Navigation Links: Exactly 2 Actions */}
                   <div className="flex flex-col gap-2">
-                    {/* My Profile */}
+                    {/* 1. My Profile (White Button) */}
                     <button
                       type="button"
                       onClick={() => {
@@ -402,41 +393,18 @@ export const Header: React.FC<HeaderProps> = ({
                       <span>{isRu ? 'МОЙ ПРОФИЛЬ' : 'MY PROFILE'}</span>
                     </button>
 
-                    {/* Admin Console (if CEO / Admin / Owner) */}
-                    {isCeo && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setUserDropdownOpen(false);
-                          if (onOpenAdmin) onOpenAdmin();
-                          else {
-                            try {
-                              history.pushState(null, '', '/admin');
-                              window.dispatchEvent(new PopStateEvent('popstate'));
-                            } catch {
-                              window.location.href = '/admin';
-                            }
-                          }
-                        }}
-                        className="btn-brand-interactive h-10 gap-2"
-                      >
-                        <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
-                        <span>{isRu ? 'КОНСОЛЬ АДМИНИСТРАТОРА ↗' : 'ADMIN CONSOLE ↗'}</span>
-                      </button>
-                    )}
+                    {/* 2. Sign Out (Gray Button) */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        handleLogout();
+                      }}
+                      className="btn-brand-signout h-10"
+                    >
+                      <span>{isRu ? 'ВЫЙТИ ИЗ АККАУНТА' : 'SIGN OUT'}</span>
+                    </button>
                   </div>
-
-                  {/* Sign Out Button */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setUserDropdownOpen(false);
-                      handleLogout();
-                    }}
-                    className="btn-brand-signout h-10"
-                  >
-                    <span>{isRu ? 'ВЫЙТИ ИЗ АККАУНТА' : 'SIGN OUT'}</span>
-                  </button>
                 </div>
               )}
             </div>
