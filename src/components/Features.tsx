@@ -24,7 +24,7 @@ const CardTextures: Record<string, React.FC> = {
   // 001: MAP POOL RADAR CHART (Single centered regular pentagon with 5 rays, subtle fill)
   radar: () => (
     <svg role="img" aria-label="Map Pool Radar Chart preview" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
-      <rect width="300" height="180" fill="#0a0a0a" />
+      <rect width="300" height="180" fill="#090909" />
 
       {/* 5 Spokes radiating from center (150, 90) */}
       <line x1="150" y1="90" x2="150" y2="38" stroke="#2c2c2c" strokeWidth="1" />
@@ -50,7 +50,7 @@ const CardTextures: Record<string, React.FC> = {
   // 002: PLAYER STATS (Authentic FACEIT Profile HUD: avatar, nickname bar, 6 stat value skeletons — zero text/digits)
   stats: () => (
     <svg role="img" aria-label="Player Performance Stats Overlay preview" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
-      <rect width="300" height="180" fill="#0a0a0a" />
+      <rect width="300" height="180" fill="#090909" />
 
       {/* Main Player Profile Banner Card */}
       <rect x="24" y="24" width="252" height="132" fill="#0d0d0d" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
@@ -102,7 +102,7 @@ const CardTextures: Record<string, React.FC> = {
   // 003: AUTO-ACCEPT MATCH (Unified window shell with faint skeleton & prominent horizontal plate with bold checkmark)
   autoAcceptMatch: () => (
     <svg role="img" aria-label="Auto-Accept Match Check preview" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
-      <rect width="300" height="180" fill="#0a0a0a" />
+      <rect width="300" height="180" fill="#090909" />
 
       {/* Unified Window Shell */}
       <rect x="25" y="28" width="250" height="124" fill="#0d0d0d" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
@@ -145,7 +145,7 @@ const CardTextures: Record<string, React.FC> = {
   // 004: AUTO-ACCEPT PARTY (Minimalist invite: square avatar slot, neutral arrow →, monochrome button with 👥)
   autoAcceptParty: () => (
     <svg role="img" aria-label="Auto-Accept Party Invites preview" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
-      <rect width="300" height="180" fill="#0a0a0a" />
+      <rect width="300" height="180" fill="#090909" />
 
       {/* Unified Window Shell */}
       <rect x="25" y="28" width="250" height="124" fill="#0d0d0d" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
@@ -195,7 +195,7 @@ const CardTextures: Record<string, React.FC> = {
   // 005: ENHANCED MATCH HISTORY (Only 1st row has download button with ↓, subsequent rows are pale placeholders)
   enhancedHistory: () => (
     <svg role="img" aria-label="Enhanced Match History preview" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
-      <rect width="300" height="180" fill="#0a0a0a" />
+      <rect width="300" height="180" fill="#090909" />
       
       {/* Top Match Row (Active / Featured) */}
       <rect x="25" y="20" width="250" height="28" fill="#141414" stroke="#fff" strokeWidth="1" />
@@ -236,7 +236,7 @@ const CardTextures: Record<string, React.FC> = {
   // 006: AUTO-COPY SERVER IP (Unified window shell: prompt, connect IP & copy badge turn #FF5500)
   autoCopyServer: () => (
     <svg role="img" aria-label="Auto-Copy Server IP preview" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
-      <rect width="300" height="180" fill="#0a0a0a" />
+      <rect width="300" height="180" fill="#090909" />
 
       {/* Unified Window Shell */}
       <rect x="25" y="28" width="250" height="124" fill="#0d0d0d" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
@@ -276,7 +276,7 @@ const CardTextures: Record<string, React.FC> = {
   // 007: LOBBY FOCUS MODE (Muted dimmed rosters opacity-20 on sides, high-contrast white [ ] framing active center blocks)
   focusMode: () => (
     <svg role="img" aria-label="Lobby Focus Mode preview" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
-      <rect width="300" height="180" fill="#0a0a0a" />
+      <rect width="300" height="180" fill="#090909" />
 
       {/* Unified Window Shell */}
       <rect x="25" y="28" width="250" height="124" fill="#0d0d0d" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
@@ -346,7 +346,7 @@ const CardTextures: Record<string, React.FC> = {
   // 008: TEAM AVERAGE ELO (FACEIT Matchroom Header HUD: Team A ELO plate + Captain avatar vs Center divider vs Captain avatar + Team B ELO plate — zero text/digits)
   avgEloPill: () => (
     <svg role="img" aria-label="Team Average ELO Badge preview" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
-      <rect width="300" height="180" fill="#0a0a0a" />
+      <rect width="300" height="180" fill="#090909" />
 
       {/* Main Match Header Banner Container */}
       <rect x="24" y="38" width="252" height="104" fill="#0d0d0d" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
@@ -430,7 +430,7 @@ const CardTextures: Record<string, React.FC> = {
   // 009: SIDEBAR ELO WIDGET (Minimalist 2-color monochrome skeleton HUD)
   sidebarElo: () => (
     <svg role="img" aria-label="Sidebar ELO Widget preview" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
-      <rect width="300" height="180" fill="#0a0a0a" />
+      <rect width="300" height="180" fill="#090909" />
 
       {/* Main Floating Widget Modal (Left / Center) */}
       <g>
@@ -502,7 +502,7 @@ const CardTextures: Record<string, React.FC> = {
   // 010: MAP SELECTOR WIN RATES (Center tile progress bar turns #FF5500)
   mapSelectorStats: () => (
     <svg role="img" aria-label="Map Selector Win Rates preview" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
-      <rect width="300" height="180" fill="#0a0a0a" />
+      <rect width="300" height="180" fill="#090909" />
       {/* Left Tile */}
       <g transform="translate(25, 35)">
         <rect width="75" height="110" stroke="#333" fill="#111" />
@@ -579,25 +579,25 @@ export const Features: React.FC<FeaturesProps> = ({ currentLang, onSelectFeature
                     onSelectFeature(item.id);
                   }
                 }}
-                className="group relative rounded-none flex flex-col h-full overflow-hidden bg-[#0a0a0a] border border-[#1f1f1f] hover:border-white/50 focus-visible:border-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white transition-colors duration-200 cursor-pointer select-none"
+                className="group relative rounded-none flex flex-col h-full overflow-hidden bg-[#090909] border border-[#1A1A1F] hover:border-white/50 focus-visible:border-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white transition-colors duration-200 cursor-pointer select-none"
                 aria-label={`${indexCode} ${item.title}`}
               >
                 {/* 1. Interactive Preview (Artwork top) */}
                 <div 
-                  className="h-44 sm:h-48 min-h-[176px] sm:min-h-[192px] aspect-[5/3] w-full relative border-b border-[#1f1f1f] overflow-hidden bg-[#0a0a0a] shrink-0 flex items-center justify-center cursor-pointer select-none"
+                  className="h-44 sm:h-48 min-h-[176px] sm:min-h-[192px] aspect-[5/3] w-full relative border-b border-[#1A1A1F] overflow-hidden bg-[#090909] shrink-0 flex items-center justify-center cursor-pointer select-none"
                   style={{ contain: 'layout' }}
                 >
                   <TextureComponent />
                 </div>
 
                 {/* Card Content Body: Clean Minimalist Layout */}
-                <div className="p-5 sm:p-7 flex flex-col flex-1 bg-[#0a0a0a] cursor-pointer select-none">
+                <div className="p-5 sm:p-7 flex flex-col flex-1 bg-[#090909] cursor-pointer select-none">
                   {/* 2. Number & Icon row (Strictly centered flex with zero excess line-height) */}
                   <div className="flex items-center justify-between mb-3 leading-none w-full cursor-pointer select-none">
-                    <span className="font-mono text-xl sm:text-2xl font-bold tracking-wider text-neutral-500 group-hover:text-[#FF5500] transition-colors duration-200 leading-none cursor-pointer select-none">
+                    <span className="font-mono text-xl sm:text-2xl font-bold tracking-wider text-[#929292] group-hover:text-[#FF5500] transition-colors duration-200 leading-none cursor-pointer select-none">
                       {indexCode}
                     </span>
-                    <div className="text-neutral-500 group-hover:text-neutral-300 transition-colors duration-200 flex items-center shrink-0 cursor-pointer select-none">
+                    <div className="text-[#929292] group-hover:text-white transition-colors duration-200 flex items-center shrink-0 cursor-pointer select-none">
                       {iconMap[item.id] || <CheckCircle className="w-5 h-5 stroke-[1.75]" />}
                     </div>
                   </div>
@@ -608,7 +608,7 @@ export const Features: React.FC<FeaturesProps> = ({ currentLang, onSelectFeature
                   </h3>
 
                   {/* 4. Description (Pure benefit, no noise) */}
-                  <p className="font-sans text-xs sm:text-sm md:text-[15px] font-normal text-neutral-400 leading-relaxed text-left sm:text-justify hyphens-auto w-full max-w-none cursor-pointer select-none">
+                  <p className="font-sans text-xs sm:text-sm md:text-[15px] font-normal text-[#929292] leading-relaxed text-left sm:text-justify hyphens-auto w-full max-w-none cursor-pointer select-none">
                     {item.desc}
                   </p>
                 </div>

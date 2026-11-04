@@ -239,7 +239,7 @@ export const Header: React.FC<HeaderProps> = ({
             {langDropdownOpen && (
               <div
                 role="listbox"
-                className="absolute right-0 top-full mt-2 w-max bg-[#0D0D0D] border border-white/15 rounded-none shadow-2xl flex flex-col z-50"
+                className="absolute right-0 top-full mt-2 w-max bg-[#090909] border border-[#1A1A1F] rounded-none shadow-2xl flex flex-col z-50"
               >
                 {SUPPORTED_LANGUAGES.map((lang) => {
                   const isSelected = currentLang === lang.code;
@@ -276,7 +276,7 @@ export const Header: React.FC<HeaderProps> = ({
                 aria-expanded={userDropdownOpen}
                 aria-haspopup="menu"
                 aria-label="User account menu"
-                className="group flex items-center gap-2 h-10 px-3 bg-[#0A0A0E] hover:bg-white/[0.06] border border-[#222228] hover:border-white text-xs transition-all rounded-none cursor-pointer focus-visible:ring-1 focus-visible:ring-white shrink-0"
+                className="group flex items-center gap-2 h-10 px-3 bg-[#090909] hover:bg-white/[0.06] border border-[#222228] hover:border-white text-xs transition-all rounded-none cursor-pointer focus-visible:ring-1 focus-visible:ring-white shrink-0"
               >
                 {/* Avatar / Icon */}
                 <div className="w-6 h-6 rounded-none bg-[#000000] border border-[#222228] overflow-hidden shrink-0 flex items-center justify-center">
@@ -314,7 +314,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <div
                   role="menu"
                   aria-label="User Account Options"
-                  className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-[#0A0A0A] border border-[#1A1A1F] rounded-none shadow-2xl p-4 flex flex-col gap-3.5 z-50 animate-fade-in"
+                  className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-[#090909] border border-[#1A1A1F] rounded-none shadow-2xl p-4 flex flex-col gap-3.5 z-50 animate-fade-in"
                 >
                   {/* Profile Header */}
                   <div className="flex items-center gap-3">
@@ -339,7 +339,7 @@ export const Header: React.FC<HeaderProps> = ({
                         {userSession.nickname}
                       </div>
                       {userSession.email && (
-                        <div className="text-xs text-[#8F9098] truncate leading-snug">
+                        <div className="text-xs text-[#929292] truncate leading-snug">
                           {userSession.email}
                         </div>
                       )}
@@ -437,7 +437,7 @@ export const Header: React.FC<HeaderProps> = ({
               <div
                 role="menu"
                 aria-label="Supported Browsers"
-                className="absolute right-0 top-full mt-2 w-52 sm:w-56 bg-[#0D0D0D] border border-white/15 rounded-none shadow-2xl flex flex-col py-1 z-50"
+                className="absolute right-0 top-full mt-2 w-52 sm:w-56 bg-[#090909] border border-[#1A1A1F] rounded-none shadow-2xl flex flex-col py-1 z-50"
               >
                 {BROWSERS.map((browser) => (
                   <a

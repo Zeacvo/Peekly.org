@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import type { Language } from '../translations';
 import { adminTranslations } from '../data/adminTranslations';
-import { type PlayerUser, type AdminStats, calculateFaceitLevel } from '../../functions/api/storage/usersDb';
+import { type PlayerUser, type AdminStats } from '../../functions/api/storage/usersDb';
 
 interface AdminDashboardProps {
   currentLang?: Language;
@@ -436,67 +436,62 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         {/* 3. Top KPI Metric Cards in clean Apple-minimalist style */}
         <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
           {/* Total Players */}
-          <div className="bg-[#0A0A0E] border border-[#1A1A1F] p-5 sm:p-6 transition-colors">
-            <div className="text-xs text-neutral-400 font-semibold tracking-widest uppercase font-mono mb-2">
+          <div className="bg-[#090909] border border-[#1A1A1F] p-5 sm:p-6 transition-colors">
+            <div className="text-xs text-[#929292] font-semibold tracking-widest uppercase mb-2">
               {t.totalPlayers}
             </div>
-            <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans">
+            <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
               {stats?.totalPlayers ?? users.length}
             </div>
           </div>
 
           {/* New Today */}
-          <div className="bg-[#0A0A0E] border border-[#1A1A1F] p-5 sm:p-6 transition-colors">
-            <div className="text-xs text-neutral-400 font-semibold tracking-widest uppercase font-mono mb-2">
+          <div className="bg-[#090909] border border-[#1A1A1F] p-5 sm:p-6 transition-colors">
+            <div className="text-xs text-[#929292] font-semibold tracking-widest uppercase mb-2">
               {t.newToday}
             </div>
-            <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans">
+            <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
               {stats ? (stats.newToday > 0 ? `+${stats.newToday}` : '0') : users.length}
             </div>
           </div>
 
           {/* Average ELO */}
-          <div className="bg-[#0A0A0E] border border-[#1A1A1F] p-5 sm:p-6 transition-colors">
-            <div className="text-xs text-neutral-400 font-semibold tracking-widest uppercase font-mono mb-2">
+          <div className="bg-[#090909] border border-[#1A1A1F] p-5 sm:p-6 transition-colors">
+            <div className="text-xs text-[#929292] font-semibold tracking-widest uppercase mb-2">
               {t.avgElo}
             </div>
-            <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans flex items-baseline gap-2">
-              <span>{avgElo ? avgElo.toLocaleString() : '—'}</span>
-              {avgElo > 0 && (
-                <span className="text-xs font-mono font-bold text-neutral-300 border border-white/20 px-1.5 py-0.5">
-                  LVL {calculateFaceitLevel(avgElo)}
-                </span>
-              )}
+            <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+              {avgElo ? avgElo.toLocaleString() : '—'}
             </div>
           </div>
 
           {/* Active 24h */}
-          <div className="bg-[#0A0A0E] border border-[#1A1A1F] p-5 sm:p-6 transition-colors">
-            <div className="text-xs text-neutral-400 font-semibold tracking-widest uppercase font-mono mb-2">
+          <div className="bg-[#090909] border border-[#1A1A1F] p-5 sm:p-6 transition-colors">
+            <div className="text-xs text-[#929292] font-semibold tracking-widest uppercase mb-2">
               {t.active24h}
             </div>
-            <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans">
+            <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
               {stats?.active24h ?? users.length}
             </div>
           </div>
 
           {/* Top Region */}
-          <div className="bg-[#0A0A0E] border border-[#1A1A1F] p-5 sm:p-6 transition-colors col-span-2 sm:col-span-1">
-            <div className="text-xs text-neutral-400 font-semibold tracking-widest uppercase font-mono mb-2">
+          <div className="bg-[#090909] border border-[#1A1A1F] p-5 sm:p-6 transition-colors col-span-2 sm:col-span-1">
+            <div className="text-xs text-[#929292] font-semibold tracking-widest uppercase mb-2">
               {t.topRegion}
             </div>
-            <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans">
+            <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
               {stats?.topCountry ?? '—'}
             </div>
           </div>
         </section>
 
         {/* 4. Filter & Search Controls */}
-        <section className="bg-[#0A0A0E] border border-[#1A1A1F] p-3 sm:p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3.5">
+        <section className="bg-[#090909] border border-[#1A1A1F] p-3 sm:p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3.5">
           {/* Search Input */}
           <div className="relative flex-1">
             <svg
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500 w-4 h-4 pointer-events-none"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#929292] w-4 h-4 pointer-events-none"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -509,7 +504,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t.searchPlaceholder}
-              className="w-full bg-black border border-white/15 focus:border-white focus:outline-none text-white text-xs font-mono placeholder:text-neutral-500 pl-10 pr-4 py-2 transition-colors rounded-none"
+              className="w-full bg-[#000000] border border-[#1A1A1F] focus:border-white focus:outline-none text-white text-xs placeholder:text-[#929292] pl-10 pr-4 py-2 transition-colors rounded-none"
             />
           </div>
 
@@ -518,7 +513,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <select
               value={countryFilter}
               onChange={(e) => setCountryFilter(e.target.value)}
-              className="bg-black border border-white/15 focus:border-white focus:outline-none text-neutral-300 text-xs font-mono px-3 py-2 cursor-pointer transition-colors rounded-none"
+              className="bg-[#000000] border border-[#1A1A1F] focus:border-white focus:outline-none text-[#929292] hover:text-white text-xs px-3 py-2 cursor-pointer transition-colors rounded-none"
             >
               <option value="ALL">{t.allCountries} ({countries.length})</option>
               {countries.map((c) => (
@@ -532,7 +527,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <select
               value={planFilter}
               onChange={(e) => setPlanFilter(e.target.value as 'ALL' | 'FREE' | 'PRO')}
-              className="bg-black border border-white/15 focus:border-white focus:outline-none text-neutral-300 text-xs font-mono px-3 py-2 cursor-pointer transition-colors rounded-none"
+              className="bg-[#000000] border border-[#1A1A1F] focus:border-white focus:outline-none text-[#929292] hover:text-white text-xs px-3 py-2 cursor-pointer transition-colors rounded-none"
             >
               <option value="ALL">{t.allPlans}</option>
               <option value="FREE">{t.planFree}</option>
@@ -543,7 +538,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as 'last_login' | 'created_at' | 'elo' | 'nickname')}
-              className="bg-black border border-white/15 focus:border-white focus:outline-none text-neutral-300 text-xs font-mono px-3 py-2 cursor-pointer transition-colors rounded-none"
+              className="bg-[#000000] border border-[#1A1A1F] focus:border-white focus:outline-none text-[#929292] hover:text-white text-xs px-3 py-2 cursor-pointer transition-colors rounded-none"
             >
               <option value="last_login">{t.sortLastActive}</option>
               <option value="created_at">{t.sortRegistration}</option>
@@ -555,7 +550,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <button
               type="button"
               onClick={handleExportCsv}
-              className="inline-flex items-center justify-center text-center h-[34px] px-3 sm:px-4 rounded-none btn-header-install font-sans font-bold text-[10px] sm:text-[11px] md:text-xs tracking-wider uppercase cursor-pointer shadow-lg active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white gap-2"
+              className="inline-flex items-center justify-center text-center h-[34px] px-3 sm:px-4 rounded-none btn-header-install font-bold text-[10px] sm:text-[11px] md:text-xs tracking-wider uppercase cursor-pointer shadow-lg active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white gap-2"
               title={t.exportCsv}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
@@ -570,7 +565,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <button
               type="button"
               onClick={handleRefresh}
-              className="bg-black border border-white/15 hover:border-white hover:text-white text-neutral-400 p-2 cursor-pointer transition-colors rounded-none h-[34px] w-[34px] flex items-center justify-center"
+              className="bg-[#000000] border border-[#1A1A1F] hover:border-white hover:text-white text-[#929292] p-2 cursor-pointer transition-colors rounded-none h-[34px] w-[34px] flex items-center justify-center"
               title={t.refreshTooltip}
             >
               <svg
@@ -589,13 +584,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </section>
 
         {/* 5. Registered Players Table */}
-        <section className="bg-[#0A0A0E] border border-[#1A1A1F] overflow-hidden">
-          <div className="px-5 py-4 border-b border-[#1A1A1F] flex items-center justify-between bg-black/40">
+        <section className="bg-[#090909] border border-[#1A1A1F] overflow-hidden">
+          <div className="px-5 py-4 border-b border-[#1A1A1F] flex items-center justify-between bg-[#000000]">
             <div className="flex items-center gap-3">
-              <span className="font-mono text-xs font-extrabold text-white tracking-widest uppercase">
+              <span className="text-xs font-extrabold text-white tracking-widest uppercase">
                 {t.registeredPlayers}
               </span>
-              <span className="px-2 py-0.5 bg-white/10 text-[10px] font-mono text-neutral-300">
+              <span className="px-2 py-0.5 bg-white/10 text-[10px] text-[#929292]">
                 {filteredUsers.length} {t.of} {users.length}
               </span>
             </div>
@@ -604,7 +599,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-[#1A1A1F] bg-black text-xs font-mono text-neutral-400 uppercase tracking-wider">
+                <tr className="border-b border-[#1A1A1F] bg-[#000000] text-xs text-[#929292] uppercase tracking-wider">
                   <th className="py-3 px-4 w-10 text-center">
                     <input
                       type="checkbox"
@@ -626,21 +621,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <th className="py-3 px-5 text-right">{t.colActions}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-900 text-sm">
+              <tbody className="divide-y divide-[#1A1A1F] text-sm">
                 {isLoading && users.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-neutral-500 font-mono text-xs">
+                    <td colSpan={8} className="py-12 text-center text-[#929292] text-xs">
                       {t.loadingRecords}
                     </td>
                   </tr>
                 ) : filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-neutral-500 font-mono text-xs">
+                    <td colSpan={8} className="py-12 text-center text-[#929292] text-xs">
                       {t.noPlayersFound}
                     </td>
                   </tr>
                 ) : (
-                  filteredUsers.map((player) => {
+                  filteredUsers.map((player, index) => {
                     const isCeo =
                       player.nickname.toLowerCase() === 'zeacvo' ||
                       player.email.toLowerCase() === 'zeacvo@icloud.com';
@@ -648,8 +643,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     return (
                       <tr
                         key={player.guid}
-                        className={`hover:bg-white/[0.03] transition-colors group ${
-                          selectedIds.includes(player.guid) ? 'bg-[#FF5500]/[0.04]' : ''
+                        className={`transition-colors group ${
+                          index % 2 === 0 ? 'bg-[#000000]' : 'bg-[#090909]'
+                        } ${
+                          selectedIds.includes(player.guid) ? '!bg-[#FF5500]/[0.08]' : 'hover:bg-white/[0.04]'
                         }`}
                       >
                         {/* Col 0: Checkbox */}
@@ -669,7 +666,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         {/* Col 1: Player (Avatar + Clickable Nickname to Profile + CEO Badge + GUID) */}
                         <td className="py-3.5 px-5">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-none bg-[#141414] border border-white/10 overflow-hidden shrink-0 flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-none bg-[#000000] border border-[#222228] overflow-hidden shrink-0 flex items-center justify-center">
                               {player.avatar && !player.avatar.includes('default_avatar.png') ? (
                                 <img
                                   src={player.avatar}
@@ -682,7 +679,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                 />
                               ) : (
                                 <svg
-                                  className="w-4 h-4 text-neutral-400"
+                                  className="w-4 h-4 text-white"
                                   viewBox="0 0 24 24"
                                   fill="none"
                                   stroke="currentColor"
@@ -714,12 +711,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                   </span>
                                 </a>
                                 {isCeo && (
-                                  <span className="border border-white/20 text-neutral-300 text-[10px] font-mono px-1.5 py-0.5 rounded-none font-semibold uppercase tracking-wider">
+                                  <span className="border border-[#222228] text-white bg-[#141416] text-[10px] px-1.5 py-0.5 rounded-none font-semibold uppercase tracking-wider">
                                     CEO
                                   </span>
                                 )}
                               </div>
-                              <span className="text-[11px] font-mono text-neutral-500 truncate max-w-[150px]">
+                              <span className="text-[11px] text-[#929292] truncate max-w-[150px]">
                                 {player.guid}
                               </span>
                             </div>
@@ -731,14 +728,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           <div className="flex items-center gap-2">
                             <a
                               href={`mailto:${player.email}`}
-                              className="font-mono text-xs text-neutral-300 hover:text-white transition-colors"
+                              className="text-xs text-[#929292] hover:text-white transition-colors"
                             >
                               {player.email}
                             </a>
                             <button
                               type="button"
                               onClick={() => copyToClipboard(player.email)}
-                              className="opacity-0 group-hover:opacity-100 text-[10px] font-mono text-neutral-400 hover:text-white px-1.5 py-0.5 bg-white/5 border border-white/10 transition-opacity cursor-pointer rounded-none"
+                              className="opacity-0 group-hover:opacity-100 text-[10px] text-[#929292] hover:text-white px-1.5 py-0.5 bg-white/5 border border-[#222228] transition-opacity cursor-pointer rounded-none"
                               title={t.copyEmail}
                             >
                               {copiedEmail === player.email ? '✓' : (
@@ -756,21 +753,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           {player.is_faceit_linked && (player.elo || 0) > 0 ? (
                             <div className="flex items-center gap-2.5">
                               <div
-                                className="px-1.5 py-0.5 bg-white/10 border border-white/20 font-mono font-bold text-xs text-white"
+                                className="px-1.5 py-0.5 bg-transparent border border-[#222228] font-bold text-xs text-white"
                                 title={`FACEIT Level ${player.level}`}
                               >
                                 LVL {player.level}
                               </div>
                               <div className="flex flex-col">
-                                <span className="font-mono text-sm font-bold text-white">
+                                <span className="text-sm font-bold text-white">
                                   {player.elo.toLocaleString()}
                                 </span>
-                                <span className="text-[10px] font-mono text-neutral-500">{t.cs2Matchmaking}</span>
+                                <span className="text-[10px] text-[#929292]">{t.cs2Matchmaking}</span>
                               </div>
                             </div>
                           ) : (
-                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-neutral-900 border border-neutral-700 text-neutral-400 font-mono text-[11px] font-bold tracking-wider">
-                              <span className="w-1.5 h-1.5 rounded-full bg-neutral-500 animate-pulse" />
+                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-transparent border border-[#222228] text-[#929292] text-[11px] font-bold tracking-wider">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#929292] animate-pulse" />
                               <span>{t.pendingNotLinked}</span>
                             </div>
                           )}
@@ -779,22 +776,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         {/* Col 4: Country */}
                         <td className="py-3.5 px-5">
                           {player.country && player.country !== '—' ? (
-                            <div className="flex items-center gap-2 font-mono text-xs">
+                            <div className="flex items-center gap-2 text-xs">
                               <CountryFlag countryCode={player.country} />
                               <span className="font-bold text-white uppercase">{player.country}</span>
                             </div>
                           ) : (
-                            <span className="text-neutral-500 font-mono text-xs">—</span>
+                            <span className="text-[#929292] text-xs">—</span>
                           )}
                         </td>
 
                         {/* Col 5: Registration & Activity */}
                         <td className="py-3.5 px-5">
-                          <div className="flex flex-col font-mono text-xs">
+                          <div className="flex flex-col text-xs">
                             <span className="text-white font-medium">
                               {formatRelativeTime(player.last_login_at, t.justNow)}
                             </span>
-                            <span className="text-[10px] text-neutral-500">
+                            <span className="text-[10px] text-[#929292]">
                               {t.joined} {formatDate(player.created_at)}
                             </span>
                           </div>
@@ -803,7 +800,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         {/* Col 6: Plan */}
                         <td className="py-3.5 px-5 text-right">
                           <span
-                            className="inline-block font-mono text-[10px] font-bold uppercase tracking-wider text-neutral-400 border border-white/10 px-2 py-0.5"
+                            className="inline-block text-[10px] font-bold uppercase tracking-wider text-[#929292] border border-[#222228] px-2 py-0.5"
                           >
                             {player.plan}
                           </span>
@@ -815,7 +812,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                             <button
                               type="button"
                               onClick={() => handleRequestSingleDelete(player)}
-                              className="p-1.5 bg-transparent border border-white/10 hover:border-red-500/60 hover:bg-red-950/20 text-neutral-400 hover:text-red-400 transition-all cursor-pointer rounded-none inline-flex items-center justify-center"
+                              className="p-1.5 bg-transparent border border-[#222228] hover:border-red-500/60 hover:bg-red-950/20 text-[#929292] hover:text-red-400 transition-all cursor-pointer rounded-none inline-flex items-center justify-center"
                               title={`${t.confirmDelete} ${player.nickname}`}
                             >
                               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -824,7 +821,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                               </svg>
                             </button>
                           ) : (
-                            <span className="text-[10px] font-mono text-neutral-600">—</span>
+                            <span className="text-[10px] text-[#929292]">—</span>
                           )}
                         </td>
                       </tr>
@@ -836,7 +833,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
 
           {/* Table Footer */}
-          <div className="px-5 py-3 border-t border-[#1A1A1F] bg-[#0A0A0E] flex items-center justify-between text-xs font-mono text-neutral-500">
+          <div className="px-5 py-3 border-t border-[#1A1A1F] bg-[#090909] flex items-center justify-between text-xs text-[#929292]">
             <span>
               {t.totalDatabaseSize}: {users.length} {users.length === 1 ? t.playerSingular : t.playerPlural}
             </span>
@@ -845,10 +842,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         {/* Floating Action Bar for Bulk Deletion */}
         {selectedIds.length > 0 && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#0A0A0E] border border-white/20 px-6 py-3.5 shadow-2xl flex items-center gap-5 sm:gap-6 animate-in fade-in slide-in-from-bottom duration-200">
-            <div className="flex items-center gap-2 font-mono text-xs">
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#090909] border border-white/20 px-6 py-3.5 shadow-2xl flex items-center gap-5 sm:gap-6 animate-in fade-in slide-in-from-bottom duration-200">
+            <div className="flex items-center gap-2 text-xs">
               <span className="w-2 h-2 rounded-full bg-[#FF5500] animate-pulse" />
-              <span className="text-neutral-400">{t.selected}:</span>
+              <span className="text-[#929292]">{t.selected}:</span>
               <span className="font-bold text-white px-2 py-0.5 bg-white/10">
                 {selectedIds.length}
               </span>
@@ -857,7 +854,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <button
               type="button"
               onClick={handleRequestBulkDelete}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-mono text-xs font-bold uppercase transition-colors cursor-pointer rounded-none flex items-center gap-2 shadow-lg"
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold uppercase transition-colors cursor-pointer rounded-none flex items-center gap-2 shadow-lg"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polyline points="3 6 5 6 21 6" />
@@ -869,7 +866,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <button
               type="button"
               onClick={() => setSelectedIds([])}
-              className="text-xs font-mono text-neutral-400 hover:text-white uppercase transition-colors cursor-pointer"
+              className="text-xs text-[#929292] hover:text-white uppercase transition-colors cursor-pointer"
             >
               {t.clearSelection}
             </button>
@@ -900,7 +897,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   type="button"
                   onClick={() => setDeleteModal({ isOpen: false, ids: [], isBulk: false })}
                   disabled={isDeleting}
-                  className="px-4 py-2 border border-white/20 text-neutral-400 hover:text-white uppercase cursor-pointer rounded-none"
+                  className="px-4 py-2 border border-[#222228] text-[#929292] hover:text-white hover:border-white uppercase cursor-pointer rounded-none"
                 >
                   {t.cancel}
                 </button>
@@ -926,7 +923,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         {/* Action Success Toast */}
         {actionSuccessMsg && (
-          <div className="fixed bottom-6 right-6 z-50 bg-black/90 border border-emerald-500 text-emerald-300 px-4 py-3 font-mono text-xs shadow-2xl flex items-center gap-2">
+          <div className="fixed bottom-6 right-6 z-50 bg-[#000000] border border-white/30 text-white px-4 py-3 text-xs shadow-2xl flex items-center gap-2">
             <span>✓</span>
             <span>{actionSuccessMsg}</span>
           </div>

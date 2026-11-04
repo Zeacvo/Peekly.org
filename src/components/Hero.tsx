@@ -19,7 +19,7 @@ export const Hero: React.FC<HeroProps> = ({ currentLang }) => {
       </h1>
 
       {/* 2. Subtitle */}
-      <p className="text-sm sm:text-lg md:text-xl font-normal text-neutral-400 tracking-normal leading-relaxed max-w-2xl mb-6 sm:mb-7 drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
+      <p className="text-sm sm:text-lg md:text-xl font-normal text-[#929292] tracking-normal leading-relaxed max-w-2xl mb-6 sm:mb-7 drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
         {t.hero.subtitle}
       </p>
 

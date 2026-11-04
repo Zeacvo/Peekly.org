@@ -331,7 +331,7 @@ export const ChangelogPage: React.FC<ChangelogPageProps> = ({ currentLang, onBac
         </h1>
 
         {/* Вводный текст описания (Шрифт 3) */}
-        <p className="w-full max-w-none font-sans text-sm md:text-[15px] font-normal text-neutral-400 leading-relaxed text-justify mb-8 cursor-text select-text">
+        <p className="w-full max-w-none font-sans text-sm md:text-[15px] font-normal text-[#929292] leading-relaxed text-justify mb-8 cursor-text select-text">
           {tLang.changelogPage.desc}
         </p>
 
@@ -344,10 +344,10 @@ export const ChangelogPage: React.FC<ChangelogPageProps> = ({ currentLang, onBac
         <div className="w-full max-w-none space-y-3 font-sans">
           {changes.map((item, idx) => (
             <div key={idx} className="w-full max-w-none flex items-baseline gap-2.5 cursor-text select-text">
-              <span className="font-mono text-sm md:text-[15px] font-bold text-neutral-500 select-none shrink-0">
+              <span className="font-mono text-sm md:text-[15px] font-bold text-[#929292] select-none shrink-0">
                 {item.num}
               </span>
-              <span className="w-full max-w-none font-sans text-sm md:text-[15px] font-normal text-neutral-400 leading-relaxed text-justify">
+              <span className="w-full max-w-none font-sans text-sm md:text-[15px] font-normal text-[#929292] leading-relaxed text-justify">
                 {item.title} — {item.desc}
               </span>
             </div>
