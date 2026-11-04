@@ -59,6 +59,21 @@ function getStoredUser(): UserProfile | null {
   return null;
 }
 
+export const TacticalDefaultAvatar: React.FC<{ className?: string }> = ({ className = 'w-full h-full' }) => (
+  <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <rect width="80" height="80" fill="#141416" />
+    <circle cx="40" cy="40" r="30" stroke="rgba(255, 255, 255, 0.05)" strokeWidth="1" strokeDasharray="3 3" />
+    <circle cx="40" cy="40" r="18" stroke="rgba(255, 255, 255, 0.04)" strokeWidth="1" />
+    <line x1="40" y1="8" x2="40" y2="18" stroke="#FF5500" strokeWidth="2" strokeLinecap="round" />
+    <line x1="40" y1="62" x2="40" y2="72" stroke="#FF5500" strokeWidth="2" strokeLinecap="round" />
+    <line x1="8" y1="40" x2="18" y2="40" stroke="#FF5500" strokeWidth="2" strokeLinecap="round" />
+    <line x1="62" y1="40" x2="72" y2="40" stroke="#FF5500" strokeWidth="2" strokeLinecap="round" />
+    <circle cx="40" cy="30" r="12" fill="#25252B" />
+    <path d="M18 68C18 53 28 48 40 48C52 48 62 53 62 68V80H18V68Z" fill="#25252B" />
+    <circle cx="40" cy="30" r="3" fill="#FF5500" />
+  </svg>
+);
+
 export const ProfilePage: React.FC<ProfilePageProps> = ({
   currentLang = 'ru',
   onGoHome,
@@ -96,6 +111,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   const [statusMessage, setStatusMessage] = useState<{ text: string; isError: boolean } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [copiedProfileLink, setCopiedProfileLink] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
 
   // Fetch current authenticated user
   useEffect(() => {
@@ -162,6 +179,18 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   // Display user: either targetUser (if public view) or currentUser
   const displayUser: UserProfile | null = isViewOnly ? targetUser : currentUser;
 
+  const copyProfileUrl = () => {
+    const profileId = displayUser?.id || displayUser?.guid || displayUser?.nickname || '';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://peekly.org';
+    const url = `${origin}/profile?id=${encodeURIComponent(profileId)}`;
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(url);
+    }
+    setCopiedProfileLink(true);
+    showNotification(`${t.linkCopied} (${url})`);
+    setTimeout(() => setCopiedProfileLink(false), 2000);
+  };
+
   const isOwner =
     displayUser?.nickname?.toLowerCase() === 'zeacvo' ||
     displayUser?.email?.toLowerCase() === 'zeacvo@icloud.com' ||
@@ -196,8 +225,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
         year: 'numeric',
       })
     : '2026';
-
-  const monogram = (displayUser?.nickname || 'P').slice(0, 1).toUpperCase();
 
   const showNotification = (text: string, isError = false) => {
     setStatusMessage({ text, isError });
@@ -500,20 +527,18 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               <div className="flex items-start gap-4 mb-5">
                 {/* Avatar with hover pencil overlay */}
                 <div className="relative group shrink-0">
-                  <div className="w-20 h-20 rounded-sm border border-[#222228] bg-[#000000] overflow-hidden flex items-center justify-center">
-                    {displayUser?.avatar || displayUser?.avatar_url ? (
+                  <div className="w-20 h-20 rounded-sm border border-[#222228] bg-[#141416] overflow-hidden flex items-center justify-center">
+                    {(displayUser?.avatar || displayUser?.avatar_url) &&
+                    !avatarError &&
+                    !(displayUser?.avatar || displayUser?.avatar_url)?.includes('default_avatar.png') ? (
                       <img
                         src={displayUser.avatar || displayUser.avatar_url}
                         alt={displayUser.nickname}
                         className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.display = 'none';
-                        }}
+                        onError={() => setAvatarError(true)}
                       />
                     ) : (
-                      <span className="font-mono text-3xl font-black text-[#FF5500]">
-                        {monogram}
-                      </span>
+                      <TacticalDefaultAvatar className="w-full h-full" />
                     )}
                   </div>
 
@@ -533,7 +558,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   )}
                 </div>
 
-                {/* Nickname, Badges & Online Marker */}
+                {/* Nickname, Badges, Member Since & Profile ID */}
                 <div className="flex-1 min-w-0">
                   <h1 className="text-xl font-bold font-mono text-white truncate uppercase mb-1">
                     {displayUser?.nickname || 'Player'}
@@ -545,7 +570,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         {t.ownerBadge}
                       </span>
                     ) : (
-                      <span className="bg-[#000000] border border-white/20 text-neutral-300 font-mono text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider">
+                      <span className="bg-[#000000] border border-[#222228] text-[#8F9098] font-mono text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider">
                         {t.freeBadge}
                       </span>
                     )}
@@ -556,11 +581,36 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-xs font-mono text-neutral-500">
-                    <Calendar className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
+                  <div className="flex items-center gap-1.5 text-xs font-mono text-[#8F9098] mb-2">
+                    <Calendar className="w-3.5 h-3.5 text-[#8F9098] shrink-0" />
                     <span>
                       {t.memberSince} {registrationDate}
                     </span>
+                  </div>
+
+                  {/* Profile ID & Copy Public Link */}
+                  <div className="flex items-center gap-2 bg-[#050507] border border-[#1A1A1F] px-2.5 py-1.5 rounded-sm">
+                    <span className="text-[11px] font-mono text-[#8F9098] truncate max-w-[150px]">
+                      ID: {displayUser?.id || displayUser?.guid || displayUser?.nickname || 'zeacvo'}
+                    </span>
+                    <button 
+                      type="button"
+                      onClick={copyProfileUrl} 
+                      className="text-[11px] font-mono text-[#FFFFFF] hover:text-[#FF5500] uppercase font-bold flex items-center gap-1 transition-colors cursor-pointer shrink-0 ml-auto"
+                      title={t.copyProfileLink}
+                    >
+                      {copiedProfileLink ? (
+                        <>
+                          <Check className="w-3 h-3 text-emerald-400" />
+                          <span className="text-emerald-400">{t.linkCopied}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3 h-3" />
+                          <span>{t.copyProfileLink}</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -648,7 +698,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 <button
                   type="button"
                   onClick={onOpenAdmin}
-                  className="w-full h-10 border border-[#FF5500]/40 bg-[#FF5500]/10 text-[#FF5500] hover:bg-[#FF5500] hover:text-black font-mono text-xs font-bold uppercase flex items-center justify-center transition-all mt-6 cursor-pointer"
+                  className="btn-action-interactive w-full h-10 mt-6"
                 >
                   <span>{t.adminConsole}</span>
                 </button>
@@ -662,21 +712,18 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           {!isViewOnly ? (
             <div className="lg:col-span-8 space-y-6">
               {/* Card 1: Account Credentials */}
-              <div className="bg-[#0A0A0E] border border-[#1A1A1F] p-6">
+              <div className="bg-[#0A0A0E] border border-[#222228] p-6">
                 <div className="mb-5 pb-3 border-b border-[#1A1A1F]">
                   <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
                     {t.credentialsTitle}
                   </h2>
-                  <p className="text-xs font-mono text-neutral-500 mt-0.5">
-                    {t.credentialsSubtitle}
-                  </p>
                 </div>
 
                 <div className="space-y-4 font-mono">
                   {/* Nickname row */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-black border border-white/10 gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3">
                     <div>
-                      <span className="text-[10px] uppercase text-neutral-500 font-bold tracking-wider block mb-1">
+                      <span className="text-[10px] uppercase text-[#8F9098] font-bold tracking-wider block mb-1">
                         {t.nicknameLabel}
                       </span>
                       <span className="text-sm font-bold text-white">
@@ -689,16 +736,16 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         setNewNickname(currentUser?.nickname || '');
                         setIsNicknameModalOpen(true);
                       }}
-                      className="px-3 py-1.5 bg-white/5 border border-white/20 hover:border-white text-xs font-bold uppercase text-white transition-colors cursor-pointer rounded-none shrink-0"
+                      className="btn-action-interactive h-9 px-4 shrink-0"
                     >
                       {t.changeNickname}
                     </button>
                   </div>
 
                   {/* Email row */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-black border border-white/10 gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3">
                     <div>
-                      <span className="text-[10px] uppercase text-neutral-500 font-bold tracking-wider block mb-1">
+                      <span className="text-[10px] uppercase text-[#8F9098] font-bold tracking-wider block mb-1">
                         {t.emailLabel}
                       </span>
                       <div className="flex items-center gap-2">
@@ -713,7 +760,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                           <button
                             type="button"
                             onClick={() => copyEmail(currentUser.email)}
-                            className="p-1 text-neutral-500 hover:text-white transition-colors"
+                            className="p-1 text-[#8F9098] hover:text-white transition-colors cursor-pointer"
                             title="Copy email"
                           >
                             {copiedEmail ? (
@@ -734,7 +781,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         setEmailTestCode(null);
                         setIsEmailModalOpen(true);
                       }}
-                      className="px-3 py-1.5 bg-white/5 border border-white/20 hover:border-white text-xs font-bold uppercase text-white transition-colors cursor-pointer rounded-none shrink-0"
+                      className="btn-action-interactive h-9 px-4 shrink-0"
                     >
                       {t.changeEmail}
                     </button>
@@ -743,20 +790,17 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               </div>
 
               {/* Card 2: Password & Security */}
-              <div className="bg-[#0A0A0E] border border-[#1A1A1F] p-6">
+              <div className="bg-[#0A0A0E] border border-[#222228] p-6">
                 <div className="mb-5 pb-3 border-b border-[#1A1A1F]">
                   <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
-                    <KeyRound className="w-3.5 h-3.5 text-neutral-400" />
+                    <KeyRound className="w-3.5 h-3.5 text-[#8F9098]" />
                     <span>{t.securityTitle}</span>
                   </h2>
-                  <p className="text-xs font-mono text-neutral-500 mt-0.5">
-                    {t.securitySubtitle}
-                  </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-black border border-white/10 gap-3 font-mono">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3 font-mono">
                   <div>
-                    <span className="text-[10px] uppercase text-neutral-500 font-bold tracking-wider block mb-1">
+                    <span className="text-[10px] uppercase text-[#8F9098] font-bold tracking-wider block mb-1">
                       {t.passwordLabel}
                     </span>
                     <span className="text-sm text-neutral-300 font-medium tracking-widest">
@@ -771,7 +815,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       setConfirmPassword('');
                       setIsPasswordModalOpen(true);
                     }}
-                    className="px-3 py-1.5 bg-white/5 border border-white/20 hover:border-white text-xs font-bold uppercase text-white transition-colors cursor-pointer rounded-none shrink-0"
+                    className="btn-action-interactive h-9 px-4 shrink-0"
                   >
                     {t.changePassword}
                   </button>
@@ -779,25 +823,22 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               </div>
 
               {/* Card 3: Active Sessions */}
-              <div className="bg-[#0A0A0E] border border-[#1A1A1F] p-6">
+              <div className="bg-[#0A0A0E] border border-[#222228] p-6">
                 <div className="mb-5 pb-3 border-b border-[#1A1A1F]">
                   <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
-                    <Laptop className="w-3.5 h-3.5 text-neutral-400" />
+                    <Laptop className="w-3.5 h-3.5 text-[#8F9098]" />
                     <span>{t.sessionsTitle}</span>
                   </h2>
-                  <p className="text-xs font-mono text-neutral-500 mt-0.5">
-                    {t.sessionsSubtitle}
-                  </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-black border border-white/10 gap-3 font-mono mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3 font-mono mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                     <div>
                       <span className="text-sm font-bold text-white block">
                         {t.currentDevice}
                       </span>
-                      <span className="text-xs text-neutral-400">
+                      <span className="text-xs text-[#8F9098]">
                         {t.currentDeviceDesc}
                       </span>
                     </div>
@@ -808,10 +849,10 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   type="button"
                   onClick={handleTerminateOtherSessions}
                   disabled={isSubmitting}
-                  className="px-4 py-2 border border-white/20 hover:border-white/50 text-neutral-300 hover:text-white font-mono text-xs font-bold uppercase transition-colors cursor-pointer rounded-none"
+                  className="btn-action-interactive h-9 px-4"
                 >
                   {isSubmitting ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1 text-black" />
                   ) : null}
                   <span>{t.terminateOtherSessions}</span>
                 </button>
@@ -825,7 +866,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
                       <span>{t.dangerZoneTitle}</span>
                     </h2>
-                    <p className="text-xs font-mono text-neutral-400 mt-1 leading-relaxed">
+                    <p className="text-xs font-mono text-[#8F9098] mt-1 leading-relaxed">
                       {t.deleteAccountWarning}
                     </p>
                   </div>
@@ -833,7 +874,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   <button
                     type="button"
                     onClick={() => setIsDeleteModalOpen(true)}
-                    className="px-4 py-2 bg-transparent border border-red-600/40 hover:border-red-500 hover:bg-red-600 hover:text-white text-red-400 font-mono text-xs font-bold uppercase transition-all cursor-pointer rounded-none"
+                    className="btn-action-interactive h-9 px-4 bg-transparent border-red-600/40 text-red-400 hover:bg-red-600 hover:text-white"
                   >
                     {t.deleteAccount}
                   </button>
@@ -843,32 +884,29 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           ) : (
             /* Public View Summary Card */
             <div className="lg:col-span-7 space-y-6">
-              <div className="bg-[#0A0A0E] border border-[#1A1A1F] p-6">
+              <div className="bg-[#0A0A0E] border border-[#222228] p-6">
                 <div className="mb-5 pb-3 border-b border-[#1A1A1F]">
                   <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
-                    Competitive Intelligence
+                    {t.publicProfileTitle}
                   </h2>
-                  <p className="text-xs font-mono text-neutral-500 mt-0.5">
-                    Player status synchronized via Cloudflare D1 telemetry engine
-                  </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
-                  <div className="p-4 bg-black border border-white/10">
-                    <span className="text-[10px] uppercase text-neutral-500 font-bold block mb-1">
-                      Platform Status
+                  <div className="p-4 bg-[#000000] border border-[#1A1A1F]">
+                    <span className="text-[10px] uppercase text-[#8F9098] font-bold block mb-1">
+                      {t.region}
                     </span>
                     <span className="text-white font-bold">
-                      {isFaceitLinked ? 'FACEIT Verified Player' : 'Standard Web User'}
+                      {displayUser?.country || 'BY'}
                     </span>
                   </div>
 
-                  <div className="p-4 bg-black border border-white/10">
-                    <span className="text-[10px] uppercase text-neutral-500 font-bold block mb-1">
-                      Account Tier
+                  <div className="p-4 bg-[#000000] border border-[#1A1A1F]">
+                    <span className="text-[10px] uppercase text-[#8F9098] font-bold block mb-1">
+                      {t.profileId}
                     </span>
                     <span className="text-[#FF5500] font-bold">
-                      {isOwner ? 'OWNER / CEO' : 'FREE TIER (EARLY BETA)'}
+                      {isOwner ? t.ownerBadge : t.freeBadge}
                     </span>
                   </div>
                 </div>

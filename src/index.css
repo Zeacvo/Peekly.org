@@ -258,6 +258,46 @@ button, a, [role="button"], .cursor-pointer {
   color: #FFFFFF !important;
 }
 
+/* Action buttons on Profile & Dashboards (Rest: White bg, Black text; Hover: #FF5500, glow) */
+.btn-action-interactive {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  border: 1px solid #FFFFFF !important;
+  border-radius: 2px !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  transition: all 0.15s ease-in-out !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+}
+
+.btn-action-interactive:hover {
+  background-color: #FF5500 !important;
+  color: #000000 !important;
+  border-color: #FFFFFF !important;
+  box-shadow: 0 0 15px rgba(255, 85, 0, 0.45) !important;
+}
+
+.btn-action-interactive svg,
+.btn-action-interactive path {
+  color: #000000 !important;
+  fill: currentColor !important;
+  transition: color 0.15s ease-in-out !important;
+}
+
+.btn-action-interactive:hover svg,
+.btn-action-interactive:hover path {
+  color: #000000 !important;
+  fill: #000000 !important;
+}
+
 /* Calm Soft Breathing for Online Indicator Dot (3.5s cycle) */
 @keyframes softBreath {
   0%, 100% {

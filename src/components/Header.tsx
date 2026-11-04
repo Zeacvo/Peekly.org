@@ -281,7 +281,7 @@ export const Header: React.FC<HeaderProps> = ({
                 aria-expanded={userDropdownOpen}
                 aria-haspopup="menu"
                 aria-label="User account menu"
-                className="group flex items-center gap-2 px-2.5 py-1 bg-[#0A0A0A] hover:bg-white/[0.06] border border-white/15 hover:border-white/30 text-xs transition-colors rounded-none cursor-pointer focus-visible:ring-1 focus-visible:ring-white"
+                className="group flex items-center gap-2 h-10 px-3 bg-[#0A0A0E] hover:bg-white/[0.06] border border-[#222228] hover:border-white text-xs transition-all rounded-sm cursor-pointer focus-visible:ring-1 focus-visible:ring-white shrink-0"
               >
                 {/* Avatar / Monogram */}
                 <div className="w-6 h-6 rounded-none bg-[#1F1F23] border border-white/20 overflow-hidden shrink-0 flex items-center justify-center">
@@ -444,7 +444,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onOpenAuthModal}
-              className="inline-flex items-center justify-center text-center h-8 sm:h-9 px-5 sm:px-6 rounded-none bg-black text-white hover:border-white/50 border border-white/20 font-mono text-xs font-bold tracking-wider uppercase transition-colors shrink-0 shadow-sm cursor-pointer focus-visible:ring-1 focus-visible:ring-white"
+              className="inline-flex items-center justify-center text-center h-10 px-5 sm:px-6 rounded-sm bg-black text-white hover:border-white border border-[#222228] font-mono text-xs font-bold tracking-wider uppercase transition-colors shrink-0 shadow-sm cursor-pointer focus-visible:ring-1 focus-visible:ring-white"
               title="Sign in to Peekly"
             >
               <span>SIGN IN</span>
@@ -459,7 +459,7 @@ export const Header: React.FC<HeaderProps> = ({
               aria-expanded={installDropdownOpen}
               aria-haspopup="menu"
               aria-label="Install extension options"
-              className="inline-flex items-center justify-center text-center h-8 sm:h-9 px-3 sm:px-3.5 md:px-4 lg:px-5 rounded-none btn-header-install font-sans font-bold text-[10px] sm:text-[11px] md:text-xs tracking-wider uppercase cursor-pointer shadow-lg active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white"
+              className="inline-flex items-center justify-center text-center h-10 px-4 sm:px-5 rounded-sm btn-header-install font-mono text-xs font-bold uppercase tracking-wider cursor-pointer shadow-lg active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white"
             >
               <span>{t.nav.install.toUpperCase()}</span>
             </button>
