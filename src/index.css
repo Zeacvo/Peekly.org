@@ -2,8 +2,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Hiragino Sans", "Noto Sans", sans-serif;
-  --font-mono: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Mono", Menlo, Monaco, Consolas, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Mono", Menlo, Monaco, Consolas, monospace;
 }
 
 :root {
@@ -25,11 +25,15 @@ html, body, #root {
   overflow-x: hidden;
 }
 
-body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Hiragino Sans", "Noto Sans", sans-serif;
+body, button, input, select, textarea {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+}
+
+/* Brutalist Strict Square Reset - Zero Rounded Corners */
+button, input, select, textarea, .btn-brand, .btn-brand-interactive, .btn-action-interactive, .btn-header-install, .btn-chrome-action, .btn-brand-signout {
+  border-radius: 0px !important;
 }
 
 /* Precise selection behavior */
@@ -112,6 +116,12 @@ button, a, [role="button"], .cursor-pointer {
   background-color: #FFFFFF !important;
   color: #000000 !important;
   border: 1px solid #FFFFFF !important;
+  border-radius: 0px !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
   transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, box-shadow 150ms ease !important;
 }
 
@@ -119,7 +129,7 @@ button, a, [role="button"], .cursor-pointer {
   background-color: #FF5500 !important;
   color: #000000 !important;
   border-color: #FFFFFF !important;
-  box-shadow: 0 0 15px rgba(255, 85, 0, 0.4) !important;
+  box-shadow: 0 0 16px rgba(255, 85, 0, 0.5) !important;
 }
 
 .btn-header-install svg,
@@ -147,6 +157,12 @@ button, a, [role="button"], .cursor-pointer {
   background-color: #FFFFFF !important;
   color: #000000 !important;
   border: 1px solid #FFFFFF !important;
+  border-radius: 0px !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
   transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease !important;
 }
 
@@ -182,10 +198,10 @@ button, a, [role="button"], .cursor-pointer {
   background-color: #FFFFFF !important;
   color: #000000 !important;
   border: 1px solid #FFFFFF !important;
-  border-radius: 2px !important;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-  font-size: 11px !important;
-  font-weight: 800 !important;
+  border-radius: 0px !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
   letter-spacing: 0.05em !important;
   text-transform: uppercase !important;
   transition: all 0.15s ease-in-out !important;
@@ -226,9 +242,9 @@ button, a, [role="button"], .cursor-pointer {
   background-color: transparent !important;
   color: #8F9098 !important;
   border: 1px solid #222228 !important;
-  border-radius: 2px !important;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-  font-size: 11px !important;
+  border-radius: 0px !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", sans-serif !important;
+  font-size: 12px !important;
   font-weight: 700 !important;
   letter-spacing: 0.05em !important;
   text-transform: uppercase !important;
@@ -266,10 +282,10 @@ button, a, [role="button"], .cursor-pointer {
   background-color: #FFFFFF !important;
   color: #000000 !important;
   border: 1px solid #FFFFFF !important;
-  border-radius: 2px !important;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-  font-size: 11px !important;
-  font-weight: 800 !important;
+  border-radius: 0px !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
   letter-spacing: 0.05em !important;
   text-transform: uppercase !important;
   transition: all 0.15s ease-in-out !important;
@@ -282,7 +298,7 @@ button, a, [role="button"], .cursor-pointer {
   background-color: #FF5500 !important;
   color: #000000 !important;
   border-color: #FFFFFF !important;
-  box-shadow: 0 0 15px rgba(255, 85, 0, 0.45) !important;
+  box-shadow: 0 0 16px rgba(255, 85, 0, 0.5) !important;
 }
 
 .btn-action-interactive svg,

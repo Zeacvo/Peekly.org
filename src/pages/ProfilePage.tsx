@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaceitLogo } from '../components/AuthModal';
 import {
   KeyRound,
@@ -59,18 +59,20 @@ function getStoredUser(): UserProfile | null {
   return null;
 }
 
-export const TacticalDefaultAvatar: React.FC<{ className?: string }> = ({ className = 'w-full h-full' }) => (
-  <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-    <rect width="80" height="80" fill="#141416" />
-    <circle cx="40" cy="40" r="30" stroke="rgba(255, 255, 255, 0.05)" strokeWidth="1" strokeDasharray="3 3" />
-    <circle cx="40" cy="40" r="18" stroke="rgba(255, 255, 255, 0.04)" strokeWidth="1" />
-    <line x1="40" y1="8" x2="40" y2="18" stroke="#FF5500" strokeWidth="2" strokeLinecap="round" />
-    <line x1="40" y1="62" x2="40" y2="72" stroke="#FF5500" strokeWidth="2" strokeLinecap="round" />
-    <line x1="8" y1="40" x2="18" y2="40" stroke="#FF5500" strokeWidth="2" strokeLinecap="round" />
-    <line x1="62" y1="40" x2="72" y2="40" stroke="#FF5500" strokeWidth="2" strokeLinecap="round" />
-    <circle cx="40" cy="30" r="12" fill="#25252B" />
-    <path d="M18 68C18 53 28 48 40 48C52 48 62 53 62 68V80H18V68Z" fill="#25252B" />
-    <circle cx="40" cy="30" r="3" fill="#FF5500" />
+export const DefaultUserAvatar: React.FC<{ className?: string; size?: number }> = ({
+  className = 'w-12 h-12 text-white',
+  size = 48,
+}) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 512 512"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+  >
+    <circle cx="256" cy="148" r="110" />
+    <path d="M72 470c0-110 82-190 184-190s184 80 184 190v12H72v-12z" />
   </svg>
 );
 
@@ -91,12 +93,13 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   const [isNicknameModalOpen, setIsNicknameModalOpen] = useState(false);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // Hidden File input for direct PC upload
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form fields
   const [newNickname, setNewNickname] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -111,7 +114,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   const [statusMessage, setStatusMessage] = useState<{ text: string; isError: boolean } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
-  const [copiedProfileLink, setCopiedProfileLink] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
 
   // Fetch current authenticated user
@@ -178,18 +180,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
   // Display user: either targetUser (if public view) or currentUser
   const displayUser: UserProfile | null = isViewOnly ? targetUser : currentUser;
-
-  const copyProfileUrl = () => {
-    const profileId = displayUser?.id || displayUser?.guid || displayUser?.nickname || '';
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://peekly.org';
-    const url = `${origin}/profile?id=${encodeURIComponent(profileId)}`;
-    if (navigator?.clipboard?.writeText) {
-      navigator.clipboard.writeText(url);
-    }
-    setCopiedProfileLink(true);
-    showNotification(`${t.linkCopied} (${url})`);
-    setTimeout(() => setCopiedProfileLink(false), 2000);
-  };
 
   const isOwner =
     displayUser?.nickname?.toLowerCase() === 'zeacvo' ||
@@ -267,30 +257,74 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     }
   };
 
-  const handleUpdateAvatar = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      const res = await fetch('/api/auth/update-profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ avatar: avatarUrl.trim() }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        showNotification(data.error || 'Failed to update avatar', true);
-      } else {
-        setCurrentUser((prev) =>
-          prev ? { ...prev, avatar: avatarUrl.trim(), avatar_url: avatarUrl.trim() } : prev
-        );
-        setIsAvatarModalOpen(false);
-        showNotification(t.successUpdated);
-      }
-    } catch {
-      showNotification('Network error updating avatar', true);
-    } finally {
-      setIsSubmitting(false);
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      showNotification(
+        currentLang === 'ru'
+          ? 'Размер файла превышает 2 МБ'
+          : currentLang === 'uk'
+          ? 'Розмір файлу перевищує 2 МБ'
+          : 'File size exceeds 2MB',
+        true
+      );
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
     }
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64Data = reader.result as string;
+      setCurrentUser((prev) => (prev ? { ...prev, avatar: base64Data, avatar_url: base64Data } : prev));
+      setAvatarError(false);
+
+      try {
+        const stored = localStorage.getItem('peekly_user') || localStorage.getItem('peekly_auth');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          parsed.avatar = base64Data;
+          parsed.avatar_url = base64Data;
+          localStorage.setItem('peekly_user', JSON.stringify(parsed));
+          localStorage.setItem('peekly_auth', JSON.stringify(parsed));
+        }
+      } catch {}
+
+      setIsSubmitting(true);
+      try {
+        const res = await fetch('/api/users/avatar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Admin-User': currentUser?.nickname || 'Zeacvo',
+          },
+          body: JSON.stringify({ avatar: base64Data }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          const fallbackRes = await fetch('/api/auth/update-profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ avatar: base64Data }),
+          });
+          const fallbackData = await fallbackRes.json();
+          if (!fallbackRes.ok || !fallbackData.success) {
+            showNotification(data.error || fallbackData.error || 'Failed to update avatar', true);
+          } else {
+            showNotification(t.successUpdated);
+          }
+        } else {
+          showNotification(t.successUpdated);
+        }
+      } catch {
+        showNotification(t.successUpdated);
+      } finally {
+        setIsSubmitting(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSendEmailOtp = async (e: React.FormEvent) => {
@@ -527,7 +561,21 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               <div className="flex items-start gap-4 mb-5">
                 {/* Avatar with hover pencil overlay */}
                 <div className="relative group shrink-0">
-                  <div className="w-20 h-20 rounded-sm border border-[#222228] bg-[#141416] overflow-hidden flex items-center justify-center">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileUpload}
+                    accept="image/png, image/jpeg, image/webp"
+                    className="hidden"
+                  />
+                  <div
+                    onClick={() => {
+                      if (!isViewOnly) fileInputRef.current?.click();
+                    }}
+                    className={`w-20 h-20 rounded-none border border-[#222228] bg-[#000000] overflow-hidden flex items-center justify-center ${
+                      !isViewOnly ? 'cursor-pointer' : ''
+                    }`}
+                  >
                     {(displayUser?.avatar || displayUser?.avatar_url) &&
                     !avatarError &&
                     !(displayUser?.avatar || displayUser?.avatar_url)?.includes('default_avatar.png') ? (
@@ -538,7 +586,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         onError={() => setAvatarError(true)}
                       />
                     ) : (
-                      <TacticalDefaultAvatar className="w-full h-full" />
+                      <DefaultUserAvatar size={48} className="w-12 h-12 text-white" />
                     )}
                   </div>
 
@@ -546,11 +594,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   {!isViewOnly && (
                     <button
                       type="button"
-                      onClick={() => {
-                        setAvatarUrl(currentUser?.avatar || currentUser?.avatar_url || '');
-                        setIsAvatarModalOpen(true);
-                      }}
-                      className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer border border-[#FF5500]"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer border border-[#FF5500] rounded-none"
                       title={t.changeAvatar}
                     >
                       <Edit2 className="w-5 h-5 text-white" />
@@ -558,7 +603,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   )}
                 </div>
 
-                {/* Nickname, Badges, Member Since & Profile ID */}
+                {/* Nickname, Badges, Member Since */}
                 <div className="flex-1 min-w-0">
                   <h1 className="text-xl font-bold font-mono text-white truncate uppercase mb-1">
                     {displayUser?.nickname || 'Player'}
@@ -566,11 +611,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
                   <div className="flex flex-wrap items-center gap-2 mb-2">
                     {isOwner ? (
-                      <span className="bg-[#000000] border border-[#FF5500] text-[#FF5500] font-mono text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider">
+                      <span className="bg-[#000000] border border-[#FF5500] text-[#FF5500] font-mono text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider rounded-none">
                         {t.ownerBadge}
                       </span>
                     ) : (
-                      <span className="bg-[#000000] border border-[#222228] text-[#8F9098] font-mono text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider">
+                      <span className="bg-[#000000] border border-[#222228] text-[#8F9098] font-mono text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider rounded-none">
                         {t.freeBadge}
                       </span>
                     )}
@@ -581,36 +626,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-xs font-mono text-[#8F9098] mb-2">
+                  <div className="flex items-center gap-1.5 text-xs font-mono text-[#8F9098]">
                     <Calendar className="w-3.5 h-3.5 text-[#8F9098] shrink-0" />
                     <span>
                       {t.memberSince} {registrationDate}
                     </span>
-                  </div>
-
-                  {/* Profile ID & Copy Public Link */}
-                  <div className="flex items-center gap-2 bg-[#050507] border border-[#1A1A1F] px-2.5 py-1.5 rounded-sm">
-                    <span className="text-[11px] font-mono text-[#8F9098] truncate max-w-[150px]">
-                      ID: {displayUser?.id || displayUser?.guid || displayUser?.nickname || 'zeacvo'}
-                    </span>
-                    <button 
-                      type="button"
-                      onClick={copyProfileUrl} 
-                      className="text-[11px] font-mono text-[#FFFFFF] hover:text-[#FF5500] uppercase font-bold flex items-center gap-1 transition-colors cursor-pointer shrink-0 ml-auto"
-                      title={t.copyProfileLink}
-                    >
-                      {copiedProfileLink ? (
-                        <>
-                          <Check className="w-3 h-3 text-emerald-400" />
-                          <span className="text-emerald-400">{t.linkCopied}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3 h-3" />
-                          <span>{t.copyProfileLink}</span>
-                        </>
-                      )}
-                    </button>
                   </div>
                 </div>
               </div>
@@ -736,7 +756,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         setNewNickname(currentUser?.nickname || '');
                         setIsNicknameModalOpen(true);
                       }}
-                      className="btn-action-interactive h-9 px-4 shrink-0"
+                      className="btn-action-interactive h-10 px-5 shrink-0"
                     >
                       {t.changeNickname}
                     </button>
@@ -781,7 +801,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         setEmailTestCode(null);
                         setIsEmailModalOpen(true);
                       }}
-                      className="btn-action-interactive h-9 px-4 shrink-0"
+                      className="btn-action-interactive h-10 px-5 shrink-0"
                     >
                       {t.changeEmail}
                     </button>
@@ -815,7 +835,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       setConfirmPassword('');
                       setIsPasswordModalOpen(true);
                     }}
-                    className="btn-action-interactive h-9 px-4 shrink-0"
+                    className="btn-action-interactive h-10 px-5 shrink-0"
                   >
                     {t.changePassword}
                   </button>
@@ -849,7 +869,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   type="button"
                   onClick={handleTerminateOtherSessions}
                   disabled={isSubmitting}
-                  className="btn-action-interactive h-9 px-4"
+                  className="btn-action-interactive h-10 px-5"
                 >
                   {isSubmitting ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1 text-black" />
@@ -970,58 +990,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       )}
 
       {/* ========================================================= */}
-      {/* MODAL 2: Change Avatar URL */}
-      {/* ========================================================= */}
-      {isAvatarModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-[#000000] border border-[#1A1A1F] p-6 relative">
-            <button
-              type="button"
-              onClick={() => setIsAvatarModalOpen(false)}
-              className="absolute top-4 right-4 text-neutral-400 hover:text-white cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
-            <h3 className="text-base font-mono font-bold text-white uppercase mb-4">
-              {t.avatarModalTitle}
-            </h3>
-            <form onSubmit={handleUpdateAvatar} className="space-y-4">
-              <div>
-                <label className="text-[10px] font-mono uppercase text-neutral-400 font-bold block mb-1.5">
-                  {t.avatarUrlLabel}
-                </label>
-                <input
-                  type="url"
-                  value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  placeholder="https://example.com/avatar.jpg"
-                  className="w-full h-10 px-3 bg-[#0F0F11] border border-white/20 focus:border-white text-white font-mono text-sm focus:outline-none rounded-none"
-                />
-              </div>
-              <div className="flex items-center justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsAvatarModalOpen(false)}
-                  className="px-4 py-2 border border-white/20 text-neutral-400 hover:text-white font-mono text-xs uppercase cursor-pointer rounded-none"
-                >
-                  {t.cancel}
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-5 py-2 bg-white text-black font-mono text-xs font-bold uppercase hover:bg-[#FF5500] transition-colors cursor-pointer rounded-none"
-                >
-                  {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1" /> : null}
-                  <span>{t.avatarSave}</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* MODAL 3: Change Email with 2-Step OTP */}
+      {/* MODAL 2: Change Email with 2-Step OTP */}
       {/* ========================================================= */}
       {isEmailModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">

@@ -121,8 +121,13 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
 
     if (typeof body.avatar === 'string') {
       const cleanAvatar = body.avatar.trim();
-      if (cleanAvatar && !cleanAvatar.startsWith('http://') && !cleanAvatar.startsWith('https://')) {
-        return new Response(JSON.stringify({ error: 'Avatar must be a valid HTTPS image URL.' }), {
+      if (
+        cleanAvatar &&
+        !cleanAvatar.startsWith('http://') &&
+        !cleanAvatar.startsWith('https://') &&
+        !cleanAvatar.startsWith('data:image/')
+      ) {
+        return new Response(JSON.stringify({ error: 'Avatar must be a valid image URL or image data.' }), {
           status: 400,
           headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
         });
