@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import type { Language } from '../translations';
+import { adminTranslations } from '../data/adminTranslations';
 import { type PlayerUser, type AdminStats, calculateFaceitLevel } from '../../functions/api/storage/usersDb';
-import { PeeklyLogo } from '../components/PeeklyLogo';
 
 interface AdminDashboardProps {
   currentLang?: Language;
-  onGoHome: () => void;
+  onGoHome?: () => void;
   onNavigateProfile?: (guid: string) => void;
 }
 
@@ -61,17 +61,20 @@ function formatDate(iso: string | number | undefined | null): string {
   }
 }
 
-function formatRelativeTime(iso: string | number | undefined | null): string {
+function formatRelativeTime(
+  iso: string | number | undefined | null,
+  justNowText: string = 'Just now'
+): string {
   try {
     const d = parseSafeDate(iso);
     const diffMs = Math.abs(Date.now() - d.getTime());
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
     if (diffMinutes < 5) {
-      return 'Just now';
+      return justNowText;
     }
     return formatDate(iso);
   } catch {
-    return 'Just now';
+    return justNowText;
   }
 }
 
@@ -124,7 +127,11 @@ function getInitialAuth(): { isAuthed: boolean; nickname: string; email: string 
   return { isAuthed: false, nickname: '', email: '' };
 }
 
-export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavigateProfile }) => {
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({
+  currentLang = 'en',
+  onNavigateProfile,
+}) => {
+  const t = adminTranslations[currentLang] || adminTranslations.en;
   const [initialAuth] = useState(getInitialAuth);
   const [isAuthorized, setIsAuthorized] = useState<boolean>(initialAuth.isAuthed);
   const [currentUser, setCurrentUser] = useState<{ nickname: string; email: string }>({
@@ -372,17 +379,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        alert(data.error || 'Failed to delete user(s)');
+        alert(data.error || t.errorDeleting);
       } else {
         const deletedCount = data.deletedCount || deleteModal.ids.length;
         setUsers((prev) => prev.filter((u) => !deleteModal.ids.includes(u.guid)));
         setSelectedIds((prev) => prev.filter((id) => !deleteModal.ids.includes(id)));
         setDeleteModal({ isOpen: false, ids: [], isBulk: false });
-        setActionSuccessMsg(`Успешно удалено: ${deletedCount} пользователей.`);
+        setActionSuccessMsg(t.deleteSuccess.replace('{count}', String(deletedCount)));
         setTimeout(() => setActionSuccessMsg(null), 4000);
       }
     } catch (err) {
-      alert(`Ошибка удаления: ${String(err)}`);
+      alert(`${t.errorDeleting}: ${String(err)}`);
     } finally {
       setIsDeleting(false);
     }
@@ -398,7 +405,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
     return (
       <div className="min-h-screen bg-[#000000] flex items-center justify-center text-white">
         <p className="text-xs font-mono text-neutral-400 tracking-wider uppercase animate-pulse">
-          Checking authorization...
+          {t.checkingAuth}
         </p>
       </div>
     );
@@ -410,114 +417,48 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
 
   return (
     <div className="min-h-screen bg-[#000000] text-white font-sans antialiased selection:bg-[#FF5500] selection:text-black">
-      {/* 1. Fixed Header matching landing page Header 1-to-1 */}
-      <header className="fixed top-0 left-0 right-0 z-50 min-h-[64px] sm:min-h-[80px] bg-black/80 backdrop-blur-md border-b border-[#1A1A1F] pt-[env(safe-area-inset-top)] transition-all">
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 min-h-[64px] sm:min-h-[80px] flex items-center justify-between">
-          <div className="flex items-center gap-2.5 sm:gap-3.5 shrink-0">
-            <button
-              type="button"
-              onClick={onGoHome}
-              className="flex items-center gap-2.5 group cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0"
-              title="Back to Landing Page"
-            >
-              <PeeklyLogo
-                size={28}
-                className="h-7 w-auto sm:h-8 sm:w-auto md:h-9 md:w-auto text-white group-hover:text-[#FF5500] transition-colors duration-150 shrink-0"
-              />
-              <span className="font-sans text-xl sm:text-2xl md:text-3xl font-black tracking-wider text-white leading-none select-none">
-                PEEKLY
-              </span>
-            </button>
-
-            <span className="text-white/20 font-mono text-xs">/</span>
-
-            <span className="border border-white/20 text-neutral-300 font-mono text-xs font-semibold uppercase tracking-wider px-2 py-0.5">
-              ADMIN
-            </span>
-          </div>
-
-          {/* Right Actions */}
-          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[#0D0D0D] border border-white/10 text-xs">
-              <span className="font-bold text-white">{currentUser.nickname || 'Zeacvo'}</span>
-              <span className="border border-white/20 text-neutral-300 text-[10px] font-mono px-1.5 py-0.5 font-semibold uppercase tracking-wider">
-                OWNER
-              </span>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleExportCsv}
-              className="inline-flex items-center justify-center text-center h-8 sm:h-9 px-3 sm:px-3.5 md:px-4 lg:px-5 rounded-none btn-header-install font-sans font-bold text-[10px] sm:text-[11px] md:text-xs tracking-wider uppercase cursor-pointer shadow-lg active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white gap-2"
-              title="Download CSV database export"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-              <span>EXPORT CSV</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={onGoHome}
-              className="inline-flex items-center justify-center text-center h-8 sm:h-9 px-3 sm:px-3.5 md:px-4 lg:px-5 rounded-none btn-header-install font-sans font-bold text-[10px] sm:text-[11px] md:text-xs tracking-wider uppercase cursor-pointer shadow-lg active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white gap-1.5"
-            >
-              <span>&lt; HOME</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* 2. Main Content Container matching landing page layout geometry */}
-      <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16 space-y-8">
+      {/* Main Content Container matching landing page layout geometry */}
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16 space-y-8">
         {/* Error Notification */}
         {errorMsg && (
           <div className="p-4 bg-red-950/40 border border-red-500/40 text-red-300 text-sm flex items-center justify-between">
-            <span>Server Error: {errorMsg}</span>
+            <span>{t.serverError}: {errorMsg}</span>
             <button
               type="button"
               onClick={handleRefresh}
               className="text-xs uppercase font-mono px-2.5 py-1 bg-red-900/60 hover:bg-red-800 text-white cursor-pointer"
             >
-              Retry
+              {t.retry}
             </button>
           </div>
         )}
 
-        {/* 3. Top KPI Metric Cards in Features block style */}
+        {/* 3. Top KPI Metric Cards in clean Apple-minimalist style */}
         <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
           {/* Total Players */}
-          <div className="bg-[#0A0A0A] border border-white/10 p-5 sm:p-6 transition-colors">
+          <div className="bg-[#0A0A0E] border border-[#1A1A1F] p-5 sm:p-6 transition-colors">
             <div className="text-xs text-neutral-400 font-semibold tracking-widest uppercase font-mono mb-2">
-              Total Players
+              {t.totalPlayers}
             </div>
             <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans">
               {stats?.totalPlayers ?? users.length}
             </div>
-            <div className="mt-2 text-xs text-neutral-500 font-mono">
-              Verified FACEIT accounts
-            </div>
           </div>
 
           {/* New Today */}
-          <div className="bg-[#0A0A0A] border border-white/10 p-5 sm:p-6 transition-colors">
+          <div className="bg-[#0A0A0E] border border-[#1A1A1F] p-5 sm:p-6 transition-colors">
             <div className="text-xs text-neutral-400 font-semibold tracking-widest uppercase font-mono mb-2">
-              New Today
+              {t.newToday}
             </div>
             <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans">
               {stats ? (stats.newToday > 0 ? `+${stats.newToday}` : '0') : users.length}
             </div>
-            <div className="mt-2 text-xs text-neutral-500 font-mono">
-              Registrations last 24h
-            </div>
           </div>
 
           {/* Average ELO */}
-          <div className="bg-[#0A0A0A] border border-white/10 p-5 sm:p-6 transition-colors">
+          <div className="bg-[#0A0A0E] border border-[#1A1A1F] p-5 sm:p-6 transition-colors">
             <div className="text-xs text-neutral-400 font-semibold tracking-widest uppercase font-mono mb-2">
-              Average CS2 ELO
+              {t.avgElo}
             </div>
             <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans flex items-baseline gap-2">
               <span>{avgElo ? avgElo.toLocaleString() : '—'}</span>
@@ -527,40 +468,31 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
                 </span>
               )}
             </div>
-            <div className="mt-2 text-xs text-neutral-500 font-mono">
-              Competitive skill tier
-            </div>
           </div>
 
           {/* Active 24h */}
-          <div className="bg-[#0A0A0A] border border-white/10 p-5 sm:p-6 transition-colors">
+          <div className="bg-[#0A0A0E] border border-[#1A1A1F] p-5 sm:p-6 transition-colors">
             <div className="text-xs text-neutral-400 font-semibold tracking-widest uppercase font-mono mb-2">
-              Active 24h
+              {t.active24h}
             </div>
             <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans">
               {stats?.active24h ?? users.length}
             </div>
-            <div className="mt-2 text-xs text-neutral-500 font-mono">
-              In match queues now
-            </div>
           </div>
 
           {/* Top Region */}
-          <div className="bg-[#0A0A0A] border border-white/10 p-5 sm:p-6 transition-colors col-span-2 sm:col-span-1">
+          <div className="bg-[#0A0A0E] border border-[#1A1A1F] p-5 sm:p-6 transition-colors col-span-2 sm:col-span-1">
             <div className="text-xs text-neutral-400 font-semibold tracking-widest uppercase font-mono mb-2">
-              Top Region
+              {t.topRegion}
             </div>
             <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans">
               {stats?.topCountry ?? '—'}
-            </div>
-            <div className="mt-2 text-xs text-neutral-500 font-mono">
-              Highest player density
             </div>
           </div>
         </section>
 
         {/* 4. Filter & Search Controls */}
-        <section className="bg-[#0A0A0A] border border-white/10 p-3 sm:p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3.5">
+        <section className="bg-[#0A0A0E] border border-[#1A1A1F] p-3 sm:p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3.5">
           {/* Search Input */}
           <div className="relative flex-1">
             <svg
@@ -576,7 +508,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by nickname, email, or GUID..."
+              placeholder={t.searchPlaceholder}
               className="w-full bg-black border border-white/15 focus:border-white focus:outline-none text-white text-xs font-mono placeholder:text-neutral-500 pl-10 pr-4 py-2 transition-colors rounded-none"
             />
           </div>
@@ -588,7 +520,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
               onChange={(e) => setCountryFilter(e.target.value)}
               className="bg-black border border-white/15 focus:border-white focus:outline-none text-neutral-300 text-xs font-mono px-3 py-2 cursor-pointer transition-colors rounded-none"
             >
-              <option value="ALL">All Countries ({countries.length})</option>
+              <option value="ALL">{t.allCountries} ({countries.length})</option>
               {countries.map((c) => (
                 <option key={c} value={c}>
                   {c}
@@ -602,9 +534,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
               onChange={(e) => setPlanFilter(e.target.value as 'ALL' | 'FREE' | 'PRO')}
               className="bg-black border border-white/15 focus:border-white focus:outline-none text-neutral-300 text-xs font-mono px-3 py-2 cursor-pointer transition-colors rounded-none"
             >
-              <option value="ALL">All Plans</option>
-              <option value="FREE">FREE</option>
-              <option value="PRO">PRO</option>
+              <option value="ALL">{t.allPlans}</option>
+              <option value="FREE">{t.planFree}</option>
+              <option value="PRO">{t.planPro}</option>
             </select>
 
             {/* Sort Selector */}
@@ -613,18 +545,33 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
               onChange={(e) => setSortBy(e.target.value as 'last_login' | 'created_at' | 'elo' | 'nickname')}
               className="bg-black border border-white/15 focus:border-white focus:outline-none text-neutral-300 text-xs font-mono px-3 py-2 cursor-pointer transition-colors rounded-none"
             >
-              <option value="last_login">Sort: Last Active</option>
-              <option value="created_at">Sort: Registration</option>
-              <option value="elo">Sort: CS2 ELO</option>
-              <option value="nickname">Sort: Nickname</option>
+              <option value="last_login">{t.sortLastActive}</option>
+              <option value="created_at">{t.sortRegistration}</option>
+              <option value="elo">{t.sortElo}</option>
+              <option value="nickname">{t.sortNickname}</option>
             </select>
+
+            {/* Export CSV Button */}
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              className="inline-flex items-center justify-center text-center h-[34px] px-3 sm:px-4 rounded-none btn-header-install font-sans font-bold text-[10px] sm:text-[11px] md:text-xs tracking-wider uppercase cursor-pointer shadow-lg active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white gap-2"
+              title={t.exportCsv}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              <span>{t.exportCsv}</span>
+            </button>
 
             {/* Refresh */}
             <button
               type="button"
               onClick={handleRefresh}
-              className="bg-black border border-white/15 hover:border-white hover:text-white text-neutral-400 p-2 cursor-pointer transition-colors rounded-none"
-              title="Refresh database"
+              className="bg-black border border-white/15 hover:border-white hover:text-white text-neutral-400 p-2 cursor-pointer transition-colors rounded-none h-[34px] w-[34px] flex items-center justify-center"
+              title={t.refreshTooltip}
             >
               <svg
                 width="14"
@@ -642,25 +589,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
         </section>
 
         {/* 5. Registered Players Table */}
-        <section className="bg-[#0A0A0A] border border-white/10 overflow-hidden">
-          <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between bg-black/40">
+        <section className="bg-[#0A0A0E] border border-[#1A1A1F] overflow-hidden">
+          <div className="px-5 py-4 border-b border-[#1A1A1F] flex items-center justify-between bg-black/40">
             <div className="flex items-center gap-3">
               <span className="font-mono text-xs font-extrabold text-white tracking-widest uppercase">
-                REGISTERED PLAYERS
+                {t.registeredPlayers}
               </span>
               <span className="px-2 py-0.5 bg-white/10 text-[10px] font-mono text-neutral-300">
-                {filteredUsers.length} of {users.length}
+                {filteredUsers.length} {t.of} {users.length}
               </span>
             </div>
-            <span className="text-[11px] font-mono text-neutral-500">
-              Real-time synchronization with FACEIT OAuth
-            </span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-white/10 bg-black text-xs font-mono text-neutral-400 uppercase tracking-wider">
+                <tr className="border-b border-[#1A1A1F] bg-black text-xs font-mono text-neutral-400 uppercase tracking-wider">
                   <th className="py-3 px-4 w-10 text-center">
                     <input
                       type="checkbox"
@@ -670,29 +614,29 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
                       }}
                       onChange={handleToggleSelectAll}
                       className="w-4 h-4 bg-black border border-white/30 checked:bg-[#FF5500] checked:border-[#FF5500] rounded-none cursor-pointer accent-[#FF5500]"
-                      title="Выбрать всех"
+                      title={t.selectAll}
                     />
                   </th>
-                  <th className="py-3 px-5">PLAYER</th>
-                  <th className="py-3 px-5">EMAIL</th>
-                  <th className="py-3 px-5">CS2 ELO & LEVEL</th>
-                  <th className="py-3 px-5">COUNTRY</th>
-                  <th className="py-3 px-5">REGISTRATION & ACTIVITY</th>
-                  <th className="py-3 px-5 text-right">PLAN</th>
-                  <th className="py-3 px-5 text-right">ACTIONS</th>
+                  <th className="py-3 px-5">{t.colPlayer}</th>
+                  <th className="py-3 px-5">{t.colEmail}</th>
+                  <th className="py-3 px-5">{t.colElo}</th>
+                  <th className="py-3 px-5">{t.colCountry}</th>
+                  <th className="py-3 px-5">{t.colActivity}</th>
+                  <th className="py-3 px-5 text-right">{t.colPlan}</th>
+                  <th className="py-3 px-5 text-right">{t.colActions}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-900 text-sm">
                 {isLoading && users.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="py-12 text-center text-neutral-500 font-mono text-xs">
-                      Loading player records from database...
+                      {t.loadingRecords}
                     </td>
                   </tr>
                 ) : filteredUsers.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="py-12 text-center text-neutral-500 font-mono text-xs">
-                      No players found matching current query or filters.
+                      {t.noPlayersFound}
                     </td>
                   </tr>
                 ) : (
@@ -718,7 +662,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
                             className={`w-4 h-4 bg-black border border-white/30 checked:bg-[#FF5500] checked:border-[#FF5500] rounded-none accent-[#FF5500] ${
                               !canSelect ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'
                             }`}
-                            title={!canSelect ? 'Владелец защищён от удаления' : 'Выбрать пользователя'}
+                            title={!canSelect ? t.protectedCeo : t.selectUser}
                           />
                         </td>
 
@@ -762,7 +706,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
                                     }
                                   }}
                                   className="font-bold text-white hover:text-[#FF5500] transition-colors flex items-center gap-1 group/nick cursor-pointer"
-                                  title={`Открыть профиль ${player.nickname}`}
+                                  title={`${t.openProfile} ${player.nickname}`}
                                 >
                                   <span>{player.nickname}</span>
                                   <span className="text-[#FF5500] text-xs opacity-0 group-hover/nick:opacity-100 transition-opacity">
@@ -795,7 +739,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
                               type="button"
                               onClick={() => copyToClipboard(player.email)}
                               className="opacity-0 group-hover:opacity-100 text-[10px] font-mono text-neutral-400 hover:text-white px-1.5 py-0.5 bg-white/5 border border-white/10 transition-opacity cursor-pointer rounded-none"
-                              title="Copy email"
+                              title={t.copyEmail}
                             >
                               {copiedEmail === player.email ? '✓' : (
                                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -821,13 +765,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
                                 <span className="font-mono text-sm font-bold text-white">
                                   {player.elo.toLocaleString()}
                                 </span>
-                                <span className="text-[10px] font-mono text-neutral-500">CS2 Matchmaking</span>
+                                <span className="text-[10px] font-mono text-neutral-500">{t.cs2Matchmaking}</span>
                               </div>
                             </div>
                           ) : (
                             <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-neutral-900 border border-neutral-700 text-neutral-400 font-mono text-[11px] font-bold tracking-wider">
                               <span className="w-1.5 h-1.5 rounded-full bg-neutral-500 animate-pulse" />
-                              <span>PENDING / NOT LINKED</span>
+                              <span>{t.pendingNotLinked}</span>
                             </div>
                           )}
                         </td>
@@ -848,10 +792,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
                         <td className="py-3.5 px-5">
                           <div className="flex flex-col font-mono text-xs">
                             <span className="text-white font-medium">
-                              {formatRelativeTime(player.last_login_at)}
+                              {formatRelativeTime(player.last_login_at, t.justNow)}
                             </span>
                             <span className="text-[10px] text-neutral-500">
-                              Joined {formatDate(player.created_at)}
+                              {t.joined} {formatDate(player.created_at)}
                             </span>
                           </div>
                         </td>
@@ -872,7 +816,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
                               type="button"
                               onClick={() => handleRequestSingleDelete(player)}
                               className="p-1.5 bg-transparent border border-white/10 hover:border-red-500/60 hover:bg-red-950/20 text-neutral-400 hover:text-red-400 transition-all cursor-pointer rounded-none inline-flex items-center justify-center"
-                              title={`Удалить ${player.nickname}`}
+                              title={`${t.confirmDelete} ${player.nickname}`}
                             >
                               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <polyline points="3 6 5 6 21 6" />
@@ -892,20 +836,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
           </div>
 
           {/* Table Footer */}
-          <div className="px-5 py-3 border-t border-white/10 bg-black flex items-center justify-between text-xs font-mono text-neutral-500">
+          <div className="px-5 py-3 border-t border-[#1A1A1F] bg-[#0A0A0E] flex items-center justify-between text-xs font-mono text-neutral-500">
             <span>
-              Total registered database size: {users.length} {users.length === 1 ? 'player' : 'players'}
+              {t.totalDatabaseSize}: {users.length} {users.length === 1 ? t.playerSingular : t.playerPlural}
             </span>
-            <div className="flex items-center gap-4">
-              <span>Cloudflare D1 / KV Engine active</span>
-              <button
-                type="button"
-                onClick={handleExportCsv}
-                className="text-white hover:underline font-bold cursor-pointer"
-              >
-                Download CSV Export
-              </button>
-            </div>
           </div>
         </section>
 
@@ -914,7 +848,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#0A0A0E] border border-white/20 px-6 py-3.5 shadow-2xl flex items-center gap-5 sm:gap-6 animate-in fade-in slide-in-from-bottom duration-200">
             <div className="flex items-center gap-2 font-mono text-xs">
               <span className="w-2 h-2 rounded-full bg-[#FF5500] animate-pulse" />
-              <span className="text-neutral-400">Выбрано:</span>
+              <span className="text-neutral-400">{t.selected}:</span>
               <span className="font-bold text-white px-2 py-0.5 bg-white/10">
                 {selectedIds.length}
               </span>
@@ -929,7 +863,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
                 <polyline points="3 6 5 6 21 6" />
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
               </svg>
-              <span>УДАЛИТЬ ВЫБРАННЫЕ ({selectedIds.length})</span>
+              <span>{t.deleteSelected} ({selectedIds.length})</span>
             </button>
 
             <button
@@ -937,7 +871,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
               onClick={() => setSelectedIds([])}
               className="text-xs font-mono text-neutral-400 hover:text-white uppercase transition-colors cursor-pointer"
             >
-              Снять выделение
+              {t.clearSelection}
             </button>
           </div>
         )}
@@ -952,13 +886,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
                   <line x1="12" y1="9" x2="12" y2="13" />
                   <line x1="12" y1="17" x2="12.01" y2="17" />
                 </svg>
-                <span>Подтверждение удаления</span>
+                <span>{t.deleteModalTitle}</span>
               </h3>
 
               <p className="text-xs font-mono text-neutral-300 leading-relaxed mb-6">
                 {deleteModal.isBulk
-                  ? `Вы действительно хотите безвозвратно удалить ${deleteModal.ids.length} выбранных аккаунтов из базы Cloudflare D1? Все связанные сессии и данные будут стёрты.`
-                  : `Вы действительно хотите удалить профиль "${deleteModal.targetNickname}" из базы Cloudflare D1?`}
+                  ? t.deleteBulkConfirm.replace('{count}', String(deleteModal.ids.length))
+                  : t.deleteSingleConfirm.replace('{name}', deleteModal.targetNickname || '')}
               </p>
 
               <div className="flex items-center justify-end gap-3 font-mono text-xs">
@@ -968,7 +902,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
                   disabled={isDeleting}
                   className="px-4 py-2 border border-white/20 text-neutral-400 hover:text-white uppercase cursor-pointer rounded-none"
                 >
-                  Отмена
+                  {t.cancel}
                 </button>
                 <button
                   type="button"
@@ -979,10 +913,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
                   {isDeleting ? (
                     <>
                       <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Удаление...</span>
+                      <span>{t.deleting}</span>
                     </>
                   ) : (
-                    <span>УДАЛИТЬ</span>
+                    <span>{t.confirmDelete}</span>
                   )}
                 </button>
               </div>
@@ -997,7 +931,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onGoHome, onNavi
             <span>{actionSuccessMsg}</span>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 };

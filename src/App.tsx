@@ -434,8 +434,8 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#000000] text-white selection:bg-[#FF5500] selection:text-black font-sans antialiased relative">
-      {/* 1. Fixed Header (hidden on CEO admin dashboard, login and register pages) */}
-      {!isAdmin && !isLogin && !isRegister && (
+      {/* 1. Fixed Header (hidden on login and register pages) */}
+      {!isLogin && !isRegister && (
         <Header 
           currentLang={currentLang} 
           onLanguageChange={handleLanguageChange}
