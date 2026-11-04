@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, User } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { LanguageIcon } from './LanguageIcon';
 import { PeeklyLogo } from './PeeklyLogo';
 import { FaceitLogo } from './AuthModal';
+import { DefaultUserAvatar } from './DefaultUserAvatar';
 import { translations, SUPPORTED_LANGUAGES } from '../translations';
 import type { Language } from '../translations';
 import { BROWSERS } from '../constants/browsers';
@@ -296,7 +297,7 @@ export const Header: React.FC<HeaderProps> = ({
                       }}
                     />
                   ) : (
-                    <User className="w-3.5 h-3.5 text-[#FFFFFF]" />
+                    <DefaultUserAvatar size={16} className="w-4 h-4 text-[#FFFFFF]" />
                   )}
                 </div>
 
@@ -335,7 +336,7 @@ export const Header: React.FC<HeaderProps> = ({
                           }}
                         />
                       ) : (
-                        <User className="w-5 h-5 text-[#FFFFFF]" />
+                        <DefaultUserAvatar size={24} className="w-6 h-6 text-[#FFFFFF]" />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -395,7 +396,7 @@ export const Header: React.FC<HeaderProps> = ({
                       }}
                       className="btn-brand-interactive h-10 gap-2"
                     >
-                      <User className="w-3.5 h-3.5 shrink-0" />
+                      <DefaultUserAvatar size={14} className="w-3.5 h-3.5 shrink-0" />
                       <span>{isRu ? 'МОЙ ПРОФИЛЬ' : 'MY PROFILE'}</span>
                     </button>
 
@@ -419,7 +420,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onOpenAuthModal}
-              className="inline-flex items-center justify-center text-center h-10 px-5 sm:px-6 rounded-none bg-black text-white hover:border-white border border-[#222228] font-mono text-xs font-bold tracking-wider uppercase transition-colors shrink-0 shadow-sm cursor-pointer focus-visible:ring-1 focus-visible:ring-white"
+              className="inline-flex items-center justify-center text-center h-10 px-5 sm:px-6 rounded-none bg-black text-white hover:border-white border border-[#222228] font-mono text-xs font-bold tracking-wider uppercase transition-colors shrink-0 cursor-pointer focus-visible:ring-1 focus-visible:ring-white"
               title="Sign in to Peekly"
             >
               <span>SIGN IN</span>
@@ -434,7 +435,7 @@ export const Header: React.FC<HeaderProps> = ({
               aria-expanded={installDropdownOpen}
               aria-haspopup="menu"
               aria-label="Install extension options"
-              className="inline-flex items-center justify-center text-center h-10 px-4 sm:px-5 rounded-none btn-header-install font-mono text-xs font-bold uppercase tracking-wider cursor-pointer shadow-lg active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white"
+              className="inline-flex items-center justify-center text-center h-10 px-4 sm:px-5 rounded-none btn-header-install font-mono text-xs font-bold uppercase tracking-wider cursor-pointer active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white"
             >
               <span>{t.nav.install.toUpperCase()}</span>
             </button>

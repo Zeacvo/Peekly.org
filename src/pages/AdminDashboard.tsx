@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import type { Language } from '../translations';
 import { adminTranslations } from '../data/adminTranslations';
+import { DefaultUserAvatar } from '../components/DefaultUserAvatar';
 import { type PlayerUser, type AdminStats } from '../../functions/api/storage/usersDb';
 
 interface AdminDashboardProps {
@@ -678,16 +679,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                   }}
                                 />
                               ) : (
-                                <svg
-                                  className="w-4 h-4 text-white"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="1.8"
-                                >
-                                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                  <circle cx="12" cy="7" r="4" />
-                                </svg>
+                                <DefaultUserAvatar size={16} className="w-4 h-4 text-white" />
                               )}
                             </div>
                             <div className="flex flex-col">

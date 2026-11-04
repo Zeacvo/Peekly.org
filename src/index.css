@@ -132,14 +132,16 @@ button, a, [role="button"], .cursor-pointer {
   font-weight: 700 !important;
   letter-spacing: 0.05em !important;
   text-transform: uppercase !important;
-  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, box-shadow 150ms ease !important;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease !important;
+  box-shadow: none !important;
 }
 
 .btn-header-install:hover {
   background-color: #FF5500 !important;
   color: #000000 !important;
   border-color: #FFFFFF !important;
-  box-shadow: 0 0 16px rgba(255, 85, 0, 0.5) !important;
+  box-shadow: none !important;
+  filter: none !important;
 }
 
 .btn-header-install svg,
@@ -174,6 +176,7 @@ button, a, [role="button"], .cursor-pointer {
   letter-spacing: 0.05em !important;
   text-transform: uppercase !important;
   transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease !important;
+  box-shadow: none !important;
 }
 
 .btn-chrome-action svg,
@@ -189,7 +192,8 @@ button, a, [role="button"], .cursor-pointer {
   background-color: #FF5500 !important;
   color: #000000 !important;
   border-color: #FFFFFF !important;
-  box-shadow: 0 0 16px rgba(255, 85, 0, 0.45) !important;
+  box-shadow: none !important;
+  filter: none !important;
 }
 
 .btn-chrome-action:hover svg,
@@ -218,13 +222,15 @@ button, a, [role="button"], .cursor-pointer {
   transition: all 0.15s ease-in-out !important;
   cursor: pointer !important;
   text-decoration: none !important;
+  box-shadow: none !important;
 }
 
 .btn-brand-interactive:hover {
   background-color: #FF5500 !important;
   color: #000000 !important;
   border-color: #FFFFFF !important;
-  box-shadow: 0 0 16px rgba(255, 85, 0, 0.5) !important;
+  box-shadow: none !important;
+  filter: none !important;
 }
 
 .btn-brand-interactive svg,
@@ -262,12 +268,15 @@ button, a, [role="button"], .cursor-pointer {
   transition: all 0.15s ease-in-out !important;
   cursor: pointer !important;
   text-decoration: none !important;
+  box-shadow: none !important;
 }
 
 .btn-brand-signout:hover {
   background-color: rgba(255, 255, 255, 0.06) !important;
   color: #FFFFFF !important;
   border-color: #FFFFFF !important;
+  box-shadow: none !important;
+  filter: none !important;
 }
 
 .btn-brand-signout svg,
@@ -285,7 +294,7 @@ button, a, [role="button"], .cursor-pointer {
   color: #FFFFFF !important;
 }
 
-/* Action buttons on Profile & Dashboards (Rest: White bg, Black text; Hover: #FF5500, glow) */
+/* Action buttons on Profile & Dashboards (Rest: White bg, Black text; Hover: #FF5500, flat) */
 .btn-action-interactive {
   display: inline-flex !important;
   align-items: center !important;
@@ -303,13 +312,15 @@ button, a, [role="button"], .cursor-pointer {
   cursor: pointer !important;
   text-decoration: none !important;
   white-space: nowrap !important;
+  box-shadow: none !important;
 }
 
 .btn-action-interactive:hover {
   background-color: #FF5500 !important;
   color: #000000 !important;
   border-color: #FFFFFF !important;
-  box-shadow: 0 0 16px rgba(255, 85, 0, 0.5) !important;
+  box-shadow: none !important;
+  filter: none !important;
 }
 
 .btn-action-interactive svg,
@@ -323,6 +334,21 @@ button, a, [role="button"], .cursor-pointer {
 .btn-action-interactive:hover path {
   color: #000000 !important;
   fill: #000000 !important;
+}
+
+/* Strict Brutalist Flat Hover - Zero Glow / Halo / Shadow */
+.btn-brand-interactive:hover,
+.btn-header-install:hover,
+.btn-chrome-action:hover,
+.btn-action-interactive:hover,
+button:hover.bg-brand-accent,
+button:hover[class*="bg-[#FF5500]"],
+button:hover[class*="hover:bg-[#FF5500]"],
+a:hover[class*="hover:bg-[#FF5500]"] {
+  background-color: #FF5500 !important;
+  color: #000000 !important;
+  box-shadow: none !important;
+  filter: none !important;
 }
 
 /* Secondary Muted Action Buttons on Profile & Dashboards (Brutalist Gray Outline) */
