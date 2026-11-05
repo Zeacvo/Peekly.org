@@ -400,7 +400,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   if (isAuthorized === false) {
     return (
       <div className="min-h-screen bg-[#000000] flex items-center justify-center text-white">
-        <p className="text-xs font-mono text-neutral-400 tracking-wider uppercase animate-pulse">
+        <p className="text-xs font-mono text-neutral-400 tracking-wider animate-pulse">
           {t.checkingAuth}
         </p>
       </div>
@@ -414,7 +414,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   return (
     <div className="min-h-screen bg-[#000000] text-white font-sans antialiased selection:bg-[#FF5500] selection:text-black">
       {/* Main Content Container matching landing page layout geometry */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16 space-y-8">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16 space-y-6">
         {/* Error Notification */}
         {errorMsg && (
           <div className="p-4 bg-red-950/40 border border-red-500/40 text-red-300 text-sm flex items-center justify-between">
@@ -422,7 +422,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <button
               type="button"
               onClick={handleRefresh}
-              className="text-xs uppercase font-mono px-2.5 py-1 bg-red-900/60 hover:bg-red-800 text-white cursor-pointer"
+              className="text-xs font-mono px-2.5 py-1 bg-red-900/60 hover:bg-red-800 text-white cursor-pointer"
             >
               {t.retry}
             </button>
@@ -433,50 +433,50 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
           {/* Total Players */}
           <div className="bg-[#090909] border border-[#1A1A1F] p-5 sm:p-6 transition-colors">
-            <div className="text-xs text-[#929292] font-semibold tracking-widest uppercase mb-2">
-              {t.totalPlayers}
+            <div className="text-xs text-[#929292] font-semibold tracking-wider mb-2">
+              {currentLang === 'ru' ? 'Всего игроков' : 'Total players'}
             </div>
-            <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            <div className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
               {stats?.totalPlayers ?? users.length}
             </div>
           </div>
 
           {/* New Today */}
           <div className="bg-[#090909] border border-[#1A1A1F] p-5 sm:p-6 transition-colors">
-            <div className="text-xs text-[#929292] font-semibold tracking-widest uppercase mb-2">
-              {t.newToday}
+            <div className="text-xs text-[#929292] font-semibold tracking-wider mb-2">
+              {currentLang === 'ru' ? 'Новые сегодня' : 'New today'}
             </div>
-            <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            <div className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
               {stats ? (stats.newToday > 0 ? `+${stats.newToday}` : '0') : users.length}
             </div>
           </div>
 
           {/* Average ELO */}
           <div className="bg-[#090909] border border-[#1A1A1F] p-5 sm:p-6 transition-colors">
-            <div className="text-xs text-[#929292] font-semibold tracking-widest uppercase mb-2">
-              {t.avgElo}
+            <div className="text-xs text-[#929292] font-semibold tracking-wider mb-2">
+              {currentLang === 'ru' ? 'Среднее Elo' : 'Average Elo'}
             </div>
-            <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            <div className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
               {avgElo ? avgElo.toLocaleString() : '—'}
             </div>
           </div>
 
           {/* Active 24h */}
           <div className="bg-[#090909] border border-[#1A1A1F] p-5 sm:p-6 transition-colors">
-            <div className="text-xs text-[#929292] font-semibold tracking-widest uppercase mb-2">
-              {t.active24h}
+            <div className="text-xs text-[#929292] font-semibold tracking-wider mb-2">
+              {currentLang === 'ru' ? 'Активные 24ч' : 'Active 24h'}
             </div>
-            <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            <div className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
               {stats?.active24h ?? users.length}
             </div>
           </div>
 
           {/* Top Region */}
           <div className="bg-[#090909] border border-[#1A1A1F] p-5 sm:p-6 transition-colors col-span-2 sm:col-span-1">
-            <div className="text-xs text-[#929292] font-semibold tracking-widest uppercase mb-2">
-              {t.topRegion}
+            <div className="text-xs text-[#929292] font-semibold tracking-wider mb-2">
+              {currentLang === 'ru' ? 'Топ регион' : 'Top region'}
             </div>
-            <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            <div className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
               {stats?.topCountry ?? '—'}
             </div>
           </div>
@@ -549,15 +549,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <button
               type="button"
               onClick={handleExportCsv}
-              className="inline-flex items-center justify-center text-center h-[34px] px-3 sm:px-4 rounded-none btn-header-install font-bold text-[10px] sm:text-[11px] md:text-xs tracking-wider uppercase cursor-pointer shadow-lg active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white gap-2"
-              title={t.exportCsv}
+              className="inline-flex items-center justify-center text-center h-[34px] px-3 sm:px-4 rounded-none bg-white text-black hover:bg-[#FF5500] font-mono font-bold text-xs tracking-wider cursor-pointer shadow-none active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white gap-2 transition-colors"
+              title="Export CSV"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                 <polyline points="7 10 12 15 17 10" />
                 <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
-              <span>{t.exportCsv}</span>
+              <span>Export CSV</span>
             </button>
 
             {/* Refresh */}
@@ -586,19 +586,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <section className="bg-[#090909] border border-[#1A1A1F] overflow-hidden">
           <div className="px-5 py-4 border-b border-[#1A1A1F] flex items-center justify-between bg-[#000000]">
             <div className="flex items-center gap-3">
-              <span className="text-xs font-extrabold text-white tracking-widest uppercase">
-                {t.registeredPlayers}
+              <span className="text-xs font-bold text-white tracking-wider">
+                {currentLang === 'ru' ? 'Зарегистрированные игроки' : 'Registered players'}
               </span>
-              <span className="px-2 py-0.5 bg-white/10 text-[10px] text-[#929292]">
-                {filteredUsers.length} {t.of} {users.length}
+              <span className="px-2 py-0.5 bg-white/10 text-[10px] text-[#929292] font-mono">
+                {filteredUsers.length} of {users.length}
               </span>
             </div>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-[#1A1A1F] bg-[#000000] text-xs text-[#929292] uppercase tracking-wider">
+              <thead className="bg-[#000000] border-b border-[#1A1A1F] text-left text-xs font-mono text-[#929292]">
+                <tr>
                   <th className="py-3 px-4 w-10 text-center">
                     <input
                       type="checkbox"
@@ -607,20 +607,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         if (el) el.indeterminate = isSomeSelected;
                       }}
                       onChange={handleToggleSelectAll}
-                      className="w-4 h-4 bg-black border border-white/30 checked:bg-[#FF5500] checked:border-[#FF5500] rounded-none cursor-pointer accent-[#FF5500]"
+                      className="w-4 h-4 rounded-none bg-[#090909] border border-[#222228] checked:bg-[#FF5500] checked:border-[#FF5500] cursor-pointer accent-[#FF5500]"
                       title={t.selectAll}
                     />
                   </th>
-                  <th className="py-3 px-5">{t.colPlayer}</th>
-                  <th className="py-3 px-5">{t.colEmail}</th>
-                  <th className="py-3 px-5">{t.colElo}</th>
-                  <th className="py-3 px-5">{t.colCountry}</th>
-                  <th className="py-3 px-5">{t.colActivity}</th>
-                  <th className="py-3 px-5 text-right">{t.colPlan}</th>
-                  <th className="py-3 px-5 text-right">{t.colActions}</th>
+                  <th className="py-3 px-4 font-normal">Nickname</th>
+                  <th className="py-3 px-4 font-normal">Email</th>
+                  <th className="py-3 px-4 font-normal">Elo & Level</th>
+                  <th className="py-3 px-4 font-normal">Country</th>
+                  <th className="py-3 px-4 font-normal">Registration & Activity</th>
+                  <th className="py-3 px-4 font-normal">Plan</th>
+                  <th className="py-3 px-4 font-normal text-right">Удалить</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#1A1A1F] text-sm">
+              <tbody className="divide-y divide-[#1A1A1F] text-xs font-mono">
                 {isLoading && users.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="py-12 text-center text-[#929292] text-xs">
@@ -639,30 +639,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     return (
                       <tr
                         key={player.guid}
-                        className={`transition-colors group ${
+                        className={`border-b border-[#1A1A1F] hover:bg-[#0c0c0e] transition-colors group ${
                           index % 2 === 0 ? 'bg-[#000000]' : 'bg-[#090909]'
                         } ${
-                          selectedIds.includes(player.guid) ? '!bg-[#FF5500]/[0.08]' : 'hover:bg-white/[0.04]'
+                          selectedIds.includes(player.guid) ? '!bg-[#FF5500]/[0.08]' : ''
                         }`}
                       >
                         {/* Col 0: Checkbox */}
-                        <td className="py-3.5 px-4 w-10 text-center">
+                        <td className="py-3 px-4 w-10 text-center">
                           <input
                             type="checkbox"
                             checked={selectedIds.includes(player.guid)}
                             disabled={!canSelect}
                             onChange={() => handleToggleRow(player.guid)}
-                            className={`w-4 h-4 bg-black border border-white/30 checked:bg-[#FF5500] checked:border-[#FF5500] rounded-none accent-[#FF5500] ${
+                            className={`w-4 h-4 rounded-none bg-[#090909] border border-[#222228] checked:bg-[#FF5500] checked:border-[#FF5500] accent-[#FF5500] ${
                               !canSelect ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'
                             }`}
                             title={!canSelect ? t.protectedCeo : t.selectUser}
                           />
                         </td>
 
-                        {/* Col 1: Player (Avatar + Nickname) */}
-                        <td className="py-3.5 px-5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-none bg-[#000000] border border-[#1A1A1F] overflow-hidden shrink-0 flex items-center justify-center">
+                        {/* Col 1: Nickname */}
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-7 h-7 bg-[#000000] border border-[#222228] rounded-none flex items-center justify-center shrink-0 overflow-hidden">
                               {player.avatar && !player.avatar.includes('default_avatar.png') ? (
                                 <img
                                   src={player.avatar}
@@ -674,7 +674,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                   }}
                                 />
                               ) : (
-                                <DefaultUserAvatar size={16} className="w-4 h-4 text-white" />
+                                <DefaultUserAvatar size={14} className="w-3.5 h-3.5 text-[#FFFFFF]" />
                               )}
                             </div>
                             <a
@@ -687,7 +687,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                   window.location.href = `/profile?id=${encodeURIComponent(player.guid)}`;
                                 }
                               }}
-                              className="font-mono text-xs font-bold text-white hover:text-[#FF5500] transition-colors"
+                              className="font-bold text-[#FFFFFF] hover:text-[#FF5500] transition-colors"
                               title={`${t.openProfile} ${player.nickname}`}
                             >
                               {player.nickname}
@@ -696,11 +696,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </td>
 
                         {/* Col 2: Email */}
-                        <td className="py-3.5 px-5">
+                        <td className="py-3 px-4 text-[#929292]">
                           <div className="flex items-center gap-2">
                             <a
                               href={`mailto:${player.email}`}
-                              className="text-xs text-[#929292] hover:text-white transition-colors"
+                              className="hover:text-white transition-colors"
                             >
                               {player.email}
                             </a>
@@ -720,44 +720,38 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           </div>
                         </td>
 
-                        {/* Col 3: CS2 ELO & Level */}
-                        <td className="py-3.5 px-5">
-                          <span className="font-mono text-xs text-[#FFFFFF]">
-                            {player.elo ? `${player.elo.toLocaleString()}, ${player.level || 1} level` : '—'}
-                          </span>
+                        {/* Col 3: Elo & Level */}
+                        <td className="py-3 px-4 text-[#FFFFFF]">
+                          {player.elo ? `${player.elo.toLocaleString()} & ${player.level || 1} level` : '—'}
                         </td>
 
                         {/* Col 4: Country */}
-                        <td className="py-3.5 px-5">
-                          <span className="font-mono text-xs text-[#FFFFFF]">
-                            {getCountryName(player.country)}
-                          </span>
+                        <td className="py-3 px-4 text-[#FFFFFF]">
+                          {getCountryName(player.country) || 'Belarus'}
                         </td>
 
                         {/* Col 5: Registration & Activity */}
-                        <td className="py-3.5 px-5">
-                          <div className="font-mono text-xs text-[#FFFFFF]">
-                            <div>{formatDateOnly(player.created_at)}</div>
-                            <div className="text-[#929292]">{formatDateOnly(player.last_login_at)}</div>
-                          </div>
+                        <td className="py-3 px-4 text-[#FFFFFF]">
+                          <span>{formatDateOnly(player.created_at)}</span>
+                          <span className="text-[#929292] mx-1.5">&</span>
+                          <span className="text-[#929292]">{formatDateOnly(player.last_login_at)}</span>
                         </td>
 
                         {/* Col 6: Plan */}
-                        <td className="py-3.5 px-5 text-right">
-                          <span className="font-mono text-xs text-[#929292]">
-                            {player.plan?.toLowerCase() === 'pro' ? 'Pro' : 'Free'}
-                          </span>
+                        <td className="py-3 px-4 text-[#929292]">
+                          {player.plan?.toLowerCase() === 'pro' ? 'Pro' : 'Free'}
                         </td>
 
                         {/* Col 7: Actions (Delete) */}
-                        <td className="py-3.5 px-5 text-right">
+                        <td className="py-3 px-4 text-right">
                           <button
                             type="button"
                             onClick={() => handleRequestSingleDelete(player)}
-                            className="p-1 text-[#929292] hover:text-[#FFFFFF] hover:bg-[#1A1A1F] transition-colors border border-transparent hover:border-[#222228] rounded-none cursor-pointer inline-flex items-center justify-center"
-                            title="Delete user"
+                            className="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-mono text-[#929292] hover:text-[#FFFFFF] hover:bg-[#1A1A1F] border border-transparent hover:border-[#222228] transition-colors rounded-none cursor-pointer"
+                            title="Удалить"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Удалить</span>
                           </button>
                         </td>
                       </tr>
@@ -766,13 +760,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 )}
               </tbody>
             </table>
-          </div>
-
-          {/* Table Footer */}
-          <div className="px-5 py-3 border-t border-[#1A1A1F] bg-[#090909] flex items-center justify-between text-xs text-[#929292]">
-            <span>
-              {t.totalDatabaseSize}: {users.length} {users.length === 1 ? t.playerSingular : t.playerPlural}
-            </span>
           </div>
         </section>
 
@@ -790,7 +777,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <button
               type="button"
               onClick={handleRequestBulkDelete}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold uppercase transition-colors cursor-pointer rounded-none flex items-center gap-2 shadow-lg"
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-colors cursor-pointer rounded-none flex items-center gap-2 shadow-lg"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polyline points="3 6 5 6 21 6" />
@@ -802,7 +789,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <button
               type="button"
               onClick={() => setSelectedIds([])}
-              className="text-xs text-[#929292] hover:text-white uppercase transition-colors cursor-pointer"
+              className="text-xs text-[#929292] hover:text-white transition-colors cursor-pointer"
             >
               {t.clearSelection}
             </button>
@@ -813,7 +800,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         {deleteModal.isOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
             <div className="w-full max-w-md bg-[#000000] border border-red-600/50 p-6 relative">
-              <h3 className="text-sm font-mono font-bold text-red-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <h3 className="text-sm font-mono font-bold text-red-500 tracking-wider mb-3 flex items-center gap-2">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                   <line x1="12" y1="9" x2="12" y2="13" />
@@ -833,7 +820,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   type="button"
                   onClick={() => setDeleteModal({ isOpen: false, ids: [], isBulk: false })}
                   disabled={isDeleting}
-                  className="px-4 py-2 border border-[#222228] text-[#929292] hover:text-white hover:border-white uppercase cursor-pointer rounded-none"
+                  className="px-4 py-2 border border-[#222228] text-[#929292] hover:text-white hover:border-white cursor-pointer rounded-none"
                 >
                   {t.cancel}
                 </button>
@@ -841,7 +828,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   type="button"
                   onClick={handleConfirmDelete}
                   disabled={isDeleting}
-                  className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold uppercase transition-colors cursor-pointer rounded-none flex items-center gap-2"
+                  className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold transition-colors cursor-pointer rounded-none flex items-center gap-2"
                 >
                   {isDeleting ? (
                     <>
