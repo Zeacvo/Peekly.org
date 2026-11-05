@@ -593,10 +593,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse border border-[#1A1A1F]">
               <thead className="bg-[#000000] border-b border-[#1A1A1F] text-left text-xs font-mono text-[#929292]">
                 <tr>
-                  <th className="py-3 px-4 w-10 text-center">
+                  <th className="py-3 px-4 w-10 text-center border-r border-dashed border-[#1A1A1F]">
                     <input
                       type="checkbox"
                       checked={isAllSelected}
@@ -608,12 +608,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       title={t.selectAll}
                     />
                   </th>
-                  <th className="py-3 px-4 font-normal">Nickname</th>
-                  <th className="py-3 px-4 font-normal">Email</th>
-                  <th className="py-3 px-4 font-normal">Elo & Level</th>
-                  <th className="py-3 px-4 font-normal">Country</th>
-                  <th className="py-3 px-4 font-normal">Registration & Activity</th>
-                  <th className="py-3 px-4 font-normal">Plan</th>
+                  <th className="py-3 px-4 font-normal border-r border-dashed border-[#1A1A1F]">Nickname</th>
+                  <th className="py-3 px-4 font-normal border-r border-dashed border-[#1A1A1F]">Email</th>
+                  <th className="py-3 px-4 font-normal border-r border-dashed border-[#1A1A1F]">Elo & Level</th>
+                  <th className="py-3 px-4 font-normal border-r border-dashed border-[#1A1A1F]">Country</th>
+                  <th className="py-3 px-4 font-normal border-r border-dashed border-[#1A1A1F]">Registration & Activity</th>
+                  <th className="py-3 px-4 font-normal border-r border-dashed border-[#1A1A1F]">Plan</th>
                   <th className="py-3 px-4 font-normal text-right w-12" />
                 </tr>
               </thead>
@@ -643,7 +643,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         }`}
                       >
                         {/* Col 0: Checkbox */}
-                        <td className="py-3 px-4 w-10 text-center">
+                        <td className="py-3 px-4 w-10 text-center border-r border-dashed border-[#1A1A1F]">
                           <input
                             type="checkbox"
                             checked={selectedIds.includes(player.guid)}
@@ -657,7 +657,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </td>
 
                         {/* Col 1: Nickname */}
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-4 border-r border-dashed border-[#1A1A1F]">
                           <div className="flex items-center gap-2.5">
                             <div className="w-7 h-7 bg-[#000000] border border-[#222228] rounded-none flex items-center justify-center shrink-0 overflow-hidden">
                               {player.avatar && !player.avatar.includes('default_avatar.png') ? (
@@ -693,7 +693,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </td>
 
                         {/* Col 2: Email — 100% white */}
-                        <td className="py-3 px-4 text-[#FFFFFF]">
+                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F]">
                           <div className="flex items-center gap-2">
                             <a
                               href={`mailto:${player.email}`}
@@ -718,24 +718,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </td>
 
                         {/* Col 3: Elo & Level — 100% white */}
-                        <td className="py-3 px-4 text-[#FFFFFF]">
+                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F]">
                           {player.elo ? `${player.elo.toLocaleString()} & ${player.level || 1} level` : '—'}
                         </td>
 
                         {/* Col 4: Country — 100% white */}
-                        <td className="py-3 px-4 text-[#FFFFFF]">
+                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F]">
                           {getCountryName(player.country) || 'Belarus'}
                         </td>
 
                         {/* Col 5: Registration & Activity — 100% white */}
-                        <td className="py-3 px-4 text-[#FFFFFF]">
+                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F]">
                           <span>{formatDateOnly(player.created_at)}</span>
                           <span className="mx-1.5 text-[#FFFFFF]">&</span>
                           <span>{formatDateOnly(player.last_login_at)}</span>
                         </td>
 
                         {/* Col 6: Plan — 100% white */}
-                        <td className="py-3 px-4 text-[#FFFFFF]">
+                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F]">
                           {player.plan?.toLowerCase() === 'pro' ? 'Pro' : 'Free'}
                         </td>
 

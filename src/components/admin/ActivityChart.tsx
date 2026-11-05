@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 
 export interface ActivityUser {
   guid: string;
@@ -25,6 +25,8 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ users, currentLang
   const isRu = currentLang === 'ru';
   const [period, setPeriod] = useState<ChartPeriod>('month');
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Generate timeline points based on selected period
   const points: DataPoint[] = useMemo(() => {
@@ -232,22 +234,77 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ users, currentLang
 
   const activeHover = hoveredIdx !== null ? { reg: regCoords[hoveredIdx], act: activeCoords[hoveredIdx] } : null;
 
+  // Static, evenly spaced ticks for X-axis to eliminate layout shift and random gaps
+  const displayTicks = useMemo(() => {
+    if (points.length === 0) return [];
+    const indices: number[] = [];
+    if (period === 'month') {
+      const step = 6;
+      for (let i = 0; i < points.length; i += step) {
+        indices.push(i);
+      }
+      if (indices[indices.length - 1] !== points.length - 1) {
+        indices.push(points.length - 1);
+      }
+    } else if (period === 'year') {
+      const step = 2;
+      for (let i = 0; i < points.length; i += step) {
+        indices.push(i);
+      }
+      if (indices[indices.length - 1] !== points.length - 1) {
+        indices.push(points.length - 1);
+      }
+    } else {
+      const step = 3;
+      for (let i = 0; i < points.length; i += step) {
+        indices.push(i);
+      }
+      if (indices[indices.length - 1] !== points.length - 1) {
+        indices.push(points.length - 1);
+      }
+    }
+
+    return indices.map((idx) => ({
+      index: idx,
+      label: points[idx].label,
+      coord: regCoords[idx],
+    }));
+  }, [points, period, regCoords]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const mouseX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const mouseY = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+    setMousePos({ x: mouseX, y: mouseY });
+
+    // Compute hovered index mapped across inner chart area
+    const mouseSvgX = (mouseX / rect.width) * chartWidth;
+    const rel = (mouseSvgX - paddingX) / innerWidth;
+    const idx = Math.round(rel * (points.length - 1));
+    const clampedIdx = Math.max(0, Math.min(idx, points.length - 1));
+    setHoveredIdx(clampedIdx);
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredIdx(null);
+    setMousePos(null);
+  };
+
+  // Safe floating tooltip positioning clamped inside chart area
+  const rectWidth = containerRef.current?.clientWidth || chartWidth;
+  const tooltipX = mousePos ? Math.max(90, Math.min(mousePos.x, rectWidth - 90)) : 0;
+  const isCursorNearTop = mousePos ? mousePos.y < 60 : false;
+  const tooltipY = mousePos ? (isCursorNearTop ? Math.max(10, mousePos.y + 16) : mousePos.y - 12) : 0;
+  const tooltipTransform = isCursorNearTop ? 'translate(-50%, 0)' : 'translate(-50%, -100%)';
+
   return (
     <section className="w-full bg-[#090909] border border-[#1A1A1F] p-5 rounded-none">
-      {/* Header with Title, Period Switch and Legend */}
+      {/* Clean Single Header without Duplicate Subtitle */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#1A1A1F] gap-2 mb-4">
-        <div>
-          <h2 className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
-            {isRu ? 'Динамика регистраций и активности' : 'Registration & Activity trends'}
-          </h2>
-          <span className="text-[10px] text-[#929292] font-mono">
-            {period === 'month'
-              ? (isRu ? 'За последние 30 дней' : 'Last 30 days')
-              : period === 'year'
-              ? (isRu ? 'За последний год' : 'Last 12 months')
-              : (isRu ? 'За всё время' : 'All recorded activity')}
-          </span>
-        </div>
+        <h3 className="font-mono text-xs font-normal text-[#FFFFFF] tracking-wider">
+          {isRu ? 'Динамика регистраций и активности' : 'Registration & Activity trends'}
+        </h3>
 
         <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
           {/* Period switch buttons */}
@@ -286,12 +343,17 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ users, currentLang
         </div>
       </div>
 
-      {/* Responsive SVG Chart */}
-      <div className="relative w-full h-[150px] select-none">
+      {/* Responsive SVG Chart with Fluid Mouse Tracking */}
+      <div
+        ref={containerRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        className="relative w-full h-[150px] select-none cursor-crosshair"
+      >
         <svg
           viewBox={`0 0 ${chartWidth} ${chartHeight}`}
           preserveAspectRatio="none"
-          className="w-full h-full overflow-visible"
+          className="w-full h-full overflow-visible pointer-events-none"
         >
           <defs>
             <linearGradient id="chartGradientWhite" x1="0" y1="0" x2="0" y2="1">
@@ -352,7 +414,7 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ users, currentLang
             strokeLinejoin="round"
           />
 
-          {/* Points & Interactive columns */}
+          {/* Points & Interactive guides */}
           {regCoords.map((rc, idx) => {
             const ac = activeCoords[idx];
             const isHovered = hoveredIdx === idx;
@@ -379,7 +441,7 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ users, currentLang
                   fill={isHovered ? '#FF5500' : '#090909'}
                   stroke={isHovered ? '#FF5500' : '#929292'}
                   strokeWidth="1.5"
-                  className="transition-all duration-150 pointer-events-none"
+                  className="transition-all duration-150"
                 />
 
                 {/* Registration point circle */}
@@ -390,31 +452,21 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ users, currentLang
                   fill={isHovered ? '#FFFFFF' : '#090909'}
                   stroke="#FFFFFF"
                   strokeWidth="2"
-                  className="transition-all duration-150 pointer-events-none"
-                />
-
-                {/* Invisible hover hitbox */}
-                <rect
-                  x={rc.x - innerWidth / points.length / 2}
-                  y={0}
-                  width={innerWidth / points.length}
-                  height={chartHeight}
-                  fill="transparent"
-                  className="cursor-pointer"
-                  onMouseEnter={() => setHoveredIdx(idx)}
-                  onMouseLeave={() => setHoveredIdx(null)}
+                  className="transition-all duration-150"
                 />
               </g>
             );
           })}
         </svg>
 
-        {/* Hover Tooltip */}
-        {activeHover && (
+        {/* Hover Tooltip — Strictly Floating Inside Chart Area (top >= 10px, never overlaps buttons) */}
+        {activeHover && mousePos && (
           <div
-            className="absolute -top-3 z-20 pointer-events-none bg-[#000000] border border-[#222228] px-2.5 py-1.5 shadow-2xl font-mono text-[11px] transform -translate-x-1/2 -translate-y-full whitespace-nowrap"
+            className="absolute z-20 pointer-events-none bg-[#000000] border border-[#222228] px-2.5 py-1.5 shadow-2xl font-mono text-[11px] whitespace-nowrap transition-transform duration-75"
             style={{
-              left: `${(activeHover.reg.x / chartWidth) * 100}%`,
+              left: `${tooltipX}px`,
+              top: `${tooltipY}px`,
+              transform: tooltipTransform,
             }}
           >
             <div className="text-white font-bold">{activeHover.reg.point.dateStr}</div>
@@ -433,19 +485,23 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ users, currentLang
         )}
       </div>
 
-      {/* Date Labels below chart */}
-      <div className="flex justify-between items-center px-4 pt-2 border-t border-[#1A1A1F] mt-1 text-[10px] font-mono text-[#929292]">
-        {points.map((p, i) => {
-          const step = period === 'month' ? 4 : period === 'year' ? 1 : 2;
-          const showLabel = i % step === 0 || i === points.length - 1;
+      {/* Date Labels below chart — Strictly Static Ticks with Absolute Positioning (Zero Layout Shift) */}
+      <div className="relative w-full h-6 border-t border-[#1A1A1F] mt-2 select-none">
+        {displayTicks.map((tick) => {
+          const isHovered = hoveredIdx === tick.index;
+          const leftPercent = (tick.coord.x / chartWidth) * 100;
           return (
             <span
-              key={i}
-              className={`${!showLabel ? 'hidden sm:inline-block opacity-0' : ''} ${
-                hoveredIdx === i ? 'text-white font-bold !opacity-100' : ''
-              }`}
+              key={tick.index}
+              className="absolute top-1.5 font-mono text-[10px] select-none pointer-events-none transition-colors duration-150"
+              style={{
+                left: `${leftPercent}%`,
+                transform: 'translateX(-50%)',
+                fontWeight: 400, // ALWAYS 400! Strict font-normal, zero layout shift!
+                color: isHovered ? '#FFFFFF' : '#929292',
+              }}
             >
-              {p.label}
+              {tick.label}
             </span>
           );
         })}
