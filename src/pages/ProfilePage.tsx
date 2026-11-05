@@ -11,11 +11,10 @@ import {
   X,
   Loader2,
   ArrowLeft,
-  Copy,
 } from 'lucide-react';
 import type { Language } from '../translations';
 import { profileTranslations } from '../data/profileTranslations';
-import { calculateFaceitLevel } from '../../functions/api/storage/usersDb';
+import { VerifiedShieldIcon } from '../components/icons/VerifiedShieldIcon';
 
 interface ProfilePageProps {
   currentLang?: Language;
@@ -37,6 +36,7 @@ interface UserProfile {
   faceit_nickname?: string | null;
   role?: string;
   created_at?: string | number;
+  createdAt?: string | number;
   plan?: string;
 }
 
@@ -100,7 +100,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   // Status & feedback
   const [statusMessage, setStatusMessage] = useState<{ text: string; isError: boolean } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [copiedEmail, setCopiedEmail] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
 
   // Fetch current authenticated user
@@ -230,22 +229,20 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       (displayUser?.elo && Number(displayUser.elo) > 0)
   );
 
-  const faceitElo = displayUser?.elo ? Number(displayUser.elo) : null;
-  const faceitLevel = displayUser?.level || (faceitElo ? calculateFaceitLevel(faceitElo) : 8);
-
-  const registrationDate = displayUser?.created_at
+  const rawCreatedAt = displayUser?.createdAt || displayUser?.created_at;
+  const registrationDate = rawCreatedAt
     ? new Date(
-        typeof displayUser.created_at === 'number'
-          ? displayUser.created_at
-          : isNaN(Number(displayUser.created_at))
-          ? displayUser.created_at
-          : Number(displayUser.created_at)
-      ).toLocaleDateString(currentLang === 'ru' ? 'ru-RU' : 'en-GB', {
+        typeof rawCreatedAt === 'number'
+          ? rawCreatedAt
+          : isNaN(Number(rawCreatedAt))
+          ? rawCreatedAt
+          : Number(rawCreatedAt)
+      ).toLocaleDateString('ru-RU', {
         day: '2-digit',
-        month: 'short',
+        month: '2-digit',
         year: 'numeric',
       })
-    : '2026';
+    : '03.11.2026';
 
   const showNotification = (text: string, isError = false) => {
     setStatusMessage({ text, isError });
@@ -553,13 +550,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     }
   };
 
-  const copyEmail = (emailStr?: string) => {
-    if (!emailStr) return;
-    navigator.clipboard?.writeText(emailStr);
-    setCopiedEmail(true);
-    setTimeout(() => setCopiedEmail(false), 2000);
-  };
-
   if (isLoadingTarget) {
     return (
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 pt-36 text-center text-white">
@@ -748,63 +738,26 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
               {/* FACEIT Integration Block */}
               <div className="border-t border-[#1A1A1F] pt-5">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white">
-                    <FaceitLogo className="w-4 h-4 text-white" />
-                    <span>FACEIT CS2</span>
-                  </div>
-                  {isFaceitLinked ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-transparent border border-[#222228] text-[#929292] text-[10px] font-bold">
-                      <Check className="w-3 h-3 text-[#929292]" />
-                      <span>{t.verified}</span>
-                    </span>
-                  ) : (
-                    <span className="px-2 py-0.5 bg-transparent border border-[#222228] text-[#929292] text-[10px] font-bold">
-                      {t.notLinked}
-                    </span>
-                  )}
-                </div>
-
                 {isFaceitLinked ? (
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="p-2.5 bg-[#000000] border border-[#1A1A1F]">
-                        <span className="text-[10px] uppercase text-[#929292] font-bold block mb-0.5">
-                          {t.cs2Level}
-                        </span>
-                        <div className="flex items-center gap-1.5">
-                          <span className="px-1.5 py-0.5 bg-transparent border border-[#222228] font-bold text-white text-xs">
-                            LVL {faceitLevel}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="p-2.5 bg-[#000000] border border-[#1A1A1F]">
-                        <span className="text-[10px] uppercase text-[#929292] font-bold block mb-0.5">
-                          {t.cs2Elo}
-                        </span>
-                        <span className="text-white font-bold text-sm">
-                          {faceitElo ? faceitElo.toLocaleString() : '1,699'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-1 text-xs">
-                      <span className="text-[#929292]">
-                        {t.region}: <strong className="text-white">{displayUser?.country || 'BY'}</strong>
+                  <div className="flex items-center justify-between p-3 bg-[#000000] border border-[#1A1A1F] rounded-none my-1">
+                    <div className="flex items-center gap-2">
+                      <FaceitLogo className="w-4 h-4 text-[#FF5500]" />
+                      <span className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
+                        FACEIT CS2
                       </span>
-                      <a
-                        href={`https://www.faceit.com/en/players/${encodeURIComponent(
-                          displayUser?.faceit_nickname || displayUser?.nickname || ''
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[#929292] hover:text-[#FFFFFF] transition-colors"
-                      >
-                        <span>{t.viewOnFaceit}</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
+                      <VerifiedShieldIcon className="w-4 h-4 text-[#FFFFFF]" />
                     </div>
+                    <a
+                      href={`https://www.faceit.com/en/players/${encodeURIComponent(
+                        displayUser?.faceit_nickname || displayUser?.nickname || 'Zeacvo'
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-7 h-7 flex items-center justify-center border border-[#222228] text-[#929292] hover:text-[#000000] hover:bg-[#FF5500] hover:border-[#FF5500] transition-colors"
+                      title="Open FACEIT profile"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
                   </div>
                 ) : (
                   <div className="text-center py-2">
@@ -883,24 +836,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         <span className="text-sm font-medium text-white break-all">
                           {currentUser?.email || '—'}
                         </span>
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-transparent border border-[#222228] text-[#929292] text-[10px] font-bold">
-                          <Check className="w-3 h-3 text-[#929292]" />
-                          <span>{t.verified}</span>
-                        </span>
-                        {currentUser?.email && (
-                          <button
-                            type="button"
-                            onClick={() => copyEmail(currentUser.email)}
-                            className="p-1 text-[#929292] hover:text-white transition-colors cursor-pointer"
-                            title="Copy email"
-                          >
-                            {copiedEmail ? (
-                              <Check className="w-3.5 h-3.5 text-[#929292]" />
-                            ) : (
-                              <Copy className="w-3.5 h-3.5" />
-                            )}
-                          </button>
-                        )}
+                        <VerifiedShieldIcon className="w-4 h-4 text-[#929292] shrink-0" />
                       </div>
                     </div>
                     <button
