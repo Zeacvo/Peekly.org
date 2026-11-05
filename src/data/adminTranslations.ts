@@ -20,6 +20,9 @@ export interface AdminTranslation {
   sortNickname: string;
   refreshTooltip: string;
   exportCsv: string;
+  period_all?: string;
+  period_year?: string;
+  period_month?: string;
 
   // Table Headers & Content
   registeredPlayers: string;
@@ -85,6 +88,9 @@ export const adminTranslations: Record<Language, AdminTranslation> = {
     sortNickname: 'Sort: Nickname',
     refreshTooltip: 'Refresh database',
     exportCsv: 'EXPORT CSV',
+    period_all: 'All time',
+    period_year: '1 year',
+    period_month: '1 month',
     registeredPlayers: 'REGISTERED PLAYERS',
     of: 'of',
     colPlayer: 'PLAYER',
@@ -141,6 +147,9 @@ export const adminTranslations: Record<Language, AdminTranslation> = {
     sortNickname: 'Сортировка: Никнейм',
     refreshTooltip: 'Обновить базу данных',
     exportCsv: 'ЭКСПОРТ CSV',
+    period_all: 'За всё время',
+    period_year: '1 год',
+    period_month: '1 месяц',
     registeredPlayers: 'ЗАРЕГИСТРИРОВАННЫЕ ИГРОКИ',
     of: 'из',
     colPlayer: 'ИГРОК',

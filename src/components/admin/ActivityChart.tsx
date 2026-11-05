@@ -19,63 +19,140 @@ interface DataPoint {
   total: number;
 }
 
+export type ChartPeriod = 'all' | 'year' | 'month';
+
 export const ActivityChart: React.FC<ActivityChartProps> = ({ users, currentLang = 'ru' }) => {
   const isRu = currentLang === 'ru';
+  const [period, setPeriod] = useState<ChartPeriod>('month');
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
-  // Generate 14-day timeline ending today
+  // Generate timeline points based on selected period
   const points: DataPoint[] = useMemo(() => {
     const list: DataPoint[] = [];
     const today = new Date();
     today.setHours(23, 59, 59, 999);
 
-    // Aggregate user dates
-    const regCounts: Record<string, number> = {};
-    const activeCounts: Record<string, number> = {};
+    const parseDate = (val?: string | number): Date | null => {
+      if (!val) return null;
+      const d = new Date(
+        typeof val === 'number'
+          ? (val < 1e11 ? val * 1000 : val)
+          : val
+      );
+      return isNaN(d.getTime()) ? null : d;
+    };
 
-    users.forEach((u) => {
-      if (u.created_at) {
-        const d = new Date(
-          typeof u.created_at === 'number'
-            ? (u.created_at < 1e11 ? u.created_at * 1000 : u.created_at)
-            : u.created_at
-        );
-        if (!isNaN(d.getTime())) {
-          const key = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}`;
-          regCounts[key] = (regCounts[key] || 0) + 1;
-        }
-      }
-      if (u.last_login_at) {
-        const d = new Date(
-          typeof u.last_login_at === 'number'
-            ? (u.last_login_at < 1e11 ? u.last_login_at * 1000 : u.last_login_at)
-            : u.last_login_at
-        );
-        if (!isNaN(d.getTime())) {
-          const key = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}`;
-          activeCounts[key] = (activeCounts[key] || 0) + 1;
-        }
-      }
-    });
+    if (period === 'month') {
+      // Last 30 daily buckets
+      const regCounts: Record<string, number> = {};
+      const activeCounts: Record<string, number> = {};
 
-    for (let i = 13; i >= 0; i--) {
-      const d = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
-      const day = String(d.getDate()).padStart(2, '0');
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const key = `${day}.${month}`;
-      const regs = regCounts[key] || 0;
-      const act = activeCounts[key] || (regs > 0 ? regs : 0);
-      list.push({
-        dateStr: `${key}.${d.getFullYear()}`,
-        label: key,
-        registrations: regs,
-        active: act,
-        total: Math.max(regs, act),
+      users.forEach((u) => {
+        const dReg = parseDate(u.created_at);
+        if (dReg) {
+          const k = `${String(dReg.getDate()).padStart(2, '0')}.${String(dReg.getMonth() + 1).padStart(2, '0')}`;
+          regCounts[k] = (regCounts[k] || 0) + 1;
+        }
+        const dAct = parseDate(u.last_login_at);
+        if (dAct) {
+          const k = `${String(dAct.getDate()).padStart(2, '0')}.${String(dAct.getMonth() + 1).padStart(2, '0')}`;
+          activeCounts[k] = (activeCounts[k] || 0) + 1;
+        }
       });
+
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const k = `${day}.${month}`;
+        const regs = regCounts[k] || 0;
+        const act = activeCounts[k] || (regs > 0 ? regs : 0);
+        list.push({
+          dateStr: `${k}.${d.getFullYear()}`,
+          label: k,
+          registrations: regs,
+          active: act,
+          total: Math.max(regs, act),
+        });
+      }
+    } else if (period === 'year') {
+      // 12 monthly buckets
+      const monthNamesRu = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+      const monthNamesEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const monthNames = isRu ? monthNamesRu : monthNamesEn;
+
+      const regCounts: Record<string, number> = {};
+      const activeCounts: Record<string, number> = {};
+
+      users.forEach((u) => {
+        const dReg = parseDate(u.created_at);
+        if (dReg) {
+          const k = `${dReg.getFullYear()}-${String(dReg.getMonth() + 1).padStart(2, '0')}`;
+          regCounts[k] = (regCounts[k] || 0) + 1;
+        }
+        const dAct = parseDate(u.last_login_at);
+        if (dAct) {
+          const k = `${dAct.getFullYear()}-${String(dAct.getMonth() + 1).padStart(2, '0')}`;
+          activeCounts[k] = (activeCounts[k] || 0) + 1;
+        }
+      });
+
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+        const y = d.getFullYear();
+        const m = d.getMonth();
+        const k = `${y}-${String(m + 1).padStart(2, '0')}`;
+        const regs = regCounts[k] || 0;
+        const act = activeCounts[k] || (regs > 0 ? regs : 0);
+        list.push({
+          dateStr: `${monthNames[m]} ${y}`,
+          label: monthNames[m],
+          registrations: regs,
+          active: act,
+          total: Math.max(regs, act),
+        });
+      }
+    } else {
+      // All time: all recorded months or 24-month horizon
+      const monthNamesRu = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+      const monthNamesEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const monthNames = isRu ? monthNamesRu : monthNamesEn;
+
+      const regCounts: Record<string, number> = {};
+      const activeCounts: Record<string, number> = {};
+
+      users.forEach((u) => {
+        const dReg = parseDate(u.created_at);
+        if (dReg) {
+          const k = `${dReg.getFullYear()}-${String(dReg.getMonth() + 1).padStart(2, '0')}`;
+          regCounts[k] = (regCounts[k] || 0) + 1;
+        }
+        const dAct = parseDate(u.last_login_at);
+        if (dAct) {
+          const k = `${dAct.getFullYear()}-${String(dAct.getMonth() + 1).padStart(2, '0')}`;
+          activeCounts[k] = (activeCounts[k] || 0) + 1;
+        }
+      });
+
+      for (let i = 17; i >= 0; i--) {
+        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+        const y = d.getFullYear();
+        const m = d.getMonth();
+        const k = `${y}-${String(m + 1).padStart(2, '0')}`;
+        const regs = regCounts[k] || 0;
+        const act = activeCounts[k] || (regs > 0 ? regs : 0);
+        list.push({
+          dateStr: `${monthNames[m]} ${y}`,
+          label: `${monthNames[m]} '${String(y).slice(2)}`,
+          registrations: regs,
+          active: act,
+          total: Math.max(regs, act),
+        });
+      }
     }
 
     return list;
-  }, [users]);
+  }, [users, period, isRu]);
 
   // Chart coordinate space
   const chartWidth = 900;
@@ -86,6 +163,7 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ users, currentLang
 
   const innerWidth = chartWidth - paddingX * 2;
   const innerHeight = chartHeight - paddingTop - paddingBottom;
+  const bottomY = paddingTop + innerHeight;
 
   const maxVal = useMemo(() => {
     const rawMax = Math.max(...points.map((p) => Math.max(p.registrations, p.active)), 1);
@@ -95,20 +173,21 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ users, currentLang
   const regCoords = useMemo(() => {
     return points.map((p, i) => {
       const x = paddingX + (i / (points.length - 1)) * innerWidth;
-      const y = paddingTop + innerHeight - (p.registrations / maxVal) * innerHeight;
+      const y = bottomY - (p.registrations / maxVal) * innerHeight;
       return { x, y, point: p, val: p.registrations };
     });
-  }, [points, maxVal, innerWidth, innerHeight]);
+  }, [points, maxVal, innerWidth, innerHeight, bottomY]);
 
   const activeCoords = useMemo(() => {
     return points.map((p, i) => {
       const x = paddingX + (i / (points.length - 1)) * innerWidth;
-      const y = paddingTop + innerHeight - (p.active / maxVal) * innerHeight;
+      const y = bottomY - (p.active / maxVal) * innerHeight;
       return { x, y, point: p, val: p.active };
     });
-  }, [points, maxVal, innerWidth, innerHeight]);
+  }, [points, maxVal, innerWidth, innerHeight, bottomY]);
 
-  function buildSmoothPath(cList: Array<{ x: number; y: number }>) {
+  // Monotonic Catmull-Rom cubic bezier with strict zero-baseline clamp
+  function buildSmoothPath(cList: Array<{ x: number; y: number; val: number }>) {
     if (cList.length === 0) return '';
     let d = `M ${cList[0].x} ${cList[0].y}`;
     for (let i = 0; i < cList.length - 1; i++) {
@@ -117,10 +196,26 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ users, currentLang
       const p2 = cList[i + 1];
       const p3 = i < cList.length - 2 ? cList[i + 2] : p2;
 
-      const cp1x = p1.x + (p2.x - p0.x) / 6;
-      const cp1y = p1.y + (p2.y - p0.y) / 6;
-      const cp2x = p2.x - (p3.x - p1.x) / 6;
-      const cp2y = p2.y - (p3.y - p1.y) / 6;
+      let cp1x = p1.x + (p2.x - p0.x) / 6;
+      let cp1y = p1.y + (p2.y - p0.y) / 6;
+      let cp2x = p2.x - (p3.x - p1.x) / 6;
+      let cp2y = p2.y - (p3.y - p1.y) / 6;
+
+      // Strict clamping to completely eliminate overshoot below the baseline
+      if (p1.val === 0 && p2.val === 0) {
+        cp1y = bottomY;
+        cp2y = bottomY;
+      } else {
+        if (p1.val === 0) {
+          cp1y = bottomY;
+        }
+        if (p2.val === 0) {
+          cp2y = bottomY;
+        }
+        // Never allow control points to dip below bottomY or exceed paddingTop
+        cp1y = Math.min(Math.max(cp1y, paddingTop), bottomY);
+        cp2y = Math.min(Math.max(cp2y, paddingTop), bottomY);
+      }
 
       d += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
     }
@@ -132,36 +227,61 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ users, currentLang
 
   const regAreaPath = useMemo(() => {
     if (regCoords.length === 0) return '';
-    const bottomY = paddingTop + innerHeight;
     return `${regLinePath} L ${regCoords[regCoords.length - 1].x} ${bottomY} L ${regCoords[0].x} ${bottomY} Z`;
-  }, [regLinePath, regCoords, innerHeight]);
+  }, [regLinePath, regCoords, bottomY]);
 
   const activeHover = hoveredIdx !== null ? { reg: regCoords[hoveredIdx], act: activeCoords[hoveredIdx] } : null;
 
   return (
     <section className="w-full bg-[#090909] border border-[#1A1A1F] p-5 rounded-none">
-      {/* Header with Title and Legend */}
+      {/* Header with Title, Period Switch and Legend */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#1A1A1F] gap-2 mb-4">
         <div>
           <h2 className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
             {isRu ? 'Динамика регистраций и активности' : 'Registration & Activity trends'}
           </h2>
           <span className="text-[10px] text-[#929292] font-mono">
-            {isRu ? 'Активность игроков за последние 14 дней' : 'Player activity trends over the last 14 days'}
+            {period === 'month'
+              ? (isRu ? 'За последние 30 дней' : 'Last 30 days')
+              : period === 'year'
+              ? (isRu ? 'За последний год' : 'Last 12 months')
+              : (isRu ? 'За всё время' : 'All recorded activity')}
           </span>
         </div>
 
-        <div className="flex items-center gap-4 text-xs font-mono text-[#929292]">
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-0.5 bg-white inline-block" />
-            <span className="text-white">{isRu ? 'Регистрации' : 'Registrations'}</span>
+        <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
+          {/* Period switch buttons */}
+          <div className="flex items-center gap-1">
+            {(['all', 'year', 'month'] as const).map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setPeriod(p)}
+                className={`px-2 py-1 text-[11px] font-mono border rounded-none transition-colors cursor-pointer ${
+                  period === p
+                    ? 'bg-[#FFFFFF] text-[#000000] border-[#FFFFFF] font-bold'
+                    : 'bg-transparent text-[#929292] border-[#222228] hover:text-[#FFFFFF] hover:border-[#929292]'
+                }`}
+              >
+                {p === 'all'
+                  ? (isRu ? 'За всё время' : 'All time')
+                  : p === 'year'
+                  ? (isRu ? '1 год' : '1 year')
+                  : (isRu ? '1 месяц' : '1 month')}
+              </button>
+            ))}
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-0.5 border-b-2 border-dotted border-[#929292] inline-block" />
-            <span>{isRu ? 'Активность' : 'Activity'}</span>
-          </div>
-          <div className="text-[#FFFFFF] font-bold bg-[#141416] border border-[#222228] px-2 py-0.5">
-            {users.length} {isRu ? 'игроков' : 'players'}
+
+          {/* Series indicators */}
+          <div className="flex items-center gap-3 text-xs text-[#929292]">
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-0.5 bg-white inline-block" />
+              <span className="text-white">{isRu ? 'Регистрации' : 'Registrations'}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-0.5 border-b-2 border-dotted border-[#929292] inline-block" />
+              <span>{isRu ? 'Активность' : 'Activity'}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -201,9 +321,9 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ users, currentLang
           />
           <line
             x1={paddingX}
-            y1={paddingTop + innerHeight}
+            y1={bottomY}
             x2={chartWidth - paddingX}
-            y2={paddingTop + innerHeight}
+            y2={bottomY}
             stroke="#1A1A1F"
             strokeWidth="1"
           />
@@ -244,7 +364,7 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ users, currentLang
                     x1={rc.x}
                     y1={paddingTop}
                     x2={rc.x}
-                    y2={paddingTop + innerHeight}
+                    y2={bottomY}
                     stroke="#222228"
                     strokeWidth="1.5"
                     strokeDasharray="2 2"
@@ -315,16 +435,20 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ users, currentLang
 
       {/* Date Labels below chart */}
       <div className="flex justify-between items-center px-4 pt-2 border-t border-[#1A1A1F] mt-1 text-[10px] font-mono text-[#929292]">
-        {points.map((p, i) => (
-          <span
-            key={i}
-            className={`${i % 2 !== 0 && points.length > 8 ? 'hidden sm:inline-block' : ''} ${
-              hoveredIdx === i ? 'text-white font-bold' : ''
-            }`}
-          >
-            {p.label}
-          </span>
-        ))}
+        {points.map((p, i) => {
+          const step = period === 'month' ? 4 : period === 'year' ? 1 : 2;
+          const showLabel = i % step === 0 || i === points.length - 1;
+          return (
+            <span
+              key={i}
+              className={`${!showLabel ? 'hidden sm:inline-block opacity-0' : ''} ${
+                hoveredIdx === i ? 'text-white font-bold !opacity-100' : ''
+              }`}
+            >
+              {p.label}
+            </span>
+          );
+        })}
       </div>
     </section>
   );

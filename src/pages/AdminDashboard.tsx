@@ -589,9 +589,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <span className="text-xs font-bold text-white tracking-wider">
                 {currentLang === 'ru' ? 'Зарегистрированные игроки' : 'Registered players'}
               </span>
-              <span className="px-2 py-0.5 bg-white/10 text-[10px] text-[#929292] font-mono">
-                {filteredUsers.length} of {users.length}
-              </span>
             </div>
           </div>
 
@@ -617,7 +614,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <th className="py-3 px-4 font-normal">Country</th>
                   <th className="py-3 px-4 font-normal">Registration & Activity</th>
                   <th className="py-3 px-4 font-normal">Plan</th>
-                  <th className="py-3 px-4 font-normal text-right">Удалить</th>
+                  <th className="py-3 px-4 font-normal text-right w-12" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#1A1A1F] text-xs font-mono">
@@ -678,13 +675,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                               )}
                             </div>
                             <a
-                              href={`/profile?id=${encodeURIComponent(player.guid)}`}
+                              href={`/id/${encodeURIComponent(player.nickname)}/`}
                               onClick={(e) => {
                                 e.preventDefault();
                                 if (onNavigateProfile) {
                                   onNavigateProfile(player.guid);
                                 } else {
-                                  window.location.href = `/profile?id=${encodeURIComponent(player.guid)}`;
+                                  window.location.href = `/id/${encodeURIComponent(player.nickname)}/`;
                                 }
                               }}
                               className="font-bold text-[#FFFFFF] hover:text-[#FF5500] transition-colors"
@@ -695,12 +692,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           </div>
                         </td>
 
-                        {/* Col 2: Email */}
-                        <td className="py-3 px-4 text-[#929292]">
+                        {/* Col 2: Email — 100% white */}
+                        <td className="py-3 px-4 text-[#FFFFFF]">
                           <div className="flex items-center gap-2">
                             <a
                               href={`mailto:${player.email}`}
-                              className="hover:text-white transition-colors"
+                              className="text-[#FFFFFF] hover:text-[#FF5500] transition-colors"
                             >
                               {player.email}
                             </a>
@@ -720,38 +717,37 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           </div>
                         </td>
 
-                        {/* Col 3: Elo & Level */}
+                        {/* Col 3: Elo & Level — 100% white */}
                         <td className="py-3 px-4 text-[#FFFFFF]">
                           {player.elo ? `${player.elo.toLocaleString()} & ${player.level || 1} level` : '—'}
                         </td>
 
-                        {/* Col 4: Country */}
+                        {/* Col 4: Country — 100% white */}
                         <td className="py-3 px-4 text-[#FFFFFF]">
                           {getCountryName(player.country) || 'Belarus'}
                         </td>
 
-                        {/* Col 5: Registration & Activity */}
+                        {/* Col 5: Registration & Activity — 100% white */}
                         <td className="py-3 px-4 text-[#FFFFFF]">
                           <span>{formatDateOnly(player.created_at)}</span>
-                          <span className="text-[#929292] mx-1.5">&</span>
-                          <span className="text-[#929292]">{formatDateOnly(player.last_login_at)}</span>
+                          <span className="mx-1.5 text-[#FFFFFF]">&</span>
+                          <span>{formatDateOnly(player.last_login_at)}</span>
                         </td>
 
-                        {/* Col 6: Plan */}
-                        <td className="py-3 px-4 text-[#929292]">
+                        {/* Col 6: Plan — 100% white */}
+                        <td className="py-3 px-4 text-[#FFFFFF]">
                           {player.plan?.toLowerCase() === 'pro' ? 'Pro' : 'Free'}
                         </td>
 
-                        {/* Col 7: Actions (Delete) */}
+                        {/* Col 7: Actions — icon only */}
                         <td className="py-3 px-4 text-right">
                           <button
                             type="button"
                             onClick={() => handleRequestSingleDelete(player)}
-                            className="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-mono text-[#929292] hover:text-[#FFFFFF] hover:bg-[#1A1A1F] border border-transparent hover:border-[#222228] transition-colors rounded-none cursor-pointer"
-                            title="Удалить"
+                            className="p-1.5 text-[#929292] hover:text-[#000000] hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none inline-flex items-center justify-center cursor-pointer"
+                            title={currentLang === 'ru' ? 'Удалить' : 'Delete'}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
-                            <span>Удалить</span>
                           </button>
                         </td>
                       </tr>

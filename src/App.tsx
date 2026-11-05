@@ -69,9 +69,13 @@ const checkRoutes = () => {
       path === '/profile' ||
       path === '/profile.html' ||
       path.startsWith('/profile/') ||
+      path === '/id' ||
+      path.startsWith('/id/') ||
       hash === '#profile' ||
       hash.startsWith('#profile?') ||
-      hash.startsWith('#profile/')
+      hash.startsWith('#profile/') ||
+      hash === '#id' ||
+      hash.startsWith('#id/')
     ) {
       return {
         isAdmin: false,

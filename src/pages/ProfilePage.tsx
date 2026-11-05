@@ -147,31 +147,42 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     const params = new URLSearchParams(window.location.search);
     let queryId = params.get('id') || params.get('userId') || params.get('guid');
 
-    // Also support /profile/:usernameOrId
+    // Also support /id/:slug or /id/:slug/ or /profile/:usernameOrId
     if (!queryId) {
-      const pathMatch = window.location.pathname.match(/^\/profile\/([^/?#]+)/);
-      if (pathMatch) {
-        queryId = decodeURIComponent(pathMatch[1]);
+      const idMatch = window.location.pathname.match(/^\/id\/([^/?#]+)/);
+      if (idMatch) {
+        queryId = decodeURIComponent(idMatch[1]);
+      } else {
+        const pathMatch = window.location.pathname.match(/^\/profile\/([^/?#]+)/);
+        if (pathMatch) {
+          queryId = decodeURIComponent(pathMatch[1]);
+        }
       }
     }
 
     if (queryId && queryId.trim()) {
       const cleanId = queryId.trim();
-      const currentId = currentUser?.id || currentUser?.guid || currentUser?.nickname;
+      const currentNickname = currentUser?.nickname;
+      const currentId = currentUser?.id || currentUser?.guid;
 
       if (
-        currentId &&
-        (currentId.toLowerCase() === cleanId.toLowerCase() ||
-          currentUser?.nickname?.toLowerCase() === cleanId.toLowerCase())
+        (currentNickname && currentNickname.toLowerCase() === cleanId.toLowerCase()) ||
+        (currentId && currentId.toLowerCase() === cleanId.toLowerCase())
       ) {
         // Viewing own profile
         setIsViewOnly(false);
         setTargetUser(null);
       } else {
-        // Fetch target user public profile
+        // Fetch target user public profile by slug or id
         setIsLoadingTarget(true);
         setTargetNotFound(false);
-        fetch(`/api/users/profile?id=${encodeURIComponent(cleanId)}`)
+        fetch(`/api/users/by-slug/${encodeURIComponent(cleanId)}`)
+          .then((res) => {
+            if (!res.ok) {
+              return fetch(`/api/users/profile?id=${encodeURIComponent(cleanId)}`);
+            }
+            return res;
+          })
           .then(async (res) => {
             if (!res.ok) throw new Error('User not found');
             return res.json();
@@ -200,22 +211,25 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   }, [currentUser, locationSearch]);
 
   // Dynamic Profile URL Auto-Sync:
-  // When an authenticated user visits /profile without an id in URL, auto-populate ?id=<USER_ID>
+  // When an authenticated user visits /profile or /id without slug, auto-populate /id/<Nickname>/
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const effectiveId = currentUser?.id || currentUser?.guid;
-    if (effectiveId && !isViewOnly) {
-      const searchParams = new URLSearchParams(window.location.search);
-      const currentId = searchParams.get('id') || searchParams.get('userId') || searchParams.get('guid');
-
-      if (!currentId) {
-        searchParams.set('id', effectiveId);
-        const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
-        window.history.replaceState({ path: newUrl }, '', newUrl);
-        setLocationSearch(searchParams.toString() ? `?${searchParams.toString()}` : '');
+    if (currentUser?.nickname && !isViewOnly) {
+      const currentPath = window.location.pathname;
+      const targetPath = `/id/${encodeURIComponent(currentUser.nickname)}/`;
+      if (
+        currentPath === '/profile' ||
+        currentPath.startsWith('/profile') ||
+        currentPath === '/id' ||
+        currentPath === '/id/'
+      ) {
+        if (currentPath !== targetPath) {
+          window.history.replaceState({ path: targetPath }, '', targetPath);
+          setLocationSearch('');
+        }
       }
     }
-  }, [currentUser, isViewOnly]);
+  }, [currentUser?.nickname, isViewOnly]);
 
   // Display user: either targetUser (if public view) or currentUser
   const displayUser: UserProfile | null = isViewOnly ? targetUser : currentUser;
@@ -264,17 +278,20 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     displayUser?.steamId ||
     displayUser?.steam_id ||
     displayUser?.steam_id_64 ||
-    (displayUser?.nickname?.toLowerCase() === 'zeacvo' ? '76561198084651349' : null);
-
-  const steamNickname =
-    displayUser?.steamNickname ||
-    displayUser?.steam_nickname ||
-    (displayUser?.nickname?.toLowerCase() === 'zeacvo' ? 'Zeacvo' : null);
-
-  const twitchUsername =
-    displayUser?.twitchUsername ||
-    displayUser?.twitch_username ||
     null;
+
+  const isSteamConnected = Boolean(steamId);
+  const steamNickname = displayUser?.steamNickname || displayUser?.steam_nickname || null;
+  const isTwitchConnected = Boolean(displayUser?.twitchUsername || displayUser?.twitch_username);
+  const twitchUsername = displayUser?.twitchUsername || displayUser?.twitch_username || null;
+
+  const handleConnectSteam = () => {
+    showNotification(
+      isRu
+        ? 'Синхронизация со Steam выполняется автоматически при подключении FACEIT'
+        : 'Steam auto-syncs when you connect your FACEIT account'
+    );
+  };
 
   const handleConnectTwitch = () => {
     showNotification(
@@ -797,14 +814,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       <span className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
                         STEAM
                       </span>
-                      {steamNickname && (
-                        <span className="font-mono text-[10px] text-[#929292]">
-                          {steamNickname}
-                        </span>
-                      )}
+                      <span className="font-mono text-[10px] text-[#929292]">
+                        {isSteamConnected ? (steamNickname || steamId) : (t.notConnected || 'Not connected')}
+                      </span>
                     </div>
                   </div>
-                  {steamId ? (
+                  {isSteamConnected ? (
                     <a
                       href={`https://steamcommunity.com/profiles/${steamId}`}
                       target="_blank"
@@ -815,9 +830,13 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   ) : (
-                    <span className="font-mono text-[10px] text-[#929292] uppercase">
-                      Synced
-                    </span>
+                    <button
+                      type="button"
+                      onClick={handleConnectSteam}
+                      className="px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
+                    >
+                      {t.connect || 'CONNECT'}
+                    </button>
                   )}
                 </div>
 
@@ -829,20 +848,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       <span className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
                         TWITCH
                       </span>
-                      {twitchUsername ? (
-                        <span className="font-mono text-[10px] text-[#929292]">
-                          {twitchUsername}
-                        </span>
-                      ) : (
-                        <span className="font-mono text-[10px] text-[#929292]">
-                          Not connected
-                        </span>
-                      )}
+                      <span className="font-mono text-[10px] text-[#929292]">
+                        {isTwitchConnected ? twitchUsername : (t.notConnected || 'Not connected')}
+                      </span>
                     </div>
                   </div>
-                  {twitchUsername ? (
+                  {isTwitchConnected ? (
                     <a
-                      href={`https://twitch.tv/${encodeURIComponent(twitchUsername)}`}
+                      href={`https://twitch.tv/${encodeURIComponent(twitchUsername!)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-7 h-7 flex items-center justify-center border border-[#222228] text-[#929292] hover:text-[#000000] hover:bg-[#FF5500] hover:border-[#FF5500] transition-colors rounded-none"
@@ -854,9 +867,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     <button
                       type="button"
                       onClick={handleConnectTwitch}
-                      className="px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none"
+                      className="px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
                     >
-                      Connect
+                      {t.connect || 'CONNECT'}
                     </button>
                   )}
                 </div>
