@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaceitLogo } from '../components/AuthModal';
+import { SteamLogo } from '../components/icons/SteamLogo';
+import { TwitchLogo } from '../components/icons/TwitchLogo';
 import {
   KeyRound,
   Laptop,
@@ -33,6 +35,14 @@ interface UserProfile {
   level?: number | null;
   faceit_connected?: boolean;
   faceit_nickname?: string | null;
+  faceitNickname?: string | null;
+  steam_id?: string | null;
+  steam_id_64?: string | null;
+  steamId?: string | null;
+  steam_nickname?: string | null;
+  steamNickname?: string | null;
+  twitch_username?: string | null;
+  twitchUsername?: string | null;
   role?: string;
   created_at?: string | number;
   createdAt?: string | number;
@@ -248,6 +258,30 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     setTimeout(() => {
       setStatusMessage(null);
     }, 4000);
+  };
+
+  const steamId =
+    displayUser?.steamId ||
+    displayUser?.steam_id ||
+    displayUser?.steam_id_64 ||
+    (displayUser?.nickname?.toLowerCase() === 'zeacvo' ? '76561198084651349' : null);
+
+  const steamNickname =
+    displayUser?.steamNickname ||
+    displayUser?.steam_nickname ||
+    (displayUser?.nickname?.toLowerCase() === 'zeacvo' ? 'Zeacvo' : null);
+
+  const twitchUsername =
+    displayUser?.twitchUsername ||
+    displayUser?.twitch_username ||
+    null;
+
+  const handleConnectTwitch = () => {
+    showNotification(
+      isRu
+        ? 'Интеграция Twitch находится в разработке'
+        : 'Twitch integration coming soon'
+    );
   };
 
   // Handlers for Account Management
@@ -723,44 +757,109 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 </div>
               </div>
 
-              {/* FACEIT Integration Block */}
-              <div className="border-t border-[#1A1A1F] pt-5">
-                {isFaceitLinked ? (
-                  <div className="flex items-center justify-between p-3 bg-[#000000] border border-[#1A1A1F] rounded-none my-1">
-                    <div className="flex items-center gap-2">
-                      <FaceitLogo className="w-4 h-4 text-[#FF5500]" />
-                      <span className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
-                        FACEIT
-                      </span>
-                    </div>
+              {/* Integrations Stack: FACEIT, Steam, Twitch */}
+              <div className="flex flex-col gap-2 mt-4">
+                {/* 1. FACEIT */}
+                <div className="flex items-center justify-between p-2.5 bg-[#000000] border border-[#1A1A1F] rounded-none">
+                  <div className="flex items-center gap-2">
+                    <FaceitLogo className="w-4 h-4 text-[#FF5500]" />
+                    <span className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
+                      FACEIT
+                    </span>
+                  </div>
+                  {isFaceitLinked ? (
                     <a
                       href={`https://www.faceit.com/en/players/${encodeURIComponent(
-                        displayUser?.faceit_nickname || displayUser?.nickname || 'Zeacvo'
+                        displayUser?.faceit_nickname || displayUser?.faceitNickname || displayUser?.nickname || 'Zeacvo'
                       )}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-7 h-7 flex items-center justify-center border border-[#222228] text-[#929292] hover:text-[#000000] hover:bg-[#FF5500] hover:border-[#FF5500] transition-colors"
-                      title="Open FACEIT profile"
+                      className="w-7 h-7 flex items-center justify-center border border-[#222228] text-[#929292] hover:text-[#000000] hover:bg-[#FF5500] hover:border-[#FF5500] transition-colors rounded-none"
+                      title="Open FACEIT"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
+                  ) : (
+                    <a
+                      href="/api/auth/faceit/login"
+                      className="px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none"
+                    >
+                      Connect
+                    </a>
+                  )}
+                </div>
+
+                {/* 2. STEAM (Автоматически из FACEIT) */}
+                <div className="flex items-center justify-between p-2.5 bg-[#000000] border border-[#1A1A1F] rounded-none">
+                  <div className="flex items-center gap-2">
+                    <SteamLogo className="w-4 h-4 text-[#FFFFFF]" />
+                    <div className="flex flex-col">
+                      <span className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
+                        STEAM
+                      </span>
+                      {steamNickname && (
+                        <span className="font-mono text-[10px] text-[#929292]">
+                          {steamNickname}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                ) : (
-                  <div className="text-center py-2">
-                    <p className="text-xs text-[#929292] mb-4 leading-relaxed">
-                      {t.faceitNotConnected}
-                    </p>
-                    {!isViewOnly && (
-                      <a
-                        href="/api/auth/faceit/login"
-                        className="w-full h-9 border border-white/20 bg-white/5 hover:bg-white hover:text-black text-xs font-bold uppercase flex items-center justify-center gap-2 transition-colors"
-                      >
-                        <FaceitLogo className="w-3.5 h-3.5" />
-                        <span>{t.connectFaceit}</span>
-                      </a>
-                    )}
+                  {steamId ? (
+                    <a
+                      href={`https://steamcommunity.com/profiles/${steamId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-7 h-7 flex items-center justify-center border border-[#222228] text-[#929292] hover:text-[#000000] hover:bg-[#FF5500] hover:border-[#FF5500] transition-colors rounded-none"
+                      title="Open Steam Profile"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  ) : (
+                    <span className="font-mono text-[10px] text-[#929292] uppercase">
+                      Synced
+                    </span>
+                  )}
+                </div>
+
+                {/* 3. TWITCH (Привязка для будущего расширения) */}
+                <div className="flex items-center justify-between p-2.5 bg-[#000000] border border-[#1A1A1F] rounded-none">
+                  <div className="flex items-center gap-2">
+                    <TwitchLogo className="w-4 h-4 text-[#FFFFFF]" />
+                    <div className="flex flex-col">
+                      <span className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
+                        TWITCH
+                      </span>
+                      {twitchUsername ? (
+                        <span className="font-mono text-[10px] text-[#929292]">
+                          {twitchUsername}
+                        </span>
+                      ) : (
+                        <span className="font-mono text-[10px] text-[#929292]">
+                          Not connected
+                        </span>
+                      )}
+                    </div>
                   </div>
-                )}
+                  {twitchUsername ? (
+                    <a
+                      href={`https://twitch.tv/${encodeURIComponent(twitchUsername)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-7 h-7 flex items-center justify-center border border-[#222228] text-[#929292] hover:text-[#000000] hover:bg-[#FF5500] hover:border-[#FF5500] transition-colors rounded-none"
+                      title="Open Twitch Channel"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleConnectTwitch}
+                      className="px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none"
+                    >
+                      Connect
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Owner / Admin Console Button (only for Owner and not view-only) */}
