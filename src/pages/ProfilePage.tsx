@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaceitLogo } from '../components/AuthModal';
-import { SteamLogo } from '../components/icons/SteamLogo';
 import { TwitchLogo } from '../components/icons/TwitchLogo';
+import { DiscordLogo } from '../components/icons/DiscordLogo';
 import {
   KeyRound,
   Laptop,
@@ -36,13 +36,14 @@ interface UserProfile {
   faceit_connected?: boolean;
   faceit_nickname?: string | null;
   faceitNickname?: string | null;
-  steam_id?: string | null;
-  steam_id_64?: string | null;
-  steamId?: string | null;
-  steam_nickname?: string | null;
-  steamNickname?: string | null;
   twitch_username?: string | null;
   twitchUsername?: string | null;
+  twitch_connected?: boolean;
+  twitchConnected?: boolean;
+  discord_username?: string | null;
+  discordUsername?: string | null;
+  discord_connected?: boolean;
+  discordConnected?: boolean;
   role?: string;
   created_at?: string | number;
   createdAt?: string | number;
@@ -274,30 +275,35 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     }, 4000);
   };
 
-  const steamId =
-    displayUser?.steamId ||
-    displayUser?.steam_id ||
-    displayUser?.steam_id_64 ||
-    null;
-
-  const isSteamConnected = Boolean(steamId);
-  const steamNickname = displayUser?.steamNickname || displayUser?.steam_nickname || null;
-  const isTwitchConnected = Boolean(displayUser?.twitchUsername || displayUser?.twitch_username);
+  const isTwitchConnected = Boolean(
+    displayUser?.twitchConnected ||
+    displayUser?.twitch_connected ||
+    displayUser?.twitchUsername ||
+    displayUser?.twitch_username
+  );
   const twitchUsername = displayUser?.twitchUsername || displayUser?.twitch_username || null;
 
-  const handleConnectSteam = () => {
-    showNotification(
-      isRu
-        ? 'Синхронизация со Steam выполняется автоматически при подключении FACEIT'
-        : 'Steam auto-syncs when you connect your FACEIT account'
-    );
-  };
+  const isDiscordConnected = Boolean(
+    displayUser?.discordConnected ||
+    displayUser?.discord_connected ||
+    displayUser?.discordUsername ||
+    displayUser?.discord_username
+  );
+  const discordUsername = displayUser?.discordUsername || displayUser?.discord_username || null;
 
   const handleConnectTwitch = () => {
     showNotification(
       isRu
         ? 'Интеграция Twitch находится в разработке'
         : 'Twitch integration coming soon'
+    );
+  };
+
+  const handleConnectDiscord = () => {
+    showNotification(
+      isRu
+        ? 'Интеграция Discord находится в разработке'
+        : 'Discord integration coming soon'
     );
   };
 
@@ -774,15 +780,20 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 </div>
               </div>
 
-              {/* Integrations Stack: FACEIT, Steam, Twitch */}
+              {/* Integrations Stack: FACEIT, Twitch, Discord */}
               <div className="flex flex-col gap-2 mt-4">
                 {/* 1. FACEIT */}
                 <div className="flex items-center justify-between p-2.5 bg-[#000000] border border-[#1A1A1F] rounded-none">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <FaceitLogo className="w-4 h-4 text-[#FF5500]" />
-                    <span className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
-                      FACEIT
-                    </span>
+                    <div className="flex flex-col">
+                      <span className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
+                        FACEIT
+                      </span>
+                      <span className="font-mono text-[10px] text-[#929292]">
+                        {isFaceitLinked ? (t.connected || 'Connected') : (t.notConnected || 'Not connected')}
+                      </span>
+                    </div>
                   </div>
                   {isFaceitLinked ? (
                     <a
@@ -792,64 +803,30 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-7 h-7 flex items-center justify-center border border-[#222228] text-[#929292] hover:text-[#000000] hover:bg-[#FF5500] hover:border-[#FF5500] transition-colors rounded-none"
-                      title="Open FACEIT"
+                      title="Open FACEIT profile"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   ) : (
                     <a
                       href="/api/auth/faceit/login"
-                      className="px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none"
-                    >
-                      Connect
-                    </a>
-                  )}
-                </div>
-
-                {/* 2. STEAM (Автоматически из FACEIT) */}
-                <div className="flex items-center justify-between p-2.5 bg-[#000000] border border-[#1A1A1F] rounded-none">
-                  <div className="flex items-center gap-2">
-                    <SteamLogo className="w-4 h-4 text-[#FFFFFF]" />
-                    <div className="flex flex-col">
-                      <span className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
-                        STEAM
-                      </span>
-                      <span className="font-mono text-[10px] text-[#929292]">
-                        {isSteamConnected ? (steamNickname || steamId) : (t.notConnected || 'Not connected')}
-                      </span>
-                    </div>
-                  </div>
-                  {isSteamConnected ? (
-                    <a
-                      href={`https://steamcommunity.com/profiles/${steamId}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-7 h-7 flex items-center justify-center border border-[#222228] text-[#929292] hover:text-[#000000] hover:bg-[#FF5500] hover:border-[#FF5500] transition-colors rounded-none"
-                      title="Open Steam Profile"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleConnectSteam}
-                      className="px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
+                      className="px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
                     >
                       {t.connect || 'CONNECT'}
-                    </button>
+                    </a>
                   )}
                 </div>
 
-                {/* 3. TWITCH (Привязка для будущего расширения) */}
+                {/* 2. TWITCH */}
                 <div className="flex items-center justify-between p-2.5 bg-[#000000] border border-[#1A1A1F] rounded-none">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <TwitchLogo className="w-4 h-4 text-[#FFFFFF]" />
                     <div className="flex flex-col">
                       <span className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
                         TWITCH
                       </span>
                       <span className="font-mono text-[10px] text-[#929292]">
-                        {isTwitchConnected ? twitchUsername : (t.notConnected || 'Not connected')}
+                        {isTwitchConnected ? (t.connected || 'Connected') : (t.notConnected || 'Not connected')}
                       </span>
                     </div>
                   </div>
@@ -867,7 +844,41 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     <button
                       type="button"
                       onClick={handleConnectTwitch}
-                      className="px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
+                      className="px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
+                    >
+                      {t.connect || 'CONNECT'}
+                    </button>
+                  )}
+                </div>
+
+                {/* 3. DISCORD */}
+                <div className="flex items-center justify-between p-2.5 bg-[#000000] border border-[#1A1A1F] rounded-none">
+                  <div className="flex items-center gap-2.5">
+                    <DiscordLogo className="w-4 h-4 text-[#FFFFFF]" />
+                    <div className="flex flex-col">
+                      <span className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
+                        DISCORD
+                      </span>
+                      <span className="font-mono text-[10px] text-[#929292]">
+                        {isDiscordConnected ? (t.connected || 'Connected') : (t.notConnected || 'Not connected')}
+                      </span>
+                    </div>
+                  </div>
+                  {isDiscordConnected ? (
+                    <a
+                      href={discordUsername ? `https://discord.com/users/${encodeURIComponent(discordUsername)}` : 'https://discord.com'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-7 h-7 flex items-center justify-center border border-[#222228] text-[#929292] hover:text-[#000000] hover:bg-[#FF5500] hover:border-[#FF5500] transition-colors rounded-none"
+                      title="Open Discord"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleConnectDiscord}
+                      className="px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
                     >
                       {t.connect || 'CONNECT'}
                     </button>

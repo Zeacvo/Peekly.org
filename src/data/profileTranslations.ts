@@ -25,6 +25,7 @@ export interface ProfileTranslation {
   connectFaceit: string;
   connect?: string;
   notConnected?: string;
+  connected?: string;
   viewOnFaceit: string;
   cs2Level: string;
   cs2Elo: string;
@@ -104,6 +105,9 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     faceitConnected: 'FACEIT акаунт прив\'язано',
     faceitNotConnected: 'FACEIT не прив\'язано',
     connectFaceit: 'Прив\'язати FACEIT',
+    connect: 'CONNECT',
+    notConnected: 'Not connected',
+    connected: 'Connected',
     viewOnFaceit: 'Профіль на FACEIT ↗',
     cs2Level: 'Рівень CS2',
     cs2Elo: 'Рейтинг CS2 ELO',
@@ -179,6 +183,7 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     connectFaceit: 'Привязать FACEIT',
     connect: 'CONNECT',
     notConnected: 'Not connected',
+    connected: 'Connected',
     viewOnFaceit: 'Профиль на FACEIT ↗',
     cs2Level: 'Уровень CS2',
     cs2Elo: 'Рейтинг CS2 ELO',
@@ -254,6 +259,7 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     connectFaceit: 'Connect FACEIT',
     connect: 'CONNECT',
     notConnected: 'Not connected',
+    connected: 'Connected',
     viewOnFaceit: 'View on FACEIT ↗',
     cs2Level: 'CS2 Level',
     cs2Elo: 'CS2 Competitive ELO',
