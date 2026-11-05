@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import type { Language } from '../translations';
 import { profileTranslations } from '../data/profileTranslations';
-import { VerifiedShieldIcon } from '../components/icons/VerifiedShieldIcon';
 
 interface ProfilePageProps {
   currentLang?: Language;
@@ -704,30 +703,18 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   );
                 })()}
 
-                {/* Nickname, Badges, Member Since */}
+                {/* Nickname & Network Status */}
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-xl font-bold text-white truncate uppercase mb-1">
+                  <h1 className="text-xl font-bold text-white truncate uppercase">
                     {displayUser?.nickname || 'Player'}
                   </h1>
 
-                  <div className="flex flex-wrap items-center gap-2 mb-2">
-                    {isOwner ? (
-                      <span className="bg-[#141416] border border-[#222228] text-[#FFFFFF] text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider rounded-none">
-                        {t.ownerBadge}
-                      </span>
-                    ) : (
-                      <span className="bg-[#000000] border border-[#222228] text-[#929292] text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider rounded-none">
-                        {t.freeBadge}
-                      </span>
-                    )}
-
-                    <div className="flex items-center gap-1.5 text-[#929292] text-xs">
-                      <span className="w-2 h-2 rounded-full bg-[#929292]" />
-                      <span>{t.online}</span>
-                    </div>
+                  <div className="flex items-center gap-1.5 mt-1 text-xs text-[#929292]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#929292]" />
+                    <span>{t.online}</span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-xs text-[#929292]">
+                  <div className="flex items-center gap-1.5 mt-2 text-xs text-[#929292]">
                     <Calendar className="w-3.5 h-3.5 text-[#929292] shrink-0" />
                     <span>
                       {t.memberSince} {registrationDate}
@@ -743,9 +730,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     <div className="flex items-center gap-2">
                       <FaceitLogo className="w-4 h-4 text-[#FF5500]" />
                       <span className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
-                        FACEIT CS2
+                        FACEIT
                       </span>
-                      <VerifiedShieldIcon className="w-4 h-4 text-[#FFFFFF]" />
                     </div>
                     <a
                       href={`https://www.faceit.com/en/players/${encodeURIComponent(
@@ -797,7 +783,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             <div className="lg:col-span-8 space-y-6">
               {/* Card 1: Account Credentials */}
               <div className="bg-[#090909] border border-[#1A1A1F] p-6">
-                <div className="mb-5 pb-3 border-b border-[#1A1A1F]">
+                <div className="mb-4">
                   <h2 className="text-xs font-bold uppercase tracking-wider text-white">
                     {t.credentialsTitle}
                   </h2>
@@ -832,12 +818,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       <span className="text-[10px] uppercase text-[#929292] font-bold tracking-wider block mb-1">
                         {t.emailLabel}
                       </span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-white break-all">
-                          {currentUser?.email || '—'}
-                        </span>
-                        <VerifiedShieldIcon className="w-4 h-4 text-[#929292] shrink-0" />
-                      </div>
+                      <span className="text-sm font-medium text-white break-all">
+                        {currentUser?.email || '—'}
+                      </span>
                     </div>
                     <button
                       type="button"
@@ -858,7 +841,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
               {/* Card 2: Password & Security */}
               <div className="bg-[#090909] border border-[#1A1A1F] p-6">
-                <div className="mb-5 pb-3 border-b border-[#1A1A1F]">
+                <div className="mb-4">
                   <h2 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
                     <KeyRound className="w-3.5 h-3.5 text-[#929292]" />
                     <span>{t.securityTitle}</span>
@@ -891,7 +874,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
               {/* Card 3: Active Sessions */}
               <div className="bg-[#090909] border border-[#1A1A1F] p-6">
-                <div className="mb-5 pb-3 border-b border-[#1A1A1F]">
+                <div className="mb-4">
                   <h2 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
                     <Laptop className="w-3.5 h-3.5 text-[#929292]" />
                     <span>{t.sessionsTitle}</span>
@@ -952,7 +935,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             /* Public View Summary Card */
             <div className="lg:col-span-7 space-y-6">
               <div className="bg-[#090909] border border-[#1A1A1F] p-6">
-                <div className="mb-5 pb-3 border-b border-[#1A1A1F]">
+                <div className="mb-4">
                   <h2 className="text-xs font-bold uppercase tracking-wider text-white">
                     {t.publicProfileTitle}
                   </h2>
