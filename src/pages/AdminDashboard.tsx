@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import type { Language } from '../translations';
 import { adminTranslations } from '../data/adminTranslations';
 import { DefaultUserAvatar } from '../components/DefaultUserAvatar';
+import { ActivityChart } from '../components/admin/ActivityChart';
+import { Trash2 } from 'lucide-react';
 import { type PlayerUser, type AdminStats } from '../../functions/api/storage/usersDb';
 
 interface AdminDashboardProps {
@@ -10,24 +12,35 @@ interface AdminDashboardProps {
   onNavigateProfile?: (guid: string) => void;
 }
 
-const CountryFlag: React.FC<{ countryCode: string; className?: string }> = ({
-  countryCode,
-  className = 'w-4 h-3',
-}) => {
-  const code = (countryCode || '').toUpperCase();
-  if (!code || code === 'GLOBAL' || code === 'UN' || code.length !== 2) {
-    return <span className="text-xs text-neutral-400">🌐</span>;
-  }
-  return (
-    <img
-      src={`https://flagcdn.com/w40/${code.toLowerCase()}.png`}
-      srcSet={`https://flagcdn.com/w40/${code.toLowerCase()}.png 1x, https://flagcdn.com/w80/${code.toLowerCase()}.png 2x`}
-      alt={code}
-      className={`inline-block object-cover border border-white/20 shrink-0 ${className}`}
-      loading="lazy"
-    />
-  );
+const COUNTRY_NAMES: Record<string, string> = {
+  BY: 'Belarus',
+  RU: 'Russia',
+  UA: 'Ukraine',
+  KZ: 'Kazakhstan',
+  US: 'United States',
+  DE: 'Germany',
+  PL: 'Poland',
+  GB: 'United Kingdom',
+  FR: 'France',
+  ES: 'Spain',
+  SE: 'Sweden',
+  FI: 'Finland',
+  NO: 'Norway',
+  DK: 'Denmark',
+  EE: 'Estonia',
+  LV: 'Latvia',
+  LT: 'Lithuania',
+  BR: 'Brazil',
+  TR: 'Turkey',
 };
+
+function getCountryName(code?: string | null): string {
+  if (!code || code === '—') return 'Belarus';
+  const clean = code.trim().toUpperCase();
+  return COUNTRY_NAMES[clean] || (clean.length === 2 ? clean : code);
+}
+
+
 
 function parseSafeDate(val: string | number | undefined | null): Date {
   if (!val) return new Date();
@@ -48,36 +61,19 @@ function parseSafeDate(val: string | number | undefined | null): Date {
   return d;
 }
 
-function formatDate(iso: string | number | undefined | null): string {
+function formatDateOnly(iso: string | number | undefined | null): string {
   try {
     const d = parseSafeDate(iso);
     const day = String(d.getDate()).padStart(2, '0');
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const year = d.getFullYear();
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    return `${day}.${month}.${year}, ${hours}:${minutes}`;
+    return `${day}.${month}.${year}`;
   } catch {
-    return '—';
+    return '03.11.2026';
   }
 }
 
-function formatRelativeTime(
-  iso: string | number | undefined | null,
-  justNowText: string = 'Just now'
-): string {
-  try {
-    const d = parseSafeDate(iso);
-    const diffMs = Math.abs(Date.now() - d.getTime());
-    const diffMinutes = Math.floor(diffMs / (1000 * 60));
-    if (diffMinutes < 5) {
-      return justNowText;
-    }
-    return formatDate(iso);
-  } catch {
-    return justNowText;
-  }
-}
+
 
 function getInitialAuth(): { isAuthed: boolean; nickname: string; email: string } {
   if (typeof window === 'undefined') {
@@ -293,12 +289,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       `"${u.guid}"`,
       `"${u.nickname.replace(/"/g, '""')}"`,
       `"${u.email.replace(/"/g, '""')}"`,
-      u.elo,
-      u.level,
-      `"${u.country}"`,
-      `"${u.plan}"`,
-      `"${u.created_at}"`,
-      `"${u.last_login_at}"`,
+      u.elo || 0,
+      u.level || 1,
+      `"${getCountryName(u.country)}"`,
+      `"${u.plan?.toLowerCase() === 'pro' ? 'Pro' : 'Free'}"`,
+      `"${formatDateOnly(u.created_at)}"`,
+      `"${formatDateOnly(u.last_login_at)}"`,
     ]);
 
     const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
@@ -348,7 +344,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   const handleRequestSingleDelete = (player: PlayerUser) => {
-    if (!isSelectable(player)) return;
     setDeleteModal({
       isOpen: true,
       ids: [player.guid],
@@ -487,6 +482,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         </section>
 
+        {/* 3.5 Activity Trends Infographic */}
+        <ActivityChart users={users} currentLang={currentLang} />
+
         {/* 4. Filter & Search Controls */}
         <section className="bg-[#090909] border border-[#1A1A1F] p-3 sm:p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3.5">
           {/* Search Input */}
@@ -504,7 +502,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t.searchPlaceholder}
+              placeholder={currentLang === 'ru' ? 'Поиск' : 'Search'}
               className="w-full bg-[#000000] border border-[#1A1A1F] focus:border-white focus:outline-none text-white text-xs placeholder:text-[#929292] pl-10 pr-4 py-2 transition-colors rounded-none"
             />
           </div>
@@ -530,9 +528,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               onChange={(e) => setPlanFilter(e.target.value as 'ALL' | 'FREE' | 'PRO')}
               className="bg-[#000000] border border-[#1A1A1F] focus:border-white focus:outline-none text-[#929292] hover:text-white text-xs px-3 py-2 cursor-pointer transition-colors rounded-none"
             >
-              <option value="ALL">{t.allPlans}</option>
-              <option value="FREE">{t.planFree}</option>
-              <option value="PRO">{t.planPro}</option>
+              <option value="ALL">{currentLang === 'ru' ? 'Все тарифы' : 'All Plans'}</option>
+              <option value="FREE">Free</option>
+              <option value="PRO">Pro</option>
             </select>
 
             {/* Sort Selector */}
@@ -637,9 +635,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   </tr>
                 ) : (
                   filteredUsers.map((player, index) => {
-                    const isCeo =
-                      player.nickname.toLowerCase() === 'zeacvo' ||
-                      player.email.toLowerCase() === 'zeacvo@icloud.com';
                     const canSelect = isSelectable(player);
                     return (
                       <tr
@@ -664,10 +659,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           />
                         </td>
 
-                        {/* Col 1: Player (Avatar + Clickable Nickname to Profile + CEO Badge + GUID) */}
+                        {/* Col 1: Player (Avatar + Nickname) */}
                         <td className="py-3.5 px-5">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-none bg-[#000000] border border-[#222228] overflow-hidden shrink-0 flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-none bg-[#000000] border border-[#1A1A1F] overflow-hidden shrink-0 flex items-center justify-center">
                               {player.avatar && !player.avatar.includes('default_avatar.png') ? (
                                 <img
                                   src={player.avatar}
@@ -682,36 +677,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                 <DefaultUserAvatar size={16} className="w-4 h-4 text-white" />
                               )}
                             </div>
-                            <div className="flex flex-col">
-                              <div className="flex items-center gap-2">
-                                <a
-                                  href={`/profile?id=${encodeURIComponent(player.guid)}`}
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    if (onNavigateProfile) {
-                                      onNavigateProfile(player.guid);
-                                    } else {
-                                      window.location.href = `/profile?id=${encodeURIComponent(player.guid)}`;
-                                    }
-                                  }}
-                                  className="font-bold text-white hover:text-[#FF5500] transition-colors flex items-center gap-1 group/nick cursor-pointer"
-                                  title={`${t.openProfile} ${player.nickname}`}
-                                >
-                                  <span>{player.nickname}</span>
-                                  <span className="text-[#FF5500] text-xs opacity-0 group-hover/nick:opacity-100 transition-opacity">
-                                    ↗
-                                  </span>
-                                </a>
-                                {isCeo && (
-                                  <span className="border border-[#222228] text-white bg-[#141416] text-[10px] px-1.5 py-0.5 rounded-none font-semibold uppercase tracking-wider">
-                                    CEO
-                                  </span>
-                                )}
-                              </div>
-                              <span className="text-[11px] text-[#929292] truncate max-w-[150px]">
-                                {player.guid}
-                              </span>
-                            </div>
+                            <a
+                              href={`/profile?id=${encodeURIComponent(player.guid)}`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                if (onNavigateProfile) {
+                                  onNavigateProfile(player.guid);
+                                } else {
+                                  window.location.href = `/profile?id=${encodeURIComponent(player.guid)}`;
+                                }
+                              }}
+                              className="font-mono text-xs font-bold text-white hover:text-[#FF5500] transition-colors"
+                              title={`${t.openProfile} ${player.nickname}`}
+                            >
+                              {player.nickname}
+                            </a>
                           </div>
                         </td>
 
@@ -740,81 +720,45 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           </div>
                         </td>
 
-                        {/* Col 3: CS2 ELO & Level Badge */}
+                        {/* Col 3: CS2 ELO & Level */}
                         <td className="py-3.5 px-5">
-                          {player.is_faceit_linked && (player.elo || 0) > 0 ? (
-                            <div className="flex items-center gap-2.5">
-                              <div
-                                className="px-1.5 py-0.5 bg-transparent border border-[#222228] font-bold text-xs text-white"
-                                title={`FACEIT Level ${player.level}`}
-                              >
-                                LVL {player.level}
-                              </div>
-                              <div className="flex flex-col">
-                                <span className="text-sm font-bold text-white">
-                                  {player.elo.toLocaleString()}
-                                </span>
-                                <span className="text-[10px] text-[#929292]">{t.cs2Matchmaking}</span>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-transparent border border-[#222228] text-[#929292] text-[11px] font-bold tracking-wider">
-                              <span className="w-1.5 h-1.5 rounded-full bg-[#929292] animate-pulse" />
-                              <span>{t.pendingNotLinked}</span>
-                            </div>
-                          )}
+                          <span className="font-mono text-xs text-[#FFFFFF]">
+                            {player.elo ? `${player.elo.toLocaleString()}, ${player.level || 1} level` : '—'}
+                          </span>
                         </td>
 
                         {/* Col 4: Country */}
                         <td className="py-3.5 px-5">
-                          {player.country && player.country !== '—' ? (
-                            <div className="flex items-center gap-2 text-xs">
-                              <CountryFlag countryCode={player.country} />
-                              <span className="font-bold text-white uppercase">{player.country}</span>
-                            </div>
-                          ) : (
-                            <span className="text-[#929292] text-xs">—</span>
-                          )}
+                          <span className="font-mono text-xs text-[#FFFFFF]">
+                            {getCountryName(player.country)}
+                          </span>
                         </td>
 
                         {/* Col 5: Registration & Activity */}
                         <td className="py-3.5 px-5">
-                          <div className="flex flex-col text-xs">
-                            <span className="text-white font-medium">
-                              {formatRelativeTime(player.last_login_at, t.justNow)}
-                            </span>
-                            <span className="text-[10px] text-[#929292]">
-                              {t.joined} {formatDate(player.created_at)}
-                            </span>
+                          <div className="font-mono text-xs text-[#FFFFFF]">
+                            <div>{formatDateOnly(player.created_at)}</div>
+                            <div className="text-[#929292]">{formatDateOnly(player.last_login_at)}</div>
                           </div>
                         </td>
 
                         {/* Col 6: Plan */}
                         <td className="py-3.5 px-5 text-right">
-                          <span
-                            className="inline-block text-[10px] font-bold uppercase tracking-wider text-[#929292] border border-[#222228] px-2 py-0.5"
-                          >
-                            {player.plan}
+                          <span className="font-mono text-xs text-[#929292]">
+                            {player.plan?.toLowerCase() === 'pro' ? 'Pro' : 'Free'}
                           </span>
                         </td>
 
-                        {/* Col 7: Actions (Single Delete) */}
+                        {/* Col 7: Actions (Delete) */}
                         <td className="py-3.5 px-5 text-right">
-                          {canSelect ? (
-                            <button
-                              type="button"
-                              onClick={() => handleRequestSingleDelete(player)}
-                              className="p-1.5 bg-transparent border border-[#222228] hover:border-red-500/60 hover:bg-red-950/20 text-[#929292] hover:text-red-400 transition-all cursor-pointer rounded-none inline-flex items-center justify-center"
-                              title={`${t.confirmDelete} ${player.nickname}`}
-                            >
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <polyline points="3 6 5 6 21 6" />
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                              </svg>
-                            </button>
-                          ) : (
-                            <span className="text-[10px] text-[#929292]">—</span>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleRequestSingleDelete(player)}
+                            className="p-1 text-[#929292] hover:text-[#FFFFFF] hover:bg-[#1A1A1F] transition-colors border border-transparent hover:border-[#222228] rounded-none cursor-pointer inline-flex items-center justify-center"
+                            title="Delete user"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </td>
                       </tr>
                     );
