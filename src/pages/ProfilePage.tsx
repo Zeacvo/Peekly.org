@@ -10,7 +10,6 @@ import {
   Check,
   Edit2,
   ExternalLink,
-  Calendar,
   X,
   Loader2,
   ArrowLeft,
@@ -719,8 +718,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   const hasCustomAvatar = Boolean(avatarUrl && !avatarError);
 
                   return (
-                    <div className="flex flex-col items-center shrink-0">
-                      <div className="relative group">
+                    <div className="flex flex-col items-center shrink-0 w-20">
+                      <div className="relative group w-20 h-20">
                         <input
                           type="file"
                           ref={fileInputRef}
@@ -732,7 +731,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                           onClick={() => {
                             if (!isViewOnly) fileInputRef.current?.click();
                           }}
-                          className={`w-20 h-20 rounded-none border border-[#222228] bg-[#000000] overflow-hidden flex items-center justify-center ${
+                          className={`w-20 h-20 rounded-none border border-[#1A1A1F] bg-[#000000] overflow-hidden flex items-center justify-center ${
                             !isViewOnly ? 'cursor-pointer' : ''
                           }`}
                         >
@@ -767,11 +766,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         <button
                           type="button"
                           onClick={handleResetAvatar}
-                          className="mt-2 text-[11px] font-mono text-[#929292] hover:text-[#FFFFFF] uppercase tracking-wider transition-colors flex items-center gap-1 cursor-pointer bg-transparent border-none p-0 focus:outline-none"
+                          className="mt-2 text-[11px] font-mono text-[#929292] hover:text-[#FFFFFF] transition-colors flex items-center justify-center gap-1.5 w-full text-center cursor-pointer bg-transparent border-none p-0 focus:outline-none"
                           title={isRu ? 'Сбросить аватар до стандартного' : 'Reset avatar to default'}
                         >
-                          <span>✕</span>
-                          <span>{t.removeAvatar || (isRu ? 'Удалить фото' : 'Remove photo')}</span>
+                          <span className="text-xs leading-none">✕</span>
+                          <span className="leading-none whitespace-nowrap">{t.removeAvatar || (isRu ? 'Удалить фото' : 'REMOVE PHOTO')}</span>
                         </button>
                       )}
                     </div>
@@ -779,19 +778,35 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 })()}
 
                 {/* Nickname & Network Status */}
-                <div className="flex-1 min-w-0">
-                  <h1 className="text-xl font-bold text-white truncate uppercase">
-                    {displayUser?.nickname || 'Player'}
+                <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
+                  <h1 className="text-lg font-bold font-mono text-[#FFFFFF] tracking-wider uppercase truncate">
+                    {displayUser?.nickname || 'ZEACVO'}
                   </h1>
 
-                  <div className="flex items-center gap-1.5 mt-1 text-xs text-[#929292]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#929292]" />
-                    <span>{t.online}</span>
+                  {/* Статус онлайн */}
+                  <div className="flex items-center gap-2 text-xs font-mono text-[#929292]">
+                    <div className="w-3.5 h-3.5 flex items-center justify-center shrink-0">
+                      <span className="w-2 h-2 rounded-full bg-[#929292] shrink-0" />
+                    </div>
+                    <span className="leading-none">{t.online}</span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 mt-2 text-xs text-[#929292]">
-                    <Calendar className="w-3.5 h-3.5 text-[#929292] shrink-0" />
-                    <span>
+                  {/* Дата регистрации */}
+                  <div className="flex items-center gap-2 text-xs font-mono text-[#929292]">
+                    <svg
+                      className="w-3.5 h-3.5 shrink-0 text-[#929292]"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="1.75"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <span className="leading-none">
                       {t.memberSince} {registrationDate}
                     </span>
                   </div>
