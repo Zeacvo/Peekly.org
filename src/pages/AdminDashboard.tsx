@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import type { Language } from '../translations';
 import { adminTranslations } from '../data/adminTranslations';
-import { DefaultUserAvatar } from '../components/DefaultUserAvatar';
+import { UserAvatar } from '../components/UserAvatar';
 import { ActivityChart } from '../components/admin/ActivityChart';
 import { Trash2 } from 'lucide-react';
 import { type PlayerUser, type AdminStats } from '../../functions/api/storage/usersDb';
@@ -274,28 +274,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleExportCsv = () => {
     const targetUsers = filteredUsers.length > 0 ? filteredUsers : users;
     const headers = [
-      'GUID',
       'Nickname',
       'Email',
-      'CS2 ELO',
-      'FACEIT Level',
+      'Elo & Level',
       'Country',
+      'Registration & Activity',
       'Plan',
-      'Registration Date',
-      'Last Login Date',
     ];
 
-    const rows = targetUsers.map((u) => [
-      `"${u.guid}"`,
-      `"${u.nickname.replace(/"/g, '""')}"`,
-      `"${u.email.replace(/"/g, '""')}"`,
-      u.elo || 0,
-      u.level || 1,
-      `"${getCountryName(u.country)}"`,
-      `"${u.plan?.toLowerCase() === 'pro' ? 'Pro' : 'Free'}"`,
-      `"${formatDateOnly(u.created_at)}"`,
-      `"${formatDateOnly(u.last_login_at)}"`,
-    ]);
+    const rows = targetUsers.map((u) => {
+      const eloVal = u.elo ? Number(u.elo).toLocaleString('en-US') : '0';
+      const lvlVal = u.level || 1;
+      const eloLevel = `"${eloVal} & ${lvlVal} level"`;
+
+      const regDate = formatDateOnly(u.created_at);
+      const lastActiveDate = formatDateOnly(u.last_login_at);
+      const regActivity = `"${regDate} & ${lastActiveDate}"`;
+
+      const planVal = `"${u.plan?.toLowerCase() === 'pro' ? 'Pro' : 'Free'}"`;
+
+      return [
+        `"${u.nickname.replace(/"/g, '""')}"`,
+        `"${u.email.replace(/"/g, '""')}"`,
+        eloLevel,
+        `"${getCountryName(u.country).replace(/"/g, '""')}"`,
+        regActivity,
+        planVal,
+      ];
+    });
 
     const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -550,14 +556,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               type="button"
               onClick={handleExportCsv}
               className="inline-flex items-center justify-center text-center h-[34px] px-3 sm:px-4 rounded-none bg-white text-black hover:bg-[#FF5500] font-mono font-bold text-xs tracking-wider cursor-pointer shadow-none active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white gap-2 transition-colors"
-              title="Export CSV"
+              title={t.exportCsv}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                 <polyline points="7 10 12 15 17 10" />
                 <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
-              <span>Export CSV</span>
+              <span>{t.exportCsv}</span>
             </button>
 
             {/* Refresh */}
@@ -587,7 +593,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <div className="px-5 py-4 border-b border-[#1A1A1F] flex items-center justify-between bg-[#000000]">
             <div className="flex items-center gap-3">
               <span className="text-xs font-bold text-white tracking-wider">
-                {currentLang === 'ru' ? 'Зарегистрированные игроки' : 'Registered players'}
+                {t.registeredPlayers}
               </span>
             </div>
           </div>
@@ -608,12 +614,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       title={t.selectAll}
                     />
                   </th>
-                  <th className="py-3 px-4 font-normal border-r border-dashed border-[#1A1A1F]">Nickname</th>
-                  <th className="py-3 px-4 font-normal border-r border-dashed border-[#1A1A1F]">Email</th>
-                  <th className="py-3 px-4 font-normal border-r border-dashed border-[#1A1A1F]">Elo & Level</th>
-                  <th className="py-3 px-4 font-normal border-r border-dashed border-[#1A1A1F]">Country</th>
-                  <th className="py-3 px-4 font-normal border-r border-dashed border-[#1A1A1F]">Registration & Activity</th>
-                  <th className="py-3 px-4 font-normal border-r border-dashed border-[#1A1A1F]">Plan</th>
+                  <th className="py-3 px-4 font-normal border-r border-dashed border-[#1A1A1F]">{t.colNickname || t.colPlayer}</th>
+                  <th className="py-3 px-4 font-normal border-r border-dashed border-[#1A1A1F]">{t.colEmail}</th>
+                  <th className="py-3 px-4 font-normal border-r border-dashed border-[#1A1A1F]">{t.colEloLevel || t.colElo}</th>
+                  <th className="py-3 px-4 font-normal border-r border-dashed border-[#1A1A1F]">{t.colCountry}</th>
+                  <th className="py-3 px-4 font-normal border-r border-dashed border-[#1A1A1F]">{t.colRegActivity || t.colActivity}</th>
+                  <th className="py-3 px-4 font-normal border-r border-dashed border-[#1A1A1F]">{t.colPlan}</th>
                   <th className="py-3 px-4 font-normal text-right w-12" />
                 </tr>
               </thead>
@@ -660,19 +666,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <td className="py-3 px-4 border-r border-dashed border-[#1A1A1F]">
                           <div className="flex items-center gap-2.5">
                             <div className="w-7 h-7 bg-[#000000] border border-[#222228] rounded-none flex items-center justify-center shrink-0 overflow-hidden">
-                              {player.avatar && !player.avatar.includes('default_avatar.png') ? (
-                                <img
-                                  src={player.avatar}
-                                  alt={player.nickname}
-                                  className="w-full h-full object-cover"
-                                  referrerPolicy="no-referrer"
-                                  onError={(e) => {
-                                    (e.currentTarget as HTMLImageElement).style.display = 'none';
-                                  }}
-                                />
-                              ) : (
-                                <DefaultUserAvatar size={14} className="w-3.5 h-3.5 text-[#FFFFFF]" />
-                              )}
+                              <UserAvatar user={player} size={14} className="w-3.5 h-3.5 text-[#FFFFFF]" />
                             </div>
                             <a
                               href={`/id/${encodeURIComponent(player.nickname)}/`}

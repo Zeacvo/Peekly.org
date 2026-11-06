@@ -3,6 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import { LanguageIcon } from './LanguageIcon';
 import { PeeklyLogo } from './PeeklyLogo';
 import { DefaultUserAvatar } from './DefaultUserAvatar';
+import { UserAvatar } from './UserAvatar';
 import { translations, SUPPORTED_LANGUAGES } from '../translations';
 import type { Language } from '../translations';
 import { BROWSERS } from '../constants/browsers';
@@ -100,10 +101,27 @@ export const Header: React.FC<HeaderProps> = ({
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.authenticated && data?.user) {
-          setUserSession(data.user);
+          setUserSession((prev) => {
+            const merged = { ...prev, ...data.user };
+            if (!merged.avatar && prev?.avatar) merged.avatar = prev.avatar;
+            return merged;
+          });
           try {
-            localStorage.setItem('peekly_user', JSON.stringify(data.user));
-            localStorage.setItem('peekly_auth', JSON.stringify(data.user));
+            const stored = localStorage.getItem('peekly_user') || localStorage.getItem('peekly_auth');
+            let storedAvatar = '';
+            let storedAvatarUrl = '';
+            if (stored) {
+              const p = JSON.parse(stored);
+              storedAvatar = p.avatar || p.picture || '';
+              storedAvatarUrl = p.avatar_url || '';
+            }
+            const toSave = {
+              ...data.user,
+              avatar: data.user.avatar || storedAvatar,
+              avatar_url: data.user.avatar_url || storedAvatarUrl || storedAvatar,
+            };
+            localStorage.setItem('peekly_user', JSON.stringify(toSave));
+            localStorage.setItem('peekly_auth', JSON.stringify(toSave));
           } catch {}
           if (new URLSearchParams(window.location.search).get('auth') === 'success') {
             window.history.replaceState({}, document.title, window.location.pathname);
@@ -284,20 +302,7 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 {/* Avatar / Icon */}
                 <div className="w-6 h-6 rounded-none bg-[#000000] border border-[#222228] overflow-hidden shrink-0 flex items-center justify-center">
-                  {(userSession.avatar || userSession.picture) &&
-                  !(userSession.avatar || userSession.picture)?.includes('default_avatar.png') ? (
-                    <img
-                      src={userSession.avatar || userSession.picture}
-                      alt={userSession.nickname}
-                      className="w-full h-full object-cover"
-                      referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <DefaultUserAvatar size={16} className="w-4 h-4 text-[#FFFFFF]" />
-                  )}
+                  <UserAvatar user={userSession} size={16} className="w-4 h-4 text-[#FFFFFF]" />
                 </div>
 
                 {/* Nickname */}
@@ -323,20 +328,7 @@ export const Header: React.FC<HeaderProps> = ({
                   {/* Profile Header */}
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-none bg-[#000000] border border-[#222228] overflow-hidden shrink-0 flex items-center justify-center">
-                      {(userSession.avatar || userSession.picture) &&
-                      !(userSession.avatar || userSession.picture)?.includes('default_avatar.png') ? (
-                        <img
-                          src={userSession.avatar || userSession.picture}
-                          alt={userSession.nickname}
-                          className="w-full h-full object-cover"
-                          referrerPolicy="no-referrer"
-                          onError={(e) => {
-                            (e.currentTarget as HTMLImageElement).style.display = 'none';
-                          }}
-                        />
-                      ) : (
-                        <DefaultUserAvatar size={24} className="w-6 h-6 text-[#FFFFFF]" />
-                      )}
+                      <UserAvatar user={userSession} size={24} className="w-6 h-6 text-[#FFFFFF]" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="font-bold text-white text-sm truncate leading-snug">

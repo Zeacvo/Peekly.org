@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaceitLogo } from '../components/AuthModal';
 import { TwitchLogo } from '../components/icons/TwitchLogo';
-import { DiscordLogo } from '../components/icons/DiscordLogo';
+import { getUserAvatarUrl } from '../components/UserAvatar';
+import { DefaultUserAvatar } from '../components/DefaultUserAvatar';
 import {
   KeyRound,
   Laptop,
@@ -69,7 +70,6 @@ function getStoredUser(): UserProfile | null {
   return null;
 }
 
-import { DefaultUserAvatar } from '../components/DefaultUserAvatar';
 export { DefaultUserAvatar };
 
 export const ProfilePage: React.FC<ProfilePageProps> = ({
@@ -112,20 +112,54 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
 
-  // Fetch current authenticated user
+  // Fetch current authenticated user & sync storage
   useEffect(() => {
     fetch('/api/auth/me')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.authenticated && data?.user) {
-          setCurrentUser(data.user);
+          setCurrentUser((prev) => {
+            const merged = { ...prev, ...data.user };
+            if (!merged.avatar && prev?.avatar) merged.avatar = prev.avatar;
+            if (!merged.avatar_url && prev?.avatar_url) merged.avatar_url = prev.avatar_url;
+            return merged;
+          });
           try {
-            localStorage.setItem('peekly_user', JSON.stringify(data.user));
-            localStorage.setItem('peekly_auth', JSON.stringify(data.user));
+            const stored = localStorage.getItem('peekly_user') || localStorage.getItem('peekly_auth');
+            let storedAvatar = '';
+            if (stored) {
+              const p = JSON.parse(stored);
+              storedAvatar = p.avatar || p.avatar_url || p.picture || '';
+            }
+            const toSave = {
+              ...data.user,
+              avatar: data.user.avatar || storedAvatar,
+              avatar_url: data.user.avatar_url || storedAvatar,
+            };
+            localStorage.setItem('peekly_user', JSON.stringify(toSave));
+            localStorage.setItem('peekly_auth', JSON.stringify(toSave));
           } catch {}
         }
       })
       .catch(() => {});
+  }, []);
+
+  // Listen for user updates across components
+  useEffect(() => {
+    const syncUser = () => {
+      const stored = getStoredUser();
+      if (stored) {
+        setCurrentUser((prev) => ({ ...prev, ...stored }));
+      }
+    };
+    window.addEventListener('peekly_user_updated', syncUser);
+    window.addEventListener('storage', syncUser);
+    window.addEventListener('focus', syncUser);
+    return () => {
+      window.removeEventListener('peekly_user_updated', syncUser);
+      window.removeEventListener('storage', syncUser);
+      window.removeEventListener('focus', syncUser);
+    };
   }, []);
 
   const [locationSearch, setLocationSearch] = useState(() =>
@@ -283,27 +317,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   );
   const twitchUsername = displayUser?.twitchUsername || displayUser?.twitch_username || null;
 
-  const isDiscordConnected = Boolean(
-    displayUser?.discordConnected ||
-    displayUser?.discord_connected ||
-    displayUser?.discordUsername ||
-    displayUser?.discord_username
-  );
-  const discordUsername = displayUser?.discordUsername || displayUser?.discord_username || null;
-
   const handleConnectTwitch = () => {
     showNotification(
       isRu
         ? 'Интеграция Twitch находится в разработке'
         : 'Twitch integration coming soon'
-    );
-  };
-
-  const handleConnectDiscord = () => {
-    showNotification(
-      isRu
-        ? 'Интеграция Discord находится в разработке'
-        : 'Discord integration coming soon'
     );
   };
 
@@ -429,6 +447,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           const parsed = JSON.parse(stored);
           parsed.avatar = '';
           parsed.avatar_url = '';
+          parsed.picture = '';
+          parsed.avatarUrl = '';
           localStorage.setItem('peekly_user', JSON.stringify(parsed));
           localStorage.setItem('peekly_auth', JSON.stringify(parsed));
         }
@@ -695,11 +715,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               <div className="flex items-start gap-4 mb-5">
                 {/* Avatar with hover pencil overlay & reset action */}
                 {(() => {
-                  const hasCustomAvatar = Boolean(
-                    (displayUser?.avatar || displayUser?.avatar_url) &&
-                    !avatarError &&
-                    !(displayUser?.avatar || displayUser?.avatar_url)?.includes('default_avatar.png')
-                  );
+                  const avatarUrl = getUserAvatarUrl(displayUser);
+                  const hasCustomAvatar = Boolean(avatarUrl && !avatarError);
 
                   return (
                     <div className="flex flex-col items-center shrink-0">
@@ -719,11 +736,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                             !isViewOnly ? 'cursor-pointer' : ''
                           }`}
                         >
-                          {hasCustomAvatar && displayUser ? (
+                          {hasCustomAvatar && avatarUrl ? (
                             <img
-                              src={displayUser.avatar || displayUser.avatar_url || ''}
-                              alt={displayUser.nickname || 'User'}
+                              src={avatarUrl}
+                              alt={displayUser?.nickname || 'User'}
                               className="w-full h-full object-cover"
+                              referrerPolicy="no-referrer"
                               onError={() => setAvatarError(true)}
                             />
                           ) : (
@@ -780,7 +798,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 </div>
               </div>
 
-              {/* Integrations Stack: FACEIT, Twitch, Discord */}
+              {/* Integrations Stack: FACEIT, Twitch */}
               <div className="flex flex-col gap-2 mt-4">
                 {/* 1. FACEIT */}
                 <div className="flex items-center justify-between p-2.5 bg-[#000000] border border-[#1A1A1F] rounded-none">
@@ -812,7 +830,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       href="/api/auth/faceit/login"
                       className="px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
                     >
-                      {t.connect || 'CONNECT'}
+                      {t.connect || (isRu ? 'Подключить' : 'Connect')}
                     </a>
                   )}
                 </div>
@@ -846,41 +864,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       onClick={handleConnectTwitch}
                       className="px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
                     >
-                      {t.connect || 'CONNECT'}
-                    </button>
-                  )}
-                </div>
-
-                {/* 3. DISCORD */}
-                <div className="flex items-center justify-between p-2.5 bg-[#000000] border border-[#1A1A1F] rounded-none">
-                  <div className="flex items-center gap-2.5">
-                    <DiscordLogo className="w-4 h-4 text-[#FFFFFF]" />
-                    <div className="flex flex-col">
-                      <span className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
-                        DISCORD
-                      </span>
-                      <span className="font-mono text-[10px] text-[#929292]">
-                        {isDiscordConnected ? (t.connected || 'Connected') : (t.notConnected || 'Not connected')}
-                      </span>
-                    </div>
-                  </div>
-                  {isDiscordConnected ? (
-                    <a
-                      href={discordUsername ? `https://discord.com/users/${encodeURIComponent(discordUsername)}` : 'https://discord.com'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-7 h-7 flex items-center justify-center border border-[#222228] text-[#929292] hover:text-[#000000] hover:bg-[#FF5500] hover:border-[#FF5500] transition-colors rounded-none"
-                      title="Open Discord"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleConnectDiscord}
-                      className="px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
-                    >
-                      {t.connect || 'CONNECT'}
+                      {t.connect || (isRu ? 'Подключить' : 'Connect')}
                     </button>
                   )}
                 </div>
