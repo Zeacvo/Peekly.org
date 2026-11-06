@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { PeeklyLogo } from './PeeklyLogo';
 import { isValidEmail, isValidNickname, checkPasswordRequirements } from '../../functions/api/utils/auth.ts';
+import type { Language } from '../translations';
+import { getAuthTranslations } from '../data/authTranslations';
 
 declare global {
   interface Window {
@@ -84,6 +86,7 @@ export const ExclamationIcon: React.FC<{ className?: string }> = ({ className = 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  currentLang?: Language;
   initialError?: string | null;
   onLoginSuccess?: (session: {
     nickname: string;
@@ -97,9 +100,11 @@ interface AuthModalProps {
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
+  currentLang,
   initialError,
   onLoginSuccess,
 }) => {
+  const t = getAuthTranslations(currentLang);
   const [view, setView] = useState<'login' | 'register'>('login');
   const [step, setStep] = useState<1 | 2>(1);
   const [regStep, setRegStep] = useState<'form' | 'verify'>('form');
@@ -166,11 +171,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   const requirements = [
-    { met: pwdReq.hasLength, label: 'At least 8 characters' },
-    { met: pwdReq.hasNumber, label: 'At least 1 number' },
-    { met: pwdReq.hasUpper, label: 'At least 1 uppercase letter' },
-    { met: pwdReq.hasLower, label: 'At least 1 lowercase letter' },
-    { met: pwdReq.hasSpecial, label: 'At least one special character' },
+    { met: pwdReq.hasLength, label: t.reqLength },
+    { met: pwdReq.hasNumber, label: t.reqNumber },
+    { met: pwdReq.hasUpper, label: t.reqUppercase },
+    { met: pwdReq.hasSpecial, label: t.reqSpecial },
   ];
 
   const resetFormValidation = () => {
@@ -624,7 +628,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {view === 'login' && step === 1 && (
           <div className="mt-3">
             <h2 className="text-xl font-bold text-white text-center mb-5 font-sans">
-              Sign in to Peekly
+              {t.signInTitle}
             </h2>
 
             <div className="w-full flex flex-col gap-3.5">
@@ -638,7 +642,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <div className="w-5 h-5 flex items-center justify-center shrink-0 mr-3">
                     <GoogleLogo className="w-4 h-4" />
                   </div>
-                  <span>Continue with Google</span>
+                  <span>{t.continueGoogle}</span>
                 </button>
 
                 <a
@@ -648,7 +652,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <div className="w-5 h-5 flex items-center justify-center shrink-0 mr-3">
                     <FaceitLogo className="w-4 h-4" fill="#FF5500" />
                   </div>
-                  <span>Continue with FACEIT</span>
+                  <span>{t.continueFaceit}</span>
                 </a>
               </div>
 
@@ -656,7 +660,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <div className="w-full flex items-center my-1">
                 <div className="flex-1 border-t border-white/10" />
                 <span className="px-3 text-[10px] font-mono uppercase tracking-widest text-neutral-500">
-                  OR
+                  {t.orDivider}
                 </span>
                 <div className="flex-1 border-t border-white/10" />
               </div>
@@ -676,7 +680,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       if (!emailTouched) setEmailTouched(true);
                     }}
                     onBlur={() => setEmailTouched(true)}
-                    placeholder="Email"
+                    placeholder={t.emailPlaceholder}
                     className={`w-full h-11 bg-[#0F0F11] border ${
                       showLoginEmailError
                         ? '!border-[#FF1744] bg-[#FF1744]/5'
@@ -686,7 +690,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   {showLoginEmailError && (
                     <span className="text-xs text-[#FF1744] flex items-center gap-1.5 mt-1 font-mono tracking-tight">
                       <ExclamationIcon />
-                      <span>Enter a valid email address to use as your account email.</span>
+                      <span>{t.enterValidEmail}</span>
                     </span>
                   )}
                 </div>
@@ -701,7 +705,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     }}
                     className="text-xs text-neutral-400 hover:text-white transition font-mono cursor-pointer text-left whitespace-nowrap inline-flex items-center gap-1"
                   >
-                    <span>Create Your Peekly Account</span>
+                    <span>{t.createAccountLink}</span>
                     <span className="text-[11px] leading-none">↗</span>
                   </button>
                 </div>
@@ -710,15 +714,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <div className="w-full flex flex-col items-center text-center my-1">
                   <PrivacyIcon />
                   <p className="text-[11px] text-neutral-500 font-sans leading-relaxed max-w-[340px] mx-auto">
-                    Your Peekly Account information is used to allow you to sign in
-                    securely and access your CS2 stats.{' '}
+                    {t.loginDisclaimer}{' '}
                     <a
                       href="/legal/account-privacy"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-neutral-400 hover:text-white transition"
                     >
-                      See how your data is managed...
+                      {t.dataManagedLink}
                     </a>
                   </p>
                 </div>
@@ -732,7 +735,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
                   }`}
                 >
-                  CONTINUE
+                  {t.continueBtn}
                 </button>
               </form>
             </div>
@@ -745,7 +748,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {view === 'login' && step === 2 && (
           <div className="mt-3">
             <h2 className="text-xl font-bold text-white text-center mb-5 font-sans">
-              Sign in to Peekly
+              {t.signInTitle}
             </h2>
 
             <form
@@ -780,7 +783,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     type={showLoginPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
+                    placeholder={t.passwordPlaceholder}
                     className="w-full h-11 bg-[#0F0F11] border border-white/15 focus:border-white/50 text-white placeholder-neutral-500 pl-3.5 pr-10 text-sm outline-none rounded-none transition font-sans"
                     autoFocus
                   />
@@ -818,7 +821,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   }}
                   className="text-neutral-400 hover:text-white cursor-pointer"
                 >
-                  Forgot password? ↗
+                  {t.forgotPassword} ↗
                 </button>
               </div>
 
@@ -831,7 +834,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
                 }`}
               >
-                {isLoading ? 'PLEASE WAIT...' : 'SIGN IN'}
+                {isLoading ? t.pleaseWait : t.signInBtn}
               </button>
 
               <button
@@ -930,10 +933,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {view === 'register' && regStep === 'form' && (
           <div className="mt-3">
             <h2 className="text-xl font-bold text-white text-center mb-1 font-sans">
-              Create Your Peekly Account
+              {t.createAccountTitle}
             </h2>
             <p className="text-xs font-mono text-[#71717A] text-center mb-5 leading-relaxed">
-              One Peekly Account is all you need. Already have an account?{' '}
+              {t.accountSubtitlePrefix}{' '}
               <button
                 type="button"
                 onClick={() => {
@@ -944,7 +947,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 }}
                 className="text-[#FFFFFF] hover:text-[#FF5500] font-semibold underline underline-offset-2 transition-colors whitespace-nowrap inline-flex items-center gap-1 cursor-pointer"
               >
-                <span>Sign in</span>
+                <span>{t.signInLink}</span>
                 <span className="text-[11px] leading-none">↗</span>
               </button>
             </p>
@@ -959,7 +962,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <div className="w-5 h-5 flex items-center justify-center shrink-0 mr-3">
                   <GoogleLogo className="w-4 h-4" />
                 </div>
-                <span>Continue with Google</span>
+                <span>{t.continueGoogle}</span>
               </button>
 
               <a
@@ -969,7 +972,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <div className="w-5 h-5 flex items-center justify-center shrink-0 mr-3">
                   <FaceitLogo className="w-4 h-4" fill="#FF5500" />
                 </div>
-                <span>Continue with FACEIT</span>
+                <span>{t.continueFaceit}</span>
               </a>
             </div>
 
@@ -977,7 +980,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div className="w-full flex items-center my-2">
               <div className="flex-1 border-t border-white/10" />
               <span className="px-3 text-[10px] font-mono uppercase tracking-widest text-neutral-500">
-                OR
+                {t.orDivider}
               </span>
               <div className="flex-1 border-t border-white/10" />
             </div>
@@ -999,7 +1002,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     if (!nicknameTouched) setNicknameTouched(true);
                   }}
                   onBlur={() => setNicknameTouched(true)}
-                  placeholder="Nickname"
+                  placeholder={t.nicknamePlaceholder}
                   className={`w-full h-11 bg-[#0F0F11] border ${
                     showNicknameError
                       ? '!border-[#FF1744] bg-[#FF1744]/5'
@@ -1009,7 +1012,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 {showNicknameError && (
                   <span className="text-xs text-[#FF1744] flex items-center gap-1.5 mt-1 font-mono tracking-tight">
                     <ExclamationIcon />
-                    <span>3 to 20 characters, letters and numbers only.</span>
+                    <span>{t.nicknameRequirements}</span>
                   </span>
                 )}
               </div>
@@ -1025,7 +1028,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     if (!emailTouched) setEmailTouched(true);
                   }}
                   onBlur={() => setEmailTouched(true)}
-                  placeholder="Email address"
+                  placeholder={t.emailPlaceholder}
                   className={`w-full h-11 bg-[#0F0F11] border ${
                     showEmailError
                       ? '!border-[#FF1744] bg-[#FF1744]/5'
@@ -1035,7 +1038,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 {showEmailError && (
                   <span className="text-xs text-[#FF1744] flex items-center gap-1.5 mt-1 font-mono tracking-tight">
                     <ExclamationIcon />
-                    <span>Enter a valid email address to use as your account email.</span>
+                    <span>{t.enterValidEmail}</span>
                   </span>
                 )}
               </div>
@@ -1048,7 +1051,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       className="absolute bottom-full left-0 mb-2 w-full sm:w-[340px] bg-[#141416] border border-white/20 p-4 shadow-2xl z-50 rounded-none pointer-events-none"
                     >
                       <div className="flex items-center justify-between text-xs font-mono text-neutral-300 mb-1.5">
-                        <span>Strength: {pwdReq.score}%</span>
+                        <span>{t.strengthLabel}: {pwdReq.score}%</span>
                       </div>
                       <div className="w-full h-[3px] bg-white/10 rounded-none overflow-hidden mb-3">
                         <div
@@ -1057,7 +1060,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         />
                       </div>
                       <div className="text-xs font-bold uppercase tracking-wider text-neutral-200 mt-1 mb-2">
-                        Password Requirements
+                        {t.passwordRequirementsTitle}
                       </div>
                       <div className="space-y-1.5 font-mono text-xs">
                         {requirements.map((req, idx) => (
@@ -1075,7 +1078,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         ))}
                       </div>
                       <div className="text-[11px] leading-relaxed text-neutral-400 mt-3 pt-2.5 border-t border-white/10 font-sans">
-                        Avoid using a password that you use with other websites or that might be easy for someone else to guess.
+                        {t.passwordTip}
                       </div>
                     </div>
                   )}
@@ -1092,7 +1095,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       setIsPasswordFocused(false);
                       setPasswordTouched(true);
                     }}
-                    placeholder="Password"
+                    placeholder={t.passwordPlaceholder}
                     className={`w-full h-11 bg-[#0F0F11] border ${
                       showPasswordError
                         ? '!border-[#FF1744] bg-[#FF1744]/5'
@@ -1112,7 +1115,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 {showPasswordError && (
                   <span className="text-xs text-[#FF1744] flex items-center gap-1.5 mt-1 font-mono tracking-tight">
                     <ExclamationIcon />
-                    <span>Must meet all password requirements.</span>
+                    <span>{t.meetAllRequirements}</span>
                   </span>
                 )}
               </div>
@@ -1128,7 +1131,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       if (!confirmPasswordTouched) setConfirmPasswordTouched(true);
                     }}
                     onBlur={() => setConfirmPasswordTouched(true)}
-                    placeholder="Confirm password"
+                    placeholder={t.confirmPasswordPlaceholder}
                     className={`w-full h-11 bg-[#0F0F11] border ${
                       showConfirmError
                         ? '!border-[#FF1744] bg-[#FF1744]/5'
@@ -1148,7 +1151,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 {showConfirmError && (
                   <span className="text-xs text-[#FF1744] flex items-center gap-1.5 mt-1 font-mono tracking-tight">
                     <ExclamationIcon />
-                    <span>Passwords do not match.</span>
+                    <span>{t.passwordsDoNotMatch}</span>
                   </span>
                 )}
               </div>
@@ -1168,7 +1171,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   </svg>
                 </div>
                 <span className="text-xs font-mono text-[#A1A1AA] leading-tight">
-                  <strong className="text-[#FFFFFF] font-bold">Announcements & Updates.</strong> Receive product updates and CS2 analytics via email.
+                  <strong className="text-[#FFFFFF] font-bold">{t.announcementsTitle}</strong> {t.announcementsDesc}
                 </span>
               </label>
 
@@ -1187,33 +1190,31 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   </svg>
                 </div>
                 <span className="text-xs font-mono text-[#A1A1AA] leading-tight">
-                  I agree to the{' '}
+                  {t.termsAgreePrefix}{' '}
                   <a
                     href="/legal/terms"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[#FFFFFF] underline underline-offset-2 hover:text-[#FF5500]"
                   >
-                    Terms of Service
+                    {t.termsOfService}
                   </a>{' '}
-                  and{' '}
+                  {t.and}{' '}
                   <a
                     href="/legal/privacy"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[#FFFFFF] underline underline-offset-2 hover:text-[#FF5500]"
                   >
-                    Privacy Policy
+                    {t.privacyPolicy}
                   </a>
                   .
                 </span>
               </label>
 
               {/* Cloudflare Turnstile Human Verification Container */}
-              <div className="w-full flex items-center justify-center border border-[#1A1A1F] bg-[#0D0D0E] py-2 px-3 my-3">
-                <div className="w-full [&>iframe]:!w-full [&>div]:!w-full flex justify-center">
-                  <div id="turnstile-container" className="w-full flex justify-center items-center" data-size="flexible" />
-                </div>
+              <div className="w-full flex justify-center items-center my-3 bg-transparent py-1">
+                <div id="turnstile-container" className="flex justify-center" />
               </div>
 
               {/* System Error Banner */}
@@ -1234,22 +1235,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
                 }`}
               >
-                {isLoading ? 'PLEASE WAIT...' : 'CREATE ACCOUNT'}
+                {isLoading ? t.pleaseWait : t.createAccountBtn}
               </button>
 
               {/* Privacy Disclaimer */}
               <div className="w-full flex flex-col items-center text-center my-1">
                 <PrivacyIcon />
                 <p className="text-[11px] text-neutral-500 font-sans leading-relaxed max-w-[340px] mx-auto">
-                  Your Peekly Account information is used to allow you to sign in securely
-                  and protect your account.{' '}
+                  {t.registerDisclaimer}{' '}
                   <a
                     href="/legal/account-privacy"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-neutral-400 hover:text-white transition"
                   >
-                    See how your data is managed...
+                    {t.dataManagedLink}
                   </a>
                 </p>
               </div>

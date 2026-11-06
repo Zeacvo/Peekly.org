@@ -6,6 +6,7 @@ import { DefaultUserAvatar } from './DefaultUserAvatar';
 import { UserAvatar } from './UserAvatar';
 import { translations, SUPPORTED_LANGUAGES } from '../translations';
 import type { Language } from '../translations';
+import { getAuthTranslations } from '../data/authTranslations';
 import { BROWSERS } from '../constants/browsers';
 
 interface HeaderProps {
@@ -88,6 +89,7 @@ export const Header: React.FC<HeaderProps> = ({
   const userDropdownRef = useRef<HTMLDivElement>(null);
 
   const t = translations[currentLang] || translations.en;
+  const authT = getAuthTranslations(currentLang);
   const isRu = currentLang === 'ru';
 
   useEffect(() => {
@@ -390,10 +392,10 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onOpenAuthModal}
-              className="inline-flex items-center justify-center text-center h-10 px-5 sm:px-6 rounded-none bg-black text-white hover:border-white border border-[#222228] font-mono text-xs font-bold tracking-wider uppercase transition-colors shrink-0 cursor-pointer focus-visible:ring-1 focus-visible:ring-white"
-              title="Sign in to Peekly"
+              className="inline-flex items-center justify-center text-center h-10 px-5 sm:px-6 rounded-none bg-black text-white hover:border-white border border-[#222228] font-mono text-xs font-bold tracking-wider transition-colors shrink-0 cursor-pointer focus-visible:ring-1 focus-visible:ring-white"
+              title={authT.signInTitle}
             >
-              <span>SIGN IN</span>
+              <span>{authT.nav_sign_in}</span>
             </button>
           )}
 

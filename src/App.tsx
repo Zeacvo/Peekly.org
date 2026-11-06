@@ -189,6 +189,9 @@ export const App: React.FC = () => {
   const handleLanguageChange = (lang: Language) => {
     setCurrentLang(lang);
     saveLanguagePreference(lang);
+    try {
+      window.dispatchEvent(new Event('peekly_language_changed'));
+    } catch {}
   };
 
   useEffect(() => {
@@ -493,12 +496,14 @@ export const App: React.FC = () => {
             />
           ) : isLogin ? (
             <LoginPage
+              currentLang={currentLang}
               onGoHome={handleGoHome}
               onNavigateRegister={handleOpenRegister}
               initialError={authErrorParam}
             />
           ) : isRegister ? (
             <RegisterPage
+              currentLang={currentLang}
               onGoHome={handleGoHome}
               onNavigateLogin={handleOpenLogin}
             />
@@ -570,6 +575,7 @@ export const App: React.FC = () => {
       {/* Apple-Style Authentication Modal */}
       <AuthModal
         isOpen={isAuthModalOpen}
+        currentLang={currentLang}
         initialError={authErrorParam}
         onClose={() => {
           setIsAuthModalOpen(false);

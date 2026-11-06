@@ -3,18 +3,23 @@ import { Eye, EyeOff } from 'lucide-react';
 import { PeeklyLogo } from '../components/PeeklyLogo';
 import { GoogleLogo, FaceitLogo, PrivacyIcon, ExclamationIcon } from '../components/AuthModal';
 import { isValidEmail } from '../../functions/api/utils/auth.ts';
+import type { Language } from '../translations';
+import { getAuthTranslations } from '../data/authTranslations';
 
 interface LoginPageProps {
+  currentLang?: Language;
   onGoHome?: () => void;
   onNavigateRegister?: () => void;
   initialError?: string | null;
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({
+  currentLang,
   onGoHome,
   onNavigateRegister,
   initialError,
 }) => {
+  const t = getAuthTranslations(currentLang);
   const [step, setStep] = useState<1 | 2>(1);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -153,7 +158,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
         {/* Title */}
         <h1 className="text-2xl font-black text-white text-center font-sans tracking-tight mb-5">
-          Sign in to Peekly
+          {t.signInTitle}
         </h1>
 
         {/* Global Error Notice */}
@@ -184,7 +189,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 <div className="w-5 h-5 flex items-center justify-center shrink-0 mr-3">
                   <GoogleLogo className="w-4 h-4" />
                 </div>
-                <span>Continue with Google</span>
+                <span>{t.continueGoogle}</span>
               </button>
 
               <a
@@ -194,7 +199,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 <div className="w-5 h-5 flex items-center justify-center shrink-0 mr-3">
                   <FaceitLogo className="w-4 h-4" fill="#FF5500" />
                 </div>
-                <span>Continue with FACEIT</span>
+                <span>{t.continueFaceit}</span>
               </a>
             </div>
 
@@ -202,7 +207,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             <div className="w-full flex items-center my-1">
               <div className="flex-1 border-t border-white/10" />
               <span className="px-3 text-[10px] font-mono uppercase tracking-widest text-neutral-500">
-                OR
+                {t.orDivider}
               </span>
               <div className="flex-1 border-t border-white/10" />
             </div>
@@ -219,7 +224,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     if (!emailTouched) setEmailTouched(true);
                   }}
                   onBlur={() => setEmailTouched(true)}
-                  placeholder="Email"
+                  placeholder={t.emailPlaceholder}
                   className={`w-full h-11 bg-[#0F0F11] border ${
                     showLoginEmailError
                       ? '!border-[#FF1744] bg-[#FF1744]/5'
@@ -229,7 +234,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 {showLoginEmailError && (
                   <span className="text-xs text-[#FF1744] flex items-center gap-1.5 mt-1 font-mono tracking-tight">
                     <ExclamationIcon />
-                    <span>Enter a valid email address to use as your account email.</span>
+                    <span>{t.enterValidEmail}</span>
                   </span>
                 )}
               </div>
@@ -240,7 +245,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   onClick={navigateToRegister}
                   className="text-xs text-neutral-400 hover:text-white transition font-mono cursor-pointer text-left no-underline whitespace-nowrap inline-flex items-center gap-1"
                 >
-                  <span>Create Your Peekly Account</span>
+                  <span>{t.createAccountLink}</span>
                   <span className="text-[11px] leading-none">↗</span>
                 </a>
               </div>
@@ -249,15 +254,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               <div className="w-full flex flex-col items-center text-center my-1">
                 <PrivacyIcon />
                 <p className="text-[11px] text-neutral-500 font-sans leading-relaxed max-w-[340px] mx-auto">
-                  Your Peekly Account information is used to allow you to sign in securely and access
-                  your CS2 stats.{' '}
+                  {t.loginDisclaimer}{' '}
                   <a
                     href="/legal/account-privacy"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-neutral-400 hover:text-white transition"
                   >
-                    See how your data is managed...
+                    {t.dataManagedLink}
                   </a>
                 </p>
               </div>
@@ -271,7 +275,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
                 }`}
               >
-                CONTINUE
+                {t.continueBtn}
               </button>
             </form>
           </div>
@@ -308,7 +312,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     setPassword(e.target.value);
                     if (error) setError(null);
                   }}
-                  placeholder="Password"
+                  placeholder={t.passwordPlaceholder}
                   className="w-full h-11 bg-[#0F0F11] border border-white/15 focus:border-white/50 text-white placeholder-neutral-500 pl-3.5 pr-10 text-sm outline-none rounded-none transition font-sans"
                   autoFocus
                 />
@@ -346,7 +350,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 }}
                 className="text-neutral-400 hover:text-white cursor-pointer"
               >
-                Forgot password? ↗
+                {t.forgotPassword} ↗
               </button>
             </div>
 
@@ -359,7 +363,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
               }`}
             >
-              {isLoading ? 'PLEASE WAIT...' : 'SIGN IN'}
+              {isLoading ? t.pleaseWait : t.signInBtn}
             </button>
 
             <button

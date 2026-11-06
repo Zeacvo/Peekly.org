@@ -62,6 +62,15 @@ export interface ProfileTranslation {
   deleteAccount: string;
   deleteAccountWarning: string;
   deleteAccountConfirm: string;
+  deleteAccountBtn?: string;
+
+  // 2FA & Controls
+  twoFactorTitle?: string;
+  twoFactorDisabled?: string;
+  twoFactorActive?: string;
+  twoFactorConfigure?: string;
+  twoFactorDisable?: string;
+  removePhoto?: string;
 
   // Modals & Forms
   save: string;
@@ -214,8 +223,16 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     dangerZoneTitle: 'ОПАСНАЯ ЗОНА',
     dangerZoneSubtitle: 'Необратимые действия с учётной записью',
     deleteAccount: 'УДАЛИТЬ АККАУНТ',
-    deleteAccountWarning: 'При удалении аккаунта все данные, сессии и привязка к FACEIT будут безвозвратно стёрты.',
+    deleteAccountBtn: 'УДАЛИТЬ АККАУНТ',
+    deleteAccountWarning: 'Удаление вашего аккаунта приведет к безвозвратному удалению всех данных.',
     deleteAccountConfirm: 'Вы уверены, что хотите удалить аккаунт? Это действие необратимо.',
+
+    twoFactorTitle: 'ДВУХЭТАПНАЯ АУТЕНТИФИКАЦИЯ (2FA)',
+    twoFactorDisabled: 'ОТКЛЮЧЕНА',
+    twoFactorActive: 'ВКЛЮЧЕНА',
+    twoFactorConfigure: 'НАСТРОИТЬ',
+    twoFactorDisable: 'ОТКЛЮЧИТЬ',
+    removePhoto: 'Удалить',
 
     save: 'Сохранить',
     cancel: 'Отмена',
@@ -290,8 +307,16 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     dangerZoneTitle: 'DANGER ZONE',
     dangerZoneSubtitle: 'Irreversible account operations',
     deleteAccount: 'DELETE ACCOUNT',
+    deleteAccountBtn: 'DELETE ACCOUNT',
     deleteAccountWarning: 'Deleting your account permanently removes all personal data, sessions, and telemetry.',
     deleteAccountConfirm: 'Are you sure you want to delete your account? This action cannot be undone.',
+
+    twoFactorTitle: 'TWO-FACTOR AUTHENTICATION (2FA)',
+    twoFactorDisabled: 'DISABLED',
+    twoFactorActive: 'ACTIVE',
+    twoFactorConfigure: 'CONFIGURE',
+    twoFactorDisable: 'DISABLE',
+    removePhoto: 'Remove',
 
     save: 'Save',
     cancel: 'Cancel',

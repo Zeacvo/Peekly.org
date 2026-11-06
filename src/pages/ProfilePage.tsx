@@ -76,8 +76,29 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   onGoHome,
   onOpenAdmin,
 }) => {
-  const t = profileTranslations[currentLang] || profileTranslations.en;
-  const isRu = currentLang === 'ru';
+  const [activeLang, setActiveLang] = useState<Language>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('peekly_lang') as Language;
+      if (stored) return stored;
+    }
+    return currentLang;
+  });
+
+  useEffect(() => {
+    if (currentLang) setActiveLang(currentLang);
+  }, [currentLang]);
+
+  useEffect(() => {
+    const handleLangChange = () => {
+      const stored = localStorage.getItem('peekly_lang') as Language;
+      if (stored) setActiveLang(stored);
+    };
+    window.addEventListener('peekly_language_changed', handleLangChange);
+    return () => window.removeEventListener('peekly_language_changed', handleLangChange);
+  }, []);
+
+  const t = profileTranslations[activeLang] || profileTranslations.en;
+  const isRu = activeLang === 'ru';
 
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(getStoredUser);
   const [targetUser, setTargetUser] = useState<UserProfile | null>(null);
@@ -813,11 +834,13 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         <button
                           type="button"
                           onClick={handleResetAvatar}
-                          className="mt-2 text-[11px] font-mono text-[#929292] hover:text-[#FFFFFF] transition-colors flex items-center justify-center gap-1.5 w-full text-center cursor-pointer bg-transparent border-none p-0 focus:outline-none"
+                          className="mt-2.5 w-20 flex items-center justify-center gap-1.5 text-[11px] font-mono font-medium text-[#71717A] hover:text-[#EF4444] transition-colors cursor-pointer bg-transparent border-none p-0 focus:outline-none mx-auto"
                           title={isRu ? 'Сбросить аватар до стандартного' : 'Reset avatar to default'}
                         >
-                          <span className="text-xs leading-none">✕</span>
-                          <span className="leading-none whitespace-nowrap">{t.removeAvatar || (isRu ? 'Удалить фото' : 'REMOVE PHOTO')}</span>
+                          <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          <span className="leading-none whitespace-nowrap">{t.removePhoto || (isRu ? 'Удалить' : 'Remove')}</span>
                         </button>
                       )}
                     </div>
@@ -873,11 +896,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       <span className="font-mono text-[10px] text-[#929292]">
                         {isFaceitLinked ? (t.connected || 'Connected') : (t.notConnected || 'Not connected')}
                       </span>
-                      {isFaceitLinked && (
-                        <span className="font-mono text-[9px] text-[#71717A] tracking-tight mt-0.5">
-                          • {isRu ? 'Авто-синхронизация активна' : 'Auto-sync active'}
-                        </span>
-                      )}
                     </div>
                   </div>
                   {isFaceitLinked ? (
@@ -1051,7 +1069,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3">
                     <div>
                       <span className="text-[10px] uppercase text-[#929292] font-bold tracking-wider block mb-1">
-                        {isRu ? 'ДВУХЭТАПНАЯ АУТЕНТИФИКАЦИЯ (2FA)' : 'TWO-FACTOR AUTHENTICATION (2FA)'}
+                        {t.twoFactorTitle || (isRu ? 'ДВУХЭТАПНАЯ АУТЕНТИФИКАЦИЯ (2FA)' : 'TWO-FACTOR AUTHENTICATION (2FA)')}
                       </span>
                       <div className="flex items-center gap-2">
                         <div
@@ -1065,8 +1083,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                           }`}
                         >
                           {is2faActive
-                            ? (isRu ? 'АКТИВНА' : 'ACTIVE')
-                            : (isRu ? 'ОТКЛЮЧЕНА' : 'DISABLED')}
+                            ? (t.twoFactorActive || (isRu ? 'АКТИВНА' : 'ACTIVE'))
+                            : (t.twoFactorDisabled || (isRu ? 'ОТКЛЮЧЕНА' : 'DISABLED'))}
                         </span>
                       </div>
                     </div>
@@ -1080,8 +1098,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       className="btn-action-secondary shrink-0"
                     >
                       {is2faActive
-                        ? (isRu ? 'ОТКЛЮЧИТЬ' : 'DISABLE')
-                        : (isRu ? 'НАСТРОИТЬ' : 'CONFIGURE')}
+                        ? (t.twoFactorDisable || (isRu ? 'ОТКЛЮЧИТЬ' : 'DISABLE'))
+                        : (t.twoFactorConfigure || (isRu ? 'НАСТРОИТЬ' : 'CONFIGURE'))}
                     </button>
                   </div>
                 </div>
@@ -1141,9 +1159,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     setDeleteConfirmText('');
                     setIsDeleteModalOpen(true);
                   }}
-                  className="btn-action-interactive h-9 px-4 bg-transparent border-[#2A1515] text-red-400 hover:bg-red-950/40 hover:text-red-300 hover:border-red-600/50"
+                  className="h-10 px-4 text-xs font-mono font-bold tracking-wider text-[#EF4444] border border-[#EF4444]/40 bg-[#EF4444]/10 hover:bg-[#EF4444] hover:text-[#FFFFFF] transition-all cursor-pointer rounded-none"
                 >
-                  {t.deleteAccount || (isRu ? 'Удалить аккаунт' : 'Delete Account')}
+                  {t.deleteAccountBtn || t.deleteAccount || (isRu ? 'УДАЛИТЬ АККАУНТ' : 'DELETE ACCOUNT')}
                 </button>
               </div>
             </div>
