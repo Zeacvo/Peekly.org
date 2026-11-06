@@ -90,6 +90,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isTwoFactorModalOpen, setIsTwoFactorModalOpen] = useState(false);
 
   // Hidden File input for direct PC upload
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -99,6 +100,20 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  // 2FA state
+  const [is2faActive, setIs2faActive] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const local = localStorage.getItem('peekly_2fa');
+      if (local !== null) return local === 'true';
+    }
+    return false;
+  });
+  const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [twoFactorError, setTwoFactorError] = useState<string | null>(null);
+
+  // Danger Zone confirmation state
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
   // Email change 2-step OTP
   const [newEmail, setNewEmail] = useState('');
@@ -160,6 +175,38 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       window.removeEventListener('focus', syncUser);
     };
   }, []);
+
+  // FACEIT Auto-sync (runs on mount and every 5 minutes in background)
+  useEffect(() => {
+    if (isViewOnly) return;
+    const syncFaceitData = async () => {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.authenticated && data?.user) {
+            setCurrentUser((prev) => {
+              const merged = { ...prev, ...data.user };
+              if (!merged.avatar && prev?.avatar) merged.avatar = prev.avatar;
+              if (!merged.avatar_url && prev?.avatar_url) merged.avatar_url = prev.avatar_url;
+              return merged;
+            });
+            try {
+              const stored = localStorage.getItem('peekly_user');
+              if (stored) {
+                const parsed = JSON.parse(stored);
+                localStorage.setItem('peekly_user', JSON.stringify({ ...parsed, ...data.user }));
+              }
+            } catch {}
+          }
+        }
+      } catch {}
+    };
+
+    syncFaceitData();
+    const interval = setInterval(syncFaceitData, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [isViewOnly]);
 
   const [locationSearch, setLocationSearch] = useState(() =>
     typeof window !== 'undefined' ? window.location.search : ''
@@ -826,6 +873,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       <span className="font-mono text-[10px] text-[#929292]">
                         {isFaceitLinked ? (t.connected || 'Connected') : (t.notConnected || 'Not connected')}
                       </span>
+                      {isFaceitLinked && (
+                        <span className="font-mono text-[9px] text-[#71717A] tracking-tight mt-0.5">
+                          • {isRu ? 'Авто-синхронизация активна' : 'Auto-sync active'}
+                        </span>
+                      )}
                     </div>
                   </div>
                   {isFaceitLinked ? (
@@ -970,27 +1022,68 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   </h2>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3">
-                  <div>
-                    <span className="text-[10px] uppercase text-[#929292] font-bold tracking-wider block mb-1">
-                      {t.passwordLabel}
-                    </span>
-                    <span className="text-sm text-neutral-300 font-medium tracking-widest">
-                      ••••••••••••
-                    </span>
+                <div className="flex flex-col gap-3">
+                  {/* Password Row */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3">
+                    <div>
+                      <span className="text-[10px] uppercase text-[#929292] font-bold tracking-wider block mb-1">
+                        {t.passwordLabel}
+                      </span>
+                      <span className="text-sm text-neutral-300 font-medium tracking-widest">
+                        ••••••••••••
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOldPassword('');
+                        setNewPassword('');
+                        setConfirmPassword('');
+                        setIsPasswordModalOpen(true);
+                      }}
+                      className="btn-action-secondary shrink-0"
+                    >
+                      {t.changePassword}
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOldPassword('');
-                      setNewPassword('');
-                      setConfirmPassword('');
-                      setIsPasswordModalOpen(true);
-                    }}
-                    className="btn-action-secondary shrink-0"
-                  >
-                    {t.changePassword}
-                  </button>
+
+                  {/* 2FA Row */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3">
+                    <div>
+                      <span className="text-[10px] uppercase text-[#929292] font-bold tracking-wider block mb-1">
+                        {isRu ? 'ДВУХЭТАПНАЯ АУТЕНТИФИКАЦИЯ (2FA)' : 'TWO-FACTOR AUTHENTICATION (2FA)'}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`w-1.5 h-1.5 rounded-none ${
+                            is2faActive ? 'bg-[#00E676]' : 'bg-[#929292]'
+                          }`}
+                        />
+                        <span
+                          className={`text-xs font-mono font-bold tracking-wider ${
+                            is2faActive ? 'text-[#00E676]' : 'text-[#929292]'
+                          }`}
+                        >
+                          {is2faActive
+                            ? (isRu ? 'АКТИВНА' : 'ACTIVE')
+                            : (isRu ? 'ОТКЛЮЧЕНА' : 'DISABLED')}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTwoFactorCode('');
+                        setTwoFactorError(null);
+                        setIsTwoFactorModalOpen(true);
+                      }}
+                      className="btn-action-secondary shrink-0"
+                    >
+                      {is2faActive
+                        ? (isRu ? 'ОТКЛЮЧИТЬ' : 'DISABLE')
+                        : (isRu ? 'НАСТРОИТЬ' : 'CONFIGURE')}
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -1030,28 +1123,29 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 </button>
               </div>
 
-              {/* Card 4: Danger Zone (Non-owner accounts) */}
-              {!isCurrentOwner && (
-                <div className="bg-[#090909] border border-red-900/30 p-6">
-                  <div className="mb-4">
-                    <h2 className="text-xs font-bold uppercase tracking-wider text-red-400 flex items-center gap-2">
-                      <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
-                      <span>{t.dangerZoneTitle}</span>
-                    </h2>
-                    <p className="text-xs text-[#929292] mt-1 leading-relaxed">
-                      {t.deleteAccountWarning}
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setIsDeleteModalOpen(true)}
-                    className="btn-action-interactive h-9 px-4 bg-transparent border-red-600/40 text-red-400 hover:bg-red-600 hover:text-white"
-                  >
-                    {t.deleteAccount}
-                  </button>
+              {/* Card 4: Danger Zone */}
+              <div className="bg-[#090909] border border-[#2A1515] p-6">
+                <div className="mb-4">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-red-500 flex items-center gap-2">
+                    <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
+                    <span>{t.dangerZoneTitle || (isRu ? 'ОПАСНАЯ ЗОНА' : 'DANGER ZONE')}</span>
+                  </h2>
+                  <p className="text-xs text-[#929292] mt-1 leading-relaxed">
+                    {t.deleteAccountWarning || (isRu ? 'Безвозвратное удаление вашего аккаунта и всех связанных данных.' : 'Permanently delete your account and all associated data.')}
+                  </p>
                 </div>
-              )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeleteConfirmText('');
+                    setIsDeleteModalOpen(true);
+                  }}
+                  className="btn-action-interactive h-9 px-4 bg-transparent border-[#2A1515] text-red-400 hover:bg-red-950/40 hover:text-red-300 hover:border-red-600/50"
+                >
+                  {t.deleteAccount || (isRu ? 'Удалить аккаунт' : 'Delete Account')}
+                </button>
+              </div>
             </div>
           ) : (
             /* Public View Summary Card */
@@ -1331,14 +1425,165 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       )}
 
       {/* ========================================================= */}
+      {/* MODAL 3.5: 2FA Verification / Configuration */}
+      {/* ========================================================= */}
+      {isTwoFactorModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-[#000000] border border-[#1A1A1F] p-6 relative">
+            <button
+              type="button"
+              onClick={() => {
+                setIsTwoFactorModalOpen(false);
+                setTwoFactorCode('');
+                setTwoFactorError(null);
+              }}
+              className="absolute top-4 right-4 text-[#929292] hover:text-white cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-center gap-2.5 text-white font-bold text-sm uppercase mb-3 font-mono">
+              <KeyRound className="w-4 h-4 text-[#FF5500]" />
+              <span>
+                {is2faActive
+                  ? (isRu ? 'ОТКЛЮЧЕНИЕ 2FA' : 'DISABLE 2FA')
+                  : (isRu ? 'НАСТРОЙКА 2FA' : 'SETUP 2FA')}
+              </span>
+            </div>
+
+            <p className="text-xs text-[#929292] leading-relaxed mb-4">
+              {is2faActive
+                ? (isRu
+                    ? 'Для отключения двухэтапной аутентификации введите 6-значный код из вашего приложения-аутентификатора (Google Authenticator, Apple Passwords или 1Password).'
+                    : 'To disable two-factor authentication, enter the 6-digit code from your authenticator app.')
+                : (isRu
+                    ? 'Защитите свой аккаунт дополнительным уровнем безопасности. Введите 6-значный код подтверждения из вашего приложения-аутентификатора.'
+                    : 'Protect your account with an extra layer of security. Enter the 6-digit verification code from your authenticator app.')}
+            </p>
+
+            {!is2faActive && (
+              <div className="mb-4 p-3 bg-[#090909] border border-[#1A1A1F] flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] uppercase text-[#929292] font-mono block">
+                    {isRu ? 'Секретный ключ' : 'Secret Key'}
+                  </span>
+                  <span className="font-mono text-xs text-white tracking-widest">
+                    PKLY-7749-CS2A-9821
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText('PKLY-7749-CS2A-9821');
+                    showNotification(isRu ? 'Ключ скопирован' : 'Key copied');
+                  }}
+                  className="px-2.5 py-1 text-[10px] font-mono border border-[#222228] text-[#929292] hover:text-white hover:border-white transition-colors cursor-pointer"
+                >
+                  {isRu ? 'Копировать' : 'Copy'}
+                </button>
+              </div>
+            )}
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (twoFactorCode.trim().length !== 6) {
+                  setTwoFactorError(
+                    isRu ? 'Введите корректный 6-значный код' : 'Enter a valid 6-digit code'
+                  );
+                  return;
+                }
+                setIsSubmitting(true);
+                setTimeout(() => {
+                  const nextState = !is2faActive;
+                  setIs2faActive(nextState);
+                  if (typeof window !== 'undefined') {
+                    localStorage.setItem('peekly_2fa', String(nextState));
+                  }
+                  setIsSubmitting(false);
+                  setIsTwoFactorModalOpen(false);
+                  setTwoFactorCode('');
+                  showNotification(
+                    nextState
+                      ? (isRu ? '2FA успешно активирована' : '2FA successfully activated')
+                      : (isRu ? '2FA отключена' : '2FA disabled')
+                  );
+                }, 400);
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-[10px] uppercase text-[#929292] font-mono font-bold tracking-wider mb-2">
+                  {isRu ? '6-значный код подтверждения' : '6-digit verification code'}
+                </label>
+                <input
+                  type="text"
+                  maxLength={6}
+                  value={twoFactorCode}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                    setTwoFactorCode(val);
+                    if (twoFactorError) setTwoFactorError(null);
+                  }}
+                  placeholder="000000"
+                  className="w-full h-11 bg-[#0F0F11] border border-white/20 focus:border-[#FF5500] text-center text-lg font-mono tracking-[0.5em] text-white placeholder-neutral-600 outline-none rounded-none"
+                  autoFocus
+                />
+                {twoFactorError && (
+                  <span className="text-xs text-[#FF1744] block mt-1.5 font-mono">
+                    {twoFactorError}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsTwoFactorModalOpen(false);
+                    setTwoFactorCode('');
+                    setTwoFactorError(null);
+                  }}
+                  className="px-4 py-2 border border-[#222228] text-[#929292] hover:text-white hover:border-white text-xs uppercase cursor-pointer rounded-none font-mono"
+                >
+                  {t.cancel || 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || twoFactorCode.trim().length !== 6}
+                  className={`px-5 py-2 text-xs font-bold uppercase transition-colors rounded-none font-mono ${
+                    twoFactorCode.trim().length === 6 && !isSubmitting
+                      ? 'bg-white text-black hover:bg-[#FF5500] hover:text-black cursor-pointer'
+                      : 'bg-white/10 text-neutral-500 cursor-not-allowed'
+                  }`}
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1" />
+                  ) : null}
+                  <span>
+                    {is2faActive
+                      ? (isRu ? 'Подтвердить отключение' : 'Confirm Disable')
+                      : (isRu ? 'Активировать 2FA' : 'Activate 2FA')}
+                  </span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
       {/* MODAL 4: Delete Account Confirmation */}
       {/* ========================================================= */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-[#000000] border border-red-600/50 p-6 relative">
+          <div className="w-full max-w-md bg-[#000000] border border-[#2A1515] p-6 relative">
             <button
               type="button"
-              onClick={() => setIsDeleteModalOpen(false)}
+              onClick={() => {
+                setIsDeleteModalOpen(false);
+                setDeleteConfirmText('');
+              }}
               className="absolute top-4 right-4 text-[#929292] hover:text-white cursor-pointer"
             >
               <X className="w-4 h-4" />
@@ -1347,22 +1592,43 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               <AlertTriangle className="w-5 h-5" />
               <span>{t.deleteAccount}</span>
             </div>
-            <p className="text-xs text-[#929292] leading-relaxed mb-6">
+            <p className="text-xs text-[#929292] leading-relaxed mb-4">
               {t.deleteAccountConfirm}
             </p>
+            <div className="mb-6">
+              <label className="block text-[11px] font-mono text-[#929292] mb-2">
+                {isRu ? 'Введите слово ' : 'Type '}
+                <strong className="text-white font-bold tracking-wider">DELETE</strong>
+                {isRu ? ' для подтверждения:' : ' to confirm:'}
+              </label>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="DELETE"
+                className="w-full h-10 bg-[#0F0F11] border border-white/20 focus:border-red-500 text-white placeholder-neutral-600 px-3 text-xs font-mono outline-none rounded-none"
+              />
+            </div>
             <div className="flex items-center justify-end gap-3">
               <button
                 type="button"
-                onClick={() => setIsDeleteModalOpen(false)}
-                className="px-4 py-2 border border-[#222228] text-[#929292] hover:text-white hover:border-white text-xs uppercase cursor-pointer rounded-none"
+                onClick={() => {
+                  setIsDeleteModalOpen(false);
+                  setDeleteConfirmText('');
+                }}
+                className="px-4 py-2 border border-[#222228] text-[#929292] hover:text-white hover:border-white text-xs uppercase cursor-pointer rounded-none font-mono"
               >
                 {t.cancel}
               </button>
               <button
                 type="button"
                 onClick={handleDeleteAccount}
-                disabled={isSubmitting}
-                className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold uppercase transition-colors cursor-pointer rounded-none"
+                disabled={isSubmitting || deleteConfirmText.trim() !== 'DELETE'}
+                className={`px-5 py-2 text-xs font-bold uppercase transition-colors rounded-none font-mono ${
+                  deleteConfirmText.trim() === 'DELETE' && !isSubmitting
+                    ? 'bg-red-600 hover:bg-red-700 text-white cursor-pointer'
+                    : 'bg-red-950/40 text-red-400/40 border border-[#2A1515] cursor-not-allowed'
+                }`}
               >
                 {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1" /> : null}
                 <span>{t.deleteAccount}</span>

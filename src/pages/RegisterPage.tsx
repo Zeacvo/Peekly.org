@@ -92,6 +92,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onGoHome, onNavigate
           widgetIdRef.current = window.turnstile.render('#turnstile-container', {
             sitekey: '0x4AAAAAAFqpQSJmI_csGCP9',
             theme: 'dark',
+            size: 'flexible',
             callback: (token: string) => {
               setTurnstileToken(token);
               setError(null);
@@ -507,14 +508,15 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onGoHome, onNavigate
         <h1 className="text-2xl font-black text-white text-center font-sans tracking-tight mb-1">
           Create Your Peekly Account
         </h1>
-        <p className="text-xs text-neutral-400 text-center mb-5 font-mono leading-relaxed">
+        <p className="text-xs font-mono text-[#71717A] text-center mb-5 leading-relaxed">
           One Peekly Account is all you need. Already have an account?{' '}
           <a
             href="/login"
             onClick={navigateToLogin}
-            className="text-white hover:text-[#FF5500] underline ml-1 cursor-pointer transition font-mono"
+            className="text-[#FFFFFF] hover:text-[#FF5500] font-semibold underline underline-offset-2 transition-colors whitespace-nowrap inline-flex items-center gap-1 cursor-pointer"
           >
-            Sign in ↗
+            <span>Sign in</span>
+            <span className="text-[11px] leading-none">↗</span>
           </a>
         </p>
 
@@ -523,17 +525,21 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onGoHome, onNavigate
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-sans text-xs font-semibold tracking-wide flex items-center justify-center gap-3 rounded-none transition cursor-pointer"
+            className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-sans text-xs font-semibold tracking-wide flex items-center justify-center rounded-none transition cursor-pointer"
           >
-            <GoogleLogo className="w-4 h-4" />
+            <div className="w-5 h-5 flex items-center justify-center shrink-0 mr-3">
+              <GoogleLogo className="w-4 h-4" />
+            </div>
             <span>Continue with Google</span>
           </button>
 
           <a
             href="/api/auth/faceit/login"
-            className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-sans text-xs font-semibold tracking-wide flex items-center justify-center gap-3 rounded-none transition cursor-pointer no-underline"
+            className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-sans text-xs font-semibold tracking-wide flex items-center justify-center rounded-none transition cursor-pointer no-underline"
           >
-            <FaceitLogo className="w-4 h-4" />
+            <div className="w-5 h-5 flex items-center justify-center shrink-0 mr-3">
+              <FaceitLogo className="w-4 h-4" fill="#FF5500" />
+            </div>
             <span>Continue with FACEIT</span>
           </a>
         </div>
@@ -721,43 +727,46 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onGoHome, onNavigate
             )}
           </div>
 
-          {/* Checkbox 1: Announcements & Updates (Clean Brutalist Black) */}
-          <div className="flex items-start gap-3 my-2 bg-black">
+          {/* Checkbox 1: Announcements & Updates */}
+          <label className="flex items-start gap-2.5 cursor-pointer select-none group my-2">
             <input
               type="checkbox"
               id="peekly-announcements"
               checked={newsletterOptIn}
               onChange={(e) => setNewsletterOptIn(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded-none bg-black border border-white/30 checked:bg-[#FF5500] checked:border-[#FF5500] focus:ring-0 cursor-pointer accent-[#FF5500]"
+              className="sr-only peer"
             />
-            <label
-              htmlFor="peekly-announcements"
-              className="text-xs text-neutral-300 select-none cursor-pointer leading-tight"
-            >
-              <span className="font-semibold text-white">Announcements & Updates.</span> Receive
-              product updates and CS2 analytics via email.
-            </label>
-          </div>
+            <div className="w-4 h-4 shrink-0 rounded-[2px] border border-[#27272A] bg-[#141416] peer-checked:bg-[#FF5500] peer-checked:border-[#FF5500] flex items-center justify-center transition-colors mt-0.5">
+              <svg className="w-2.5 h-2.5 text-black stroke-[3] fill-none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span className="text-xs font-mono text-[#A1A1AA] leading-tight">
+              <strong className="text-[#FFFFFF] font-bold">Announcements & Updates.</strong> Receive product updates and CS2 analytics via email.
+            </span>
+          </label>
 
-          {/* Checkbox 2: Terms & Privacy (Clean Brutalist Black) */}
-          <div className="flex items-start gap-3 my-2 bg-black">
+          {/* Checkbox 2: Terms & Privacy */}
+          <label className="flex items-start gap-2.5 cursor-pointer select-none group my-2">
             <input
               type="checkbox"
               id="terms-agree"
               checked={termsAgreed}
               onChange={(e) => setTermsAgreed(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded-none bg-black border border-white/30 checked:bg-[#FF5500] checked:border-[#FF5500] focus:ring-0 cursor-pointer accent-[#FF5500]"
+              className="sr-only peer"
             />
-            <label
-              htmlFor="terms-agree"
-              className="text-xs text-neutral-300 select-none cursor-pointer leading-tight"
-            >
+            <div className="w-4 h-4 shrink-0 rounded-[2px] border border-[#27272A] bg-[#141416] peer-checked:bg-[#FF5500] peer-checked:border-[#FF5500] flex items-center justify-center transition-colors mt-0.5">
+              <svg className="w-2.5 h-2.5 text-black stroke-[3] fill-none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span className="text-xs font-mono text-[#A1A1AA] leading-tight">
               I agree to the{' '}
               <a
                 href="/legal/terms"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white underline hover:text-[#FF5500] transition-colors"
+                className="text-[#FFFFFF] underline underline-offset-2 hover:text-[#FF5500]"
               >
                 Terms of Service
               </a>{' '}
@@ -766,17 +775,19 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onGoHome, onNavigate
                 href="/legal/privacy"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white underline hover:text-[#FF5500] transition-colors"
+                className="text-[#FFFFFF] underline underline-offset-2 hover:text-[#FF5500]"
               >
                 Privacy Policy
               </a>
               .
-            </label>
-          </div>
+            </span>
+          </label>
 
-          {/* Cloudflare Turnstile Human Verification Container (Theme: dark, Centered) */}
-          <div className="w-full flex justify-center items-center my-3 bg-black py-1">
-            <div id="turnstile-container" className="flex justify-center" />
+          {/* Cloudflare Turnstile Human Verification Container */}
+          <div className="w-full flex items-center justify-center border border-[#1A1A1F] bg-[#0D0D0E] py-2 px-3 my-3">
+            <div className="w-full [&>iframe]:!w-full [&>div]:!w-full flex justify-center">
+              <div id="turnstile-container" className="w-full flex justify-center items-center" data-size="flexible" />
+            </div>
           </div>
 
           {/* System Error Banner */}

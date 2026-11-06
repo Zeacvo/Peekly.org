@@ -179,17 +179,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
-                className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-sans text-xs font-semibold tracking-wide flex items-center justify-center gap-3 rounded-none transition cursor-pointer"
+                className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-sans text-xs font-semibold tracking-wide flex items-center justify-center rounded-none transition cursor-pointer"
               >
-                <GoogleLogo className="w-4 h-4" />
+                <div className="w-5 h-5 flex items-center justify-center shrink-0 mr-3">
+                  <GoogleLogo className="w-4 h-4" />
+                </div>
                 <span>Continue with Google</span>
               </button>
 
               <a
                 href="/api/auth/faceit/login"
-                className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-sans text-xs font-semibold tracking-wide flex items-center justify-center gap-3 rounded-none transition cursor-pointer no-underline"
+                className="w-full h-11 bg-black border border-white/20 hover:border-white/40 text-white font-sans text-xs font-semibold tracking-wide flex items-center justify-center rounded-none transition cursor-pointer no-underline"
               >
-                <FaceitLogo className="w-4 h-4" />
+                <div className="w-5 h-5 flex items-center justify-center shrink-0 mr-3">
+                  <FaceitLogo className="w-4 h-4" fill="#FF5500" />
+                </div>
                 <span>Continue with FACEIT</span>
               </a>
             </div>
@@ -234,9 +238,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 <a
                   href="/register"
                   onClick={navigateToRegister}
-                  className="text-xs text-neutral-400 hover:text-white transition font-mono cursor-pointer text-left no-underline"
+                  className="text-xs text-neutral-400 hover:text-white transition font-mono cursor-pointer text-left no-underline whitespace-nowrap inline-flex items-center gap-1"
                 >
-                  Create Your Peekly Account ↗
+                  <span>Create Your Peekly Account</span>
+                  <span className="text-[11px] leading-none">↗</span>
                 </a>
               </div>
 
