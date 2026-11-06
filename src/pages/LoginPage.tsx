@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, KeyRound } from 'lucide-react';
 import { PeeklyLogo } from '../components/PeeklyLogo';
 import { GoogleLogo, FaceitLogo, PrivacyIcon, ExclamationIcon } from '../components/AuthModal';
 import { isValidEmail } from '../../functions/api/utils/auth.ts';
 import type { Language } from '../translations';
 import { getAuthTranslations } from '../data/authTranslations';
+import { verifyTOTPToken } from '../utils/totp';
 
 interface LoginPageProps {
   currentLang?: Language;
@@ -20,9 +21,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   initialError,
 }) => {
   const t = getAuthTranslations(currentLang);
-  const [step, setStep] = useState<1 | 2>(1);
+  const isRu = currentLang === 'ru';
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [pendingSession, setPendingSession] = useState<any>(null);
+  const [pending2faSecret, setPending2faSecret] = useState<string>('');
   const [rememberMe, setRememberMe] = useState(true);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
@@ -86,16 +91,65 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        setError(data?.error || 'Invalid email or password.');
+        // Local-first dev fallback: support local testing when running Vite without Cloudflare D1
+        const storedAuth = localStorage.getItem('peekly_user') || localStorage.getItem('peekly_auth');
+        if (storedAuth) {
+          try {
+            const parsed = JSON.parse(storedAuth);
+            if (parsed.email?.toLowerCase() === cleanEmail) {
+              const is2faActive = Boolean(
+                parsed.twoFactorEnabled ||
+                localStorage.getItem('peekly_2fa') === 'true'
+              );
+              const secret = parsed.twoFactorSecret || localStorage.getItem('peekly_2fa_secret') || '';
+              if (is2faActive && secret) {
+                setPendingSession(parsed);
+                setPending2faSecret(secret);
+                setStep(3);
+                setTwoFactorCode('');
+                setIsLoading(false);
+                return;
+              } else {
+                localStorage.setItem('peekly_auth', JSON.stringify(parsed));
+                localStorage.setItem('peekly_user', JSON.stringify(parsed));
+                window.dispatchEvent(new Event('storage'));
+                window.dispatchEvent(new Event('peekly_user_updated'));
+                setIsLoading(false);
+                if (onGoHome) onGoHome(); else window.location.href = '/';
+                return;
+              }
+            }
+          } catch {}
+        }
+        setError(data?.error || (isRu ? 'Неверный адрес электронной почты или пароль.' : 'Invalid email or password.'));
         setIsLoading(false);
         return;
       }
 
       const sessionData = data.user;
+
+      // Check if 2FA is active for this account
+      const is2faActive = Boolean(
+        sessionData?.twoFactorEnabled ||
+        (localStorage.getItem('peekly_2fa') === 'true' &&
+         (cleanEmail === (JSON.parse(localStorage.getItem('peekly_user') || '{}').email?.toLowerCase() || 'zeacvo@icloud.com')))
+      );
+      const secret = sessionData?.twoFactorSecret || localStorage.getItem('peekly_2fa_secret') || '';
+
+      if (is2faActive && secret) {
+        setPendingSession(sessionData);
+        setPending2faSecret(secret);
+        setStep(3);
+        setTwoFactorCode('');
+        setIsLoading(false);
+        return;
+      }
+
       try {
         localStorage.setItem('peekly_auth', JSON.stringify(sessionData));
         localStorage.setItem('peekly_user', JSON.stringify(sessionData));
         window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new Event('peekly_user_updated'));
       } catch {}
 
       if (onGoHome) {
@@ -107,6 +161,47 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       setError(`Connection error: ${String(err)}`);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleVerify2FA = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (twoFactorCode.trim().length !== 6) {
+      setError(isRu ? 'Введите 6-значный код подтверждения' : 'Enter a 6-digit verification code');
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
+
+    const isValid = verifyTOTPToken(twoFactorCode, pending2faSecret);
+    if (!isValid) {
+      setIsLoading(false);
+      setError(
+        isRu
+          ? 'Неверный код подтверждения. Проверьте время на телефоне.'
+          : 'Invalid verification code. Check device clock.'
+      );
+      return;
+    }
+
+    const sessionData = pendingSession || {
+      nickname: email.split('@')[0],
+      email: email.trim().toLowerCase(),
+      twoFactorEnabled: true,
+    };
+
+    try {
+      localStorage.setItem('peekly_auth', JSON.stringify(sessionData));
+      localStorage.setItem('peekly_user', JSON.stringify(sessionData));
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new Event('peekly_user_updated'));
+    } catch {}
+
+    setIsLoading(false);
+    if (onGoHome) {
+      onGoHome();
+    } else {
+      window.location.href = '/';
     }
   };
 
@@ -375,6 +470,66 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               className="text-xs font-mono text-neutral-400 hover:text-white transition cursor-pointer text-center"
             >
               ← Back to email
+            </button>
+          </form>
+        )}
+
+        {/* STEP 3: 2FA TOTP VERIFICATION */}
+        {step === 3 && (
+          <form onSubmit={handleVerify2FA} noValidate className="w-full flex flex-col gap-4">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-10 h-10 border border-[#1A1A1F] bg-[#090909] flex items-center justify-center mb-3">
+                <KeyRound className="w-5 h-5 text-[#FF5500]" />
+              </div>
+              <h2 className="text-lg font-bold font-mono uppercase tracking-wider text-white mb-1">
+                {isRu ? 'Двухэтапная аутентификация' : 'Two-Factor Authentication'}
+              </h2>
+              <p className="text-xs font-mono text-[#929292] leading-relaxed max-w-[320px]">
+                {isRu
+                  ? 'Введите 6-значный код из Google Authenticator, Яндекс Ключ или Aegis'
+                  : 'Enter the 6-digit code from your authenticator app'}
+              </p>
+            </div>
+
+            <div>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                value={twoFactorCode}
+                onChange={(e) => {
+                  setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6));
+                  if (error) setError(null);
+                }}
+                autoFocus
+                placeholder="000000"
+                className="w-full h-12 bg-[#0F0F11] border border-white/20 focus:border-[#FF5500] text-center text-xl font-mono tracking-[0.5em] text-white placeholder-neutral-600 outline-none rounded-none"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading || twoFactorCode.trim().length !== 6}
+              className={`w-full h-11 rounded-none font-mono font-bold text-xs uppercase tracking-wider transition ${
+                isLoading || twoFactorCode.trim().length !== 6
+                  ? 'bg-white/20 text-neutral-400 cursor-not-allowed border-none shadow-none'
+                  : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
+              }`}
+            >
+              {isLoading ? t.pleaseWait : (isRu ? 'ПОДТВЕРДИТЬ И ВОЙТИ' : 'VERIFY & SIGN IN')}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setStep(2);
+                setError(null);
+                setTwoFactorCode('');
+              }}
+              className="text-xs font-mono text-neutral-400 hover:text-white transition cursor-pointer text-center"
+            >
+              ← {isRu ? 'Назад к паролю' : 'Back to password'}
             </button>
           </form>
         )}

@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import { FaceitLogo } from '../components/AuthModal';
 import { TwitchLogo } from '../components/icons/TwitchLogo';
 import { getUserAvatarUrl } from '../components/UserAvatar';
 import { DefaultUserAvatar } from '../components/DefaultUserAvatar';
+import { generateTOTP, verifyTOTPToken } from '../utils/totp';
 import {
   KeyRound,
   Laptop,
@@ -28,6 +30,8 @@ interface UserProfile {
   guid?: string;
   nickname: string;
   email?: string;
+  twoFactorEnabled?: boolean;
+  twoFactorSecret?: string;
   avatar?: string;
   avatar_url?: string;
   country?: string | null;
@@ -127,11 +131,51 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     if (typeof window !== 'undefined') {
       const local = localStorage.getItem('peekly_2fa');
       if (local !== null) return local === 'true';
+      const stored = localStorage.getItem('peekly_user') || localStorage.getItem('peekly_auth');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed?.twoFactorEnabled !== undefined) return Boolean(parsed.twoFactorEnabled);
+        } catch {}
+      }
     }
     return false;
   });
+  const [twoFactorSecret, setTwoFactorSecret] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const sec = localStorage.getItem('peekly_2fa_secret');
+      if (sec) return sec;
+      const stored = localStorage.getItem('peekly_user') || localStorage.getItem('peekly_auth');
+      if (stored) {
+        try {
+          return JSON.parse(stored)?.twoFactorSecret || '';
+        } catch {}
+      }
+    }
+    return '';
+  });
+  const [tempSecret, setTempSecret] = useState<string>('');
+  const [otpauthUri, setOtpauthUri] = useState<string>('');
   const [twoFactorCode, setTwoFactorCode] = useState('');
   const [twoFactorError, setTwoFactorError] = useState<string | null>(null);
+
+  // Sync 2FA modal setup data
+  useEffect(() => {
+    if (isTwoFactorModalOpen) {
+      setTwoFactorCode('');
+      setTwoFactorError(null);
+      if (!is2faActive) {
+        const userEmail = currentUser?.email || 'zeacvo@icloud.com';
+        const setup = generateTOTP(userEmail);
+        setTempSecret(setup.secret);
+        setOtpauthUri(setup.uri);
+      } else {
+        const activeSec = twoFactorSecret || localStorage.getItem('peekly_2fa_secret') || '';
+        setTempSecret(activeSec);
+        setOtpauthUri('');
+      }
+    }
+  }, [isTwoFactorModalOpen, is2faActive, currentUser?.email, twoFactorSecret]);
 
   // Danger Zone confirmation state
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
@@ -1472,34 +1516,45 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             <p className="text-xs text-[#929292] leading-relaxed mb-4">
               {is2faActive
                 ? (isRu
-                    ? 'Для отключения двухэтапной аутентификации введите 6-значный код из вашего приложения-аутентификатора (Google Authenticator, Apple Passwords или 1Password).'
+                    ? 'Для отключения двухэтапной аутентификации введите 6-значный код из вашего приложения-аутентификатора (Google Authenticator, Яндекс Ключ, Aegis или 1Password).'
                     : 'To disable two-factor authentication, enter the 6-digit code from your authenticator app.')
                 : (isRu
-                    ? 'Защитите свой аккаунт дополнительным уровнем безопасности. Введите 6-значный код подтверждения из вашего приложения-аутентификатора.'
-                    : 'Protect your account with an extra layer of security. Enter the 6-digit verification code from your authenticator app.')}
+                    ? 'Отсканируйте QR-код в приложении-аутентификаторе (Google Authenticator, Яндекс Ключ, Aegis или 1Password) или введите секретный ключ вручную, затем введите 6-значный код для активации.'
+                    : 'Scan the QR code with your authenticator app (Google Authenticator, Aegis, 1Password) or enter the secret key manually, then enter the 6-digit code to activate.')}
             </p>
 
-            {!is2faActive && (
-              <div className="mb-4 p-3 bg-[#090909] border border-[#1A1A1F] flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] uppercase text-[#929292] font-mono block">
-                    {isRu ? 'Секретный ключ' : 'Secret Key'}
-                  </span>
-                  <span className="font-mono text-xs text-white tracking-widest">
-                    PKLY-7749-CS2A-9821
-                  </span>
+            {!is2faActive && otpauthUri && (
+              <>
+                <div className="flex justify-center p-3 bg-white rounded-none mx-auto w-fit mb-4">
+                  <QRCodeSVG
+                    value={otpauthUri}
+                    size={160}
+                    level="M"
+                    includeMargin={false}
+                  />
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText('PKLY-7749-CS2A-9821');
-                    showNotification(isRu ? 'Ключ скопирован' : 'Key copied');
-                  }}
-                  className="px-2.5 py-1 text-[10px] font-mono border border-[#222228] text-[#929292] hover:text-white hover:border-white transition-colors cursor-pointer"
-                >
-                  {isRu ? 'Копировать' : 'Copy'}
-                </button>
-              </div>
+
+                <div className="mb-4 p-3 bg-[#090909] border border-[#1A1A1F] flex items-center justify-between">
+                  <div className="min-w-0 mr-3">
+                    <span className="text-[10px] uppercase text-[#929292] font-mono block">
+                      {isRu ? 'Секретный ключ (Base32)' : 'Secret Key (Base32)'}
+                    </span>
+                    <span className="font-mono text-xs text-white tracking-widest select-all break-all">
+                      {tempSecret.match(/.{1,4}/g)?.join(' ') || tempSecret}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(tempSecret);
+                      showNotification(isRu ? 'Ключ скопирован' : 'Key copied');
+                    }}
+                    className="shrink-0 px-2.5 py-1 text-[10px] font-mono border border-[#222228] text-[#929292] hover:text-white hover:border-white transition-colors cursor-pointer"
+                  >
+                    {isRu ? 'Копировать' : 'Copy'}
+                  </button>
+                </div>
+              </>
             )}
 
             <form
@@ -1512,21 +1567,77 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   return;
                 }
                 setIsSubmitting(true);
-                setTimeout(() => {
-                  const nextState = !is2faActive;
-                  setIs2faActive(nextState);
-                  if (typeof window !== 'undefined') {
-                    localStorage.setItem('peekly_2fa', String(nextState));
+
+                if (!is2faActive) {
+                  const isValid = verifyTOTPToken(twoFactorCode, tempSecret);
+                  if (isValid) {
+                    setIs2faActive(true);
+                    setTwoFactorSecret(tempSecret);
+                    if (typeof window !== 'undefined') {
+                      localStorage.setItem('peekly_2fa', 'true');
+                      localStorage.setItem('peekly_2fa_secret', tempSecret);
+                      try {
+                        const stored = localStorage.getItem('peekly_user') || localStorage.getItem('peekly_auth');
+                        if (stored) {
+                          const p = JSON.parse(stored);
+                          p.twoFactorEnabled = true;
+                          p.twoFactorSecret = tempSecret;
+                          localStorage.setItem('peekly_user', JSON.stringify(p));
+                          localStorage.setItem('peekly_auth', JSON.stringify(p));
+                        }
+                        window.dispatchEvent(new Event('peekly_user_updated'));
+                        window.dispatchEvent(new Event('storage'));
+                      } catch {}
+                    }
+                    setIsSubmitting(false);
+                    setIsTwoFactorModalOpen(false);
+                    setTwoFactorCode('');
+                    showNotification(
+                      isRu ? '2FA успешно активирована' : '2FA successfully activated'
+                    );
+                  } else {
+                    setIsSubmitting(false);
+                    setTwoFactorError(
+                      isRu
+                        ? 'Неверный код подтверждения. Проверьте время на телефоне.'
+                        : 'Invalid verification code. Check device clock.'
+                    );
                   }
-                  setIsSubmitting(false);
-                  setIsTwoFactorModalOpen(false);
-                  setTwoFactorCode('');
-                  showNotification(
-                    nextState
-                      ? (isRu ? '2FA успешно активирована' : '2FA successfully activated')
-                      : (isRu ? '2FA отключена' : '2FA disabled')
-                  );
-                }, 400);
+                } else {
+                  const secToVerify = twoFactorSecret || localStorage.getItem('peekly_2fa_secret') || '';
+                  const isValid = !secToVerify || verifyTOTPToken(twoFactorCode, secToVerify);
+                  if (isValid) {
+                    setIs2faActive(false);
+                    setTwoFactorSecret('');
+                    if (typeof window !== 'undefined') {
+                      localStorage.setItem('peekly_2fa', 'false');
+                      localStorage.removeItem('peekly_2fa_secret');
+                      try {
+                        const stored = localStorage.getItem('peekly_user') || localStorage.getItem('peekly_auth');
+                        if (stored) {
+                          const p = JSON.parse(stored);
+                          p.twoFactorEnabled = false;
+                          delete p.twoFactorSecret;
+                          localStorage.setItem('peekly_user', JSON.stringify(p));
+                          localStorage.setItem('peekly_auth', JSON.stringify(p));
+                        }
+                        window.dispatchEvent(new Event('peekly_user_updated'));
+                        window.dispatchEvent(new Event('storage'));
+                      } catch {}
+                    }
+                    setIsSubmitting(false);
+                    setIsTwoFactorModalOpen(false);
+                    setTwoFactorCode('');
+                    showNotification(isRu ? '2FA отключена' : '2FA disabled');
+                  } else {
+                    setIsSubmitting(false);
+                    setTwoFactorError(
+                      isRu
+                        ? 'Неверный код подтверждения. Проверьте время на телефоне.'
+                        : 'Invalid verification code. Check device clock.'
+                    );
+                  }
+                }
               }}
               className="space-y-4"
             >
