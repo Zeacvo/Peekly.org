@@ -3,10 +3,15 @@ import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { Features } from './components/Features';
 import { Footer } from './components/Footer';
-import { AuthModal } from './components/AuthModal';
-import { ProfilePage } from './pages/ProfilePage';
 import { getSafeInitialLanguage, saveLanguagePreference } from './translations';
 import type { Language } from './translations';
+
+const AuthModal = lazy(() =>
+  import('./components/AuthModal').then((m) => ({ default: m.AuthModal }))
+);
+const ProfilePage = lazy(() =>
+  import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage }))
+);
 
 const FeatureDetailPage = lazy(() =>
   import('./components/FeatureDetailPage').then((m) => ({ default: m.FeatureDetailPage }))
@@ -584,18 +589,22 @@ export const App: React.FC = () => {
       )}
 
       {/* Apple-Style Authentication Modal */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        currentLang={currentLang}
-        initialError={authErrorParam}
-        onClose={() => {
-          setIsAuthModalOpen(false);
-          setAuthErrorParam(null);
-        }}
-        onLoginSuccess={() => {
-          // User session established; keep user in current flow
-        }}
-      />
+      {isAuthModalOpen && (
+        <Suspense fallback={null}>
+          <AuthModal
+            isOpen={isAuthModalOpen}
+            currentLang={currentLang}
+            initialError={authErrorParam}
+            onClose={() => {
+              setIsAuthModalOpen(false);
+              setAuthErrorParam(null);
+            }}
+            onLoginSuccess={() => {
+              // User session established; keep user in current flow
+            }}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };
