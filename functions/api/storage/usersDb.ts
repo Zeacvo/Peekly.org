@@ -179,9 +179,10 @@ export async function getAllPlayers(env: Record<string, unknown> | undefined): P
         for (const raw of res.results) {
           const row = raw as Record<string, unknown>;
           const email = String(row.email || '').trim().toLowerCase();
-          const nickname = String(row.faceit_nickname || row.nickname || 'Unknown');
+          const nickname = String(row.nickname || row.faceit_nickname || 'Unknown');
           const isCeo =
             nickname.toLowerCase() === 'zeacvo' ||
+            nickname.toLowerCase() === 'zeacvo123' ||
             email === 'zeacvo@icloud.com' ||
             row.role === 'OWNER' ||
             row.role === 'CEO';
@@ -427,7 +428,6 @@ export async function getPlayerById(
     all.find(
       (p) =>
         p.guid.toLowerCase() === target ||
-        p.email.toLowerCase() === target ||
         p.nickname.toLowerCase() === target
     ) || null
   );

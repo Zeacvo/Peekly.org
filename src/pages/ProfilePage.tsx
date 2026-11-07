@@ -973,7 +973,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 {/* Nickname & Network Status */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
                   <h1 className="text-lg font-bold font-mono text-[#FFFFFF] tracking-normal truncate">
-                    {displayUser?.nickname || 'Zeacvo'}
+                    {displayUser?.nickname || (isLoadingTarget ? '...' : '')}
                   </h1>
 
                   {/* Статус онлайн */}
@@ -1030,7 +1030,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       {isFaceitLinked ? (
                         <a
                           href={`https://www.faceit.com/en/players/${encodeURIComponent(
-                            displayUser?.faceit_nickname || displayUser?.faceitNickname || displayUser?.nickname || 'Zeacvo'
+                            displayUser?.faceit_nickname || displayUser?.faceitNickname || displayUser?.nickname || ''
                           )}`}
                           target="_blank"
                           rel="noopener noreferrer"

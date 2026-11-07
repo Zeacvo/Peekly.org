@@ -52,9 +52,9 @@ export const onRequestGet = async (context: EventContext): Promise<Response> => 
           .prepare(
             `SELECT id, nickname, email, role, created_at, avatar_url, country, level, elo, faceit_id, faceit_nickname
              FROM users
-             WHERE LOWER(nickname) = LOWER(?) OR LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?) OR LOWER(faceit_id) = LOWER(?)`
+             WHERE LOWER(nickname) = LOWER(?) OR LOWER(id) = LOWER(?)`
           )
-          .bind(target, target, target, target)
+          .bind(target, target)
           .first<{
             id: string;
             nickname: string;
@@ -72,6 +72,7 @@ export const onRequestGet = async (context: EventContext): Promise<Response> => 
         if (row) {
           const isOwner =
             row.nickname.toLowerCase() === 'zeacvo' ||
+            row.nickname.toLowerCase() === 'zeacvo123' ||
             row.email.toLowerCase() === 'zeacvo@icloud.com' ||
             row.role?.toUpperCase() === 'OWNER' ||
             row.role?.toUpperCase() === 'CEO';
@@ -100,6 +101,12 @@ export const onRequestGet = async (context: EventContext): Promise<Response> => 
             }
           );
         }
+
+        // If D1 is connected and no user matches this slug/id, return 404 immediately
+        return new Response(JSON.stringify({ error: 'Player not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        });
       } catch (err) {
         console.error('D1 slug lookup error:', err);
       }

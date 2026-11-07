@@ -372,7 +372,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onOpenAuthModal}
-              className="inline-flex items-center justify-center text-center h-11 px-6 rounded-none bg-black text-white hover:border-white border border-[#222228] font-sans text-sm font-bold tracking-normal transition-colors shrink-0 cursor-pointer focus-visible:ring-1 focus-visible:ring-white leading-none box-border"
+              className="inline-flex items-center justify-center text-center h-11 px-6 rounded-none bg-black text-white hover:border-white border border-[#222228] font-sans text-base font-extrabold tracking-normal transition-colors shrink-0 cursor-pointer focus-visible:ring-1 focus-visible:ring-white leading-none box-border"
               title={authT.signInTitle}
             >
               <span>{authT.nav_sign_in}</span>
@@ -387,7 +387,7 @@ export const Header: React.FC<HeaderProps> = ({
               aria-expanded={installDropdownOpen}
               aria-haspopup="menu"
               aria-label="Install extension options"
-              className="inline-flex items-center justify-center text-center h-11 px-6 rounded-none btn-header-install font-sans text-sm font-bold tracking-normal cursor-pointer active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white leading-none box-border"
+              className="inline-flex items-center justify-center text-center h-11 px-6 rounded-none btn-header-install font-sans text-base font-extrabold tracking-normal cursor-pointer active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white leading-none box-border"
             >
               <span>{t.nav.install}</span>
             </button>
