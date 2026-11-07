@@ -220,80 +220,81 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right: Navigation, Auth & Install CTA */}
         <div className="flex items-center gap-3 sm:gap-4 md:gap-5 shrink-0">
-          {/* Changelog Link */}
-          <button
-            type="button"
-            onClick={() => {
-              if (onOpenChangelog) onOpenChangelog();
-            }}
-            className="group inline-flex items-center gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
-            aria-label={t.nav.changelog}
-          >
-            <span className="font-mono text-white flex items-center leading-none">
-              <span>&gt;</span>
-              <span className="inline-block text-white animate-terminal-blink">_</span>
-            </span>
-            <span className="hidden sm:inline text-neutral-400 group-hover:text-white transition-colors leading-none">
-              {t.nav.changelog}
-            </span>
-          </button>
-
-          {/* Language Selector */}
-          <div className="relative inline-flex items-center shrink-0" ref={dropdownRef}>
+          {/* Sub-container containing [История версий], [Язык], [Аватарка]: Dropdown spans from > to end of avatar */}
+          <div className="relative flex items-center gap-3 sm:gap-4 md:gap-5 shrink-0" ref={userDropdownRef}>
+            {/* Changelog Link */}
             <button
               type="button"
-              onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+              onClick={() => {
+                if (onOpenChangelog) onOpenChangelog();
+              }}
               className="group inline-flex items-center gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
-              aria-label="Select language"
-              aria-expanded={langDropdownOpen}
-              aria-haspopup="listbox"
+              aria-label={t.nav.changelog}
             >
-              <LanguageIcon className="w-3.5 h-3.5 text-neutral-400 group-hover:text-white transition-colors shrink-0" />
-              <span className="sm:hidden font-mono uppercase font-medium leading-none">{currentLangObj.code}</span>
-              <span className="hidden sm:inline leading-none">{currentLangObj.name}</span>
-              <ChevronDown
-                className={`w-3 h-3 shrink-0 text-neutral-500 group-hover:text-white transition-transform duration-150 ${
-                  langDropdownOpen ? 'rotate-180' : ''
-                }`}
-              />
+              <span className="font-mono text-white flex items-center leading-none">
+                <span>&gt;</span>
+                <span className="inline-block text-white animate-terminal-blink">_</span>
+              </span>
+              <span className="hidden sm:inline text-neutral-400 group-hover:text-white transition-colors leading-none">
+                {t.nav.changelog}
+              </span>
             </button>
 
-            {/* Language dropdown menu */}
-            {langDropdownOpen && (
-              <div
-                role="listbox"
-                className="absolute right-0 top-full mt-2 w-max bg-[#090909] border border-[#1A1A1F] rounded-none shadow-2xl flex flex-col z-50"
+            {/* Language Selector */}
+            <div className="relative inline-flex items-center shrink-0" ref={dropdownRef}>
+              <button
+                type="button"
+                onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+                className="group inline-flex items-center gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
+                aria-label="Select language"
+                aria-expanded={langDropdownOpen}
+                aria-haspopup="listbox"
               >
-                {SUPPORTED_LANGUAGES.map((lang) => {
-                  const isSelected = currentLang === lang.code;
-                  return (
-                    <button
-                      key={lang.code}
-                      role="option"
-                      aria-selected={isSelected}
-                      type="button"
-                      onClick={() => {
-                        onLanguageChange(lang.code);
-                        setLangDropdownOpen(false);
-                      }}
-                      className={`w-full text-left px-3.5 py-2 font-sans text-xs md:text-[13px] leading-none whitespace-nowrap rounded-none transition-colors duration-150 border-0 cursor-pointer ${
-                        isSelected
-                          ? 'bg-white/[0.12] text-white font-medium'
-                          : 'bg-transparent text-neutral-400 font-normal hover:bg-white/[0.08] hover:text-white'
-                      }`}
-                    >
-                      {lang.name}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-            <span className="sr-only" aria-hidden="true" />
-          </div>
+                <LanguageIcon className="w-3.5 h-3.5 text-neutral-400 group-hover:text-white transition-colors shrink-0" />
+                <span className="sm:hidden font-mono uppercase font-medium leading-none">{currentLangObj.code}</span>
+                <span className="hidden sm:inline leading-none">{currentLangObj.name}</span>
+                <ChevronDown
+                  className={`w-3 h-3 shrink-0 text-neutral-500 group-hover:text-white transition-transform duration-150 ${
+                    langDropdownOpen ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
 
-          {/* User Profile Trigger & Dropdown */}
-          {userSession ? (
-            <div className="relative inline-flex items-center shrink-0" ref={userDropdownRef}>
+              {/* Language dropdown menu */}
+              {langDropdownOpen && (
+                <div
+                  role="listbox"
+                  className="absolute right-0 top-full mt-2 w-max bg-[#090909] border border-[#1A1A1F] rounded-none shadow-2xl flex flex-col z-50"
+                >
+                  {SUPPORTED_LANGUAGES.map((lang) => {
+                    const isSelected = currentLang === lang.code;
+                    return (
+                      <button
+                        key={lang.code}
+                        role="option"
+                        aria-selected={isSelected}
+                        type="button"
+                        onClick={() => {
+                          onLanguageChange(lang.code);
+                          setLangDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-3.5 py-2 font-sans text-xs md:text-[13px] leading-none whitespace-nowrap rounded-none transition-colors duration-150 border-0 cursor-pointer ${
+                          isSelected
+                            ? 'bg-white/[0.12] text-white font-medium'
+                            : 'bg-transparent text-neutral-400 font-normal hover:bg-white/[0.08] hover:text-white'
+                        }`}
+                      >
+                        {lang.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              <span className="sr-only" aria-hidden="true" />
+            </div>
+
+            {/* User Profile Trigger & Dropdown */}
+            {userSession ? (
               <button
                 type="button"
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
@@ -304,80 +305,79 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <UserAvatar user={userSession} size={20} className="w-5 h-5 text-[#FFFFFF]" imgClassName="w-full h-full object-cover" />
               </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onOpenAuthModal}
+                className="inline-flex items-center justify-center text-center h-11 px-6 rounded-none bg-black text-white hover:border-white border border-[#222228] font-sans text-[15px] font-semibold tracking-normal transition-colors shrink-0 cursor-pointer focus-visible:ring-1 focus-visible:ring-white leading-none box-border"
+                title={authT.signInTitle}
+              >
+                <span>{authT.nav_sign_in}</span>
+              </button>
+            )}
 
-              {/* User Dropdown Menu */}
-              {userDropdownOpen && (
-                <div
-                  role="menu"
-                  aria-label="User Account Options"
-                  className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-[#090909] border border-[#1A1A1F] rounded-none shadow-2xl p-4 flex flex-col gap-3.5 z-50 animate-fade-in"
-                >
-                  {/* Profile Header */}
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-none bg-[#000000] border border-[#222228] overflow-hidden shrink-0 flex items-center justify-center">
-                      <UserAvatar user={userSession} size={20} className="w-5 h-5 text-[#FFFFFF]" imgClassName="w-full h-full object-cover" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="font-bold text-white text-sm truncate leading-snug">
-                        {userSession.nickname}
-                      </div>
-                    </div>
+            {/* User Dropdown Menu spanning from >_ История версий to end of avatar */}
+            {userSession && userDropdownOpen && (
+              <div
+                role="menu"
+                aria-label="User Account Options"
+                className="absolute left-0 right-0 top-full mt-2 bg-[#090909] border border-[#1A1A1F] rounded-none shadow-2xl p-4 flex flex-col gap-3 z-50 animate-fade-in"
+              >
+                {/* Profile Header */}
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-none bg-[#000000] border border-[#222228] overflow-hidden shrink-0 flex items-center justify-center">
+                    <UserAvatar user={userSession} size={18} className="w-4.5 h-4.5 text-[#FFFFFF]" imgClassName="w-full h-full object-cover" />
                   </div>
-
-                  {/* Navigation Links: Exactly 2 Actions */}
-                  <div className="flex flex-col gap-2">
-                    {/* 1. My Profile (White Button) */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setUserDropdownOpen(false);
-                        const stored = getStoredUser();
-                        const profileSlug = stored?.nickname || userSession?.nickname || stored?.id || userSession?.id;
-                        if (onOpenProfile) {
-                          onOpenProfile(profileSlug);
-                        } else {
-                          try {
-                            const targetUrl = profileSlug ? `/id/${encodeURIComponent(profileSlug)}/` : '/profile';
-                            history.pushState(null, '', targetUrl);
-                            window.dispatchEvent(new CustomEvent('peekly:navigate'));
-                            window.dispatchEvent(new PopStateEvent('popstate'));
-                          } catch {
-                            window.location.href = profileSlug ? `/id/${encodeURIComponent(profileSlug)}/` : '/profile';
-                          }
-                        }
-                      }}
-                      className="btn-brand-interactive h-10 gap-2"
-                    >
-                      <DefaultUserAvatar size={14} className="w-3.5 h-3.5 shrink-0" />
-                      <span>{isRu ? 'Мой профиль' : 'My profile'}</span>
-                    </button>
-
-                    {/* 2. Sign Out (Gray Button) */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setUserDropdownOpen(false);
-                        handleLogout();
-                      }}
-                      className="btn-brand-signout h-10"
-                    >
-                      <span>{isRu ? 'Выйти из аккаунта' : 'Sign out'}</span>
-                    </button>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-semibold text-white text-sm truncate leading-snug">
+                      {userSession.nickname}
+                    </div>
                   </div>
                 </div>
-              )}
-              <span className="sr-only" aria-hidden="true" />
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={onOpenAuthModal}
-              className="inline-flex items-center justify-center text-center h-11 px-6 rounded-none bg-black text-white hover:border-white border border-[#222228] font-sans text-base font-extrabold tracking-normal transition-colors shrink-0 cursor-pointer focus-visible:ring-1 focus-visible:ring-white leading-none box-border"
-              title={authT.signInTitle}
-            >
-              <span>{authT.nav_sign_in}</span>
-            </button>
-          )}
+
+                {/* Navigation Links: Exactly 2 Actions */}
+                <div className="flex flex-col gap-2">
+                  {/* 1. My Profile (White Button) */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      const stored = getStoredUser();
+                      const profileSlug = stored?.nickname || userSession?.nickname || stored?.id || userSession?.id;
+                      if (onOpenProfile) {
+                        onOpenProfile(profileSlug);
+                      } else {
+                        try {
+                          const targetUrl = profileSlug ? `/id/${encodeURIComponent(profileSlug)}/` : '/profile';
+                          history.pushState(null, '', targetUrl);
+                          window.dispatchEvent(new CustomEvent('peekly:navigate'));
+                          window.dispatchEvent(new PopStateEvent('popstate'));
+                        } catch {
+                          window.location.href = profileSlug ? `/id/${encodeURIComponent(profileSlug)}/` : '/profile';
+                        }
+                      }
+                    }}
+                    className="btn-brand-interactive h-10 gap-2 font-semibold text-sm"
+                  >
+                    <DefaultUserAvatar size={14} className="w-3.5 h-3.5 shrink-0" />
+                    <span>{isRu ? 'Мой профиль' : 'My profile'}</span>
+                  </button>
+
+                  {/* 2. Sign Out (Gray Button) */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      handleLogout();
+                    }}
+                    className="btn-brand-signout h-10 font-medium text-sm"
+                  >
+                    <span>{isRu ? 'Выйти из аккаунта' : 'Sign out'}</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Install Extension CTA Button & Dropdown */}
           <div className="relative inline-flex items-center shrink-0" ref={installDropdownRef}>
@@ -387,17 +387,17 @@ export const Header: React.FC<HeaderProps> = ({
               aria-expanded={installDropdownOpen}
               aria-haspopup="menu"
               aria-label="Install extension options"
-              className="inline-flex items-center justify-center text-center h-11 px-6 rounded-none btn-header-install font-sans text-base font-extrabold tracking-normal cursor-pointer active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white leading-none box-border"
+              className="inline-flex items-center justify-center text-center h-11 px-6 rounded-none btn-header-install font-sans text-[15px] font-semibold tracking-normal cursor-pointer active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white leading-none box-border"
             >
               <span>{t.nav.install}</span>
             </button>
 
-            {/* Browser Install Dropdown Menu */}
+            {/* Browser Install Dropdown Menu - EXACTLY matching width and position of button */}
             {installDropdownOpen && (
               <div
                 role="menu"
                 aria-label="Supported Browsers"
-                className="absolute right-0 top-full mt-2 w-52 sm:w-56 bg-[#090909] border border-[#1A1A1F] rounded-none shadow-2xl flex flex-col py-1 z-50"
+                className="absolute left-0 right-0 top-full mt-2 w-full min-w-full bg-[#090909] border border-[#1A1A1F] rounded-none shadow-2xl flex flex-col py-1 z-50"
               >
                 {BROWSERS.map((browser) => (
                   <a
@@ -407,10 +407,10 @@ export const Header: React.FC<HeaderProps> = ({
                     rel="noopener noreferrer"
                     role="menuitem"
                     onClick={() => setInstallDropdownOpen(false)}
-                    className="group flex items-center gap-3 px-3.5 py-2.5 text-white font-bold text-[13px] tracking-wide bg-transparent hover:bg-white/[0.08] transition-colors duration-100 cursor-pointer no-underline select-none rounded-none"
+                    className="group flex items-center gap-3 px-3.5 py-2.5 text-white/90 font-medium text-[13px] tracking-normal bg-transparent hover:bg-white/[0.08] hover:text-white transition-colors duration-100 cursor-pointer no-underline select-none rounded-none"
                   >
-                    <span className="text-white group-hover:text-[#FF5500] transition-colors duration-100 shrink-0 flex items-center justify-center">
-                      {browser.icon('w-[22px] h-[22px] shrink-0 fill-current')}
+                    <span className="text-white/80 group-hover:text-[#FF5500] transition-colors duration-100 shrink-0 flex items-center justify-center">
+                      {browser.icon('w-[20px] h-[20px] shrink-0 fill-current')}
                     </span>
                     <span className="truncate">{browser.name}</span>
                   </a>
