@@ -331,22 +331,22 @@ export const Header: React.FC<HeaderProps> = ({
                       type="button"
                       onClick={() => {
                         setUserDropdownOpen(false);
-                        const profileId = userSession.id;
-                        if (onOpenProfile) onOpenProfile(profileId);
+                        const profileSlug = userSession.nickname || userSession.id;
+                        if (onOpenProfile) onOpenProfile(profileSlug);
                         else {
                           try {
-                            const targetUrl = profileId ? `/profile?id=${encodeURIComponent(profileId)}` : '/profile';
+                            const targetUrl = profileSlug ? `/id/${encodeURIComponent(profileSlug)}/` : '/profile';
                             history.pushState(null, '', targetUrl);
                             window.dispatchEvent(new PopStateEvent('popstate'));
                           } catch {
-                            window.location.href = profileId ? `/profile?id=${encodeURIComponent(profileId)}` : '/profile';
+                            window.location.href = profileSlug ? `/id/${encodeURIComponent(profileSlug)}/` : '/profile';
                           }
                         }
                       }}
                       className="btn-brand-interactive h-10 gap-2"
                     >
                       <DefaultUserAvatar size={14} className="w-3.5 h-3.5 shrink-0" />
-                      <span>{isRu ? 'МОЙ ПРОФИЛЬ' : 'MY PROFILE'}</span>
+                      <span>{isRu ? 'Мой профиль' : 'My profile'}</span>
                     </button>
 
                     {/* 2. Sign Out (Gray Button) */}
@@ -358,7 +358,7 @@ export const Header: React.FC<HeaderProps> = ({
                       }}
                       className="btn-brand-signout h-10"
                     >
-                      <span>{isRu ? 'ВЫЙТИ ИЗ АККАУНТА' : 'SIGN OUT'}</span>
+                      <span>{isRu ? 'Выйти из аккаунта' : 'Sign out'}</span>
                     </button>
                   </div>
                 </div>

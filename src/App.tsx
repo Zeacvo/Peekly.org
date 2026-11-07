@@ -418,7 +418,10 @@ export const App: React.FC = () => {
     setIsRegister(false);
     setIsProfile(true);
     try {
-      history.pushState(null, '', guid ? `/profile?id=${encodeURIComponent(guid)}` : '/profile');
+      const targetUrl = guid
+        ? (guid.includes('-') ? `/profile?id=${encodeURIComponent(guid)}` : `/id/${encodeURIComponent(guid)}/`)
+        : '/profile';
+      history.pushState(null, '', targetUrl);
     } catch {}
     try {
       window.scrollTo({ top: 0, behavior: 'smooth' });

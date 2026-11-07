@@ -11,6 +11,7 @@ export interface ProfileTranslation {
 
   // Persona Card
   online: string;
+  offline?: string;
   memberSince: string;
   ownerBadge: string;
   freeBadge: string;
@@ -102,7 +103,8 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     checkingAuth: 'Завантаження профілю...',
 
     online: 'В мережі',
-    memberSince: 'У лавах з',
+    offline: 'Не в мережі',
+    memberSince: 'Зареєстрований',
     ownerBadge: 'OWNER',
     freeBadge: 'FREE TIER',
     adminConsole: 'КОНСОЛЬ АДМІНІСТРАТОРА ↗',
@@ -178,10 +180,11 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     checkingAuth: 'Загрузка профиля...',
 
     online: 'В сети',
-    memberSince: 'В рядах с',
+    offline: 'Не в сети',
+    memberSince: 'Зарегистрирован',
     ownerBadge: 'OWNER',
     freeBadge: 'FREE TIER',
-    adminConsole: 'КОНСОЛЬ АДМИНИСТРАТОРА ↗',
+    adminConsole: 'Консоль администратора ↗',
     changeAvatar: 'Изменить аватар',
     removeAvatar: 'Удалить фото',
     avatarModalTitle: 'Ссылка на аватар',
@@ -199,39 +202,39 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     region: 'Регион',
     verified: 'Подтверждён',
     notLinked: 'Не привязан',
-    profileId: 'ID ПРОФИЛЯ',
-    copyProfileLink: 'СКОПИРОВАТЬ ССЫЛКУ',
-    linkCopied: 'СКОПИРОВАНО!',
+    profileId: 'ID профиля',
+    copyProfileLink: 'Скопировать ссылку',
+    linkCopied: 'Скопировано!',
 
-    credentialsTitle: 'УЧЕТНЫЕ ДАННЫЕ',
-    nicknameLabel: 'НИКНЕЙМ ИГРОКА',
-    changeNickname: 'ИЗМЕНИТЬ НИКНЕЙМ',
-    emailLabel: 'ОСНОВНОЙ EMAIL',
-    changeEmail: 'ИЗМЕНИТЬ EMAIL',
+    credentialsTitle: 'Учетные данные',
+    nicknameLabel: 'Никнейм игрока',
+    changeNickname: 'Изменить никнейм',
+    emailLabel: 'Основной email',
+    changeEmail: 'Изменить email',
 
-    securityTitle: 'ПАРОЛЬ И БЕЗОПАСНОСТЬ',
-    passwordLabel: 'ПАРОЛЬ',
-    changePassword: 'ИЗМЕНИТЬ ПАРОЛЬ',
+    securityTitle: 'Пароль и безопасность',
+    passwordLabel: 'Пароль',
+    changePassword: 'Изменить пароль',
 
-    sessionsTitle: 'АКТИВНЫЕ СЕССИИ',
-    currentDevice: 'ТЕКУЩЕЕ УСТРОЙСТВО',
+    sessionsTitle: 'Активные сессии',
+    currentDevice: 'Текущее устройство',
     currentDeviceDesc: 'Chrome (Windows) • Активно сейчас',
     activeNow: 'Активно сейчас',
-    terminateOtherSessions: 'ЗАВЕРШИТЬ ВСЕ ДРУГИЕ СЕАНСЫ',
+    terminateOtherSessions: 'Завершить все другие сеансы',
     sessionsTerminatedSuccess: 'Все остальные сеансы успешно завершены.',
 
-    dangerZoneTitle: 'ОПАСНАЯ ЗОНА',
+    dangerZoneTitle: 'Опасная зона',
     dangerZoneSubtitle: 'Необратимые действия с учётной записью',
-    deleteAccount: 'УДАЛИТЬ АККАУНТ',
-    deleteAccountBtn: 'УДАЛИТЬ АККАУНТ',
+    deleteAccount: 'Удалить аккаунт',
+    deleteAccountBtn: 'Удалить аккаунт',
     deleteAccountWarning: 'Удаление вашего аккаунта приведет к безвозвратному удалению всех данных.',
     deleteAccountConfirm: 'Вы уверены, что хотите удалить аккаунт? Это действие необратимо.',
 
-    twoFactorTitle: 'ДВУХЭТАПНАЯ АУТЕНТИФИКАЦИЯ (2FA)',
-    twoFactorDisabled: 'ОТКЛЮЧЕНА',
-    twoFactorActive: 'ВКЛЮЧЕНА',
-    twoFactorConfigure: 'НАСТРОИТЬ',
-    twoFactorDisable: 'ОТКЛЮЧИТЬ',
+    twoFactorTitle: 'Двухэтапная аутентификация (2FA)',
+    twoFactorDisabled: 'Отключена',
+    twoFactorActive: 'Включена',
+    twoFactorConfigure: 'Настроить',
+    twoFactorDisable: 'Отключить',
     removePhoto: 'Удалить',
 
     save: 'Сохранить',
@@ -262,7 +265,8 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     checkingAuth: 'Loading profile...',
 
     online: 'Online',
-    memberSince: 'Member since',
+    offline: 'Offline',
+    memberSince: 'Registered',
     ownerBadge: 'OWNER',
     freeBadge: 'FREE TIER',
     adminConsole: 'ADMIN CONSOLE ↗',
@@ -421,7 +425,8 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     checkingAuth: 'Ładowanie profilu...',
 
     online: 'Online',
-    memberSince: 'W szeregach od',
+    offline: 'Offline',
+    memberSince: 'Zarejestrowany',
     ownerBadge: 'OWNER',
     freeBadge: 'FREE TIER',
     adminConsole: 'KONSOLA ADMINISTRATORA ↗',

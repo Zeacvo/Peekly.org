@@ -13,6 +13,9 @@ import { onRequest as onAuthLoginRequest } from './functions/api/auth/login.ts';
 import { onRequest as onAuthMeRequest } from './functions/api/auth/me.ts';
 import { onRequest as onAuthLogoutRequest } from './functions/api/auth/logout.ts';
 import { onRequest as onGoogleCallbackRequest } from './functions/api/auth/callback/google.ts';
+import { onRequestGet as onBySlugRequest } from './functions/api/users/by-slug/[slug].ts';
+import { onRequestPost as onUpdateProfileRequest } from './functions/api/auth/update-profile.ts';
+import { onRequestPost as onDeleteAccountRequest } from './functions/api/auth/delete-account.ts';
 
 function loadDevVars(): Record<string, string> {
   const vars: Record<string, string> = {};
@@ -62,7 +65,10 @@ function faceitOAuthDevPlugin(): Plugin {
           url.pathname === '/api/auth/login' ||
           url.pathname === '/api/auth/me' ||
           url.pathname === '/api/auth/logout' ||
-          url.pathname === '/api/auth/callback/google'
+          url.pathname === '/api/auth/callback/google' ||
+          url.pathname === '/api/auth/update-profile' ||
+          url.pathname === '/api/auth/delete-account' ||
+          url.pathname.startsWith('/api/users/by-slug/')
         ) {
           try {
             const fullUrl = `http://localhost:5173${req.url}`;
@@ -112,6 +118,13 @@ function faceitOAuthDevPlugin(): Plugin {
               response = await onAuthLogoutRequest({ request: webReq, env: {} });
             } else if (url.pathname === '/api/auth/callback/google') {
               response = await onGoogleCallbackRequest({ request: webReq, env: loadDevVars() });
+            } else if (url.pathname === '/api/auth/update-profile') {
+              response = await onUpdateProfileRequest({ request: webReq, env: {} });
+            } else if (url.pathname === '/api/auth/delete-account') {
+              response = await onDeleteAccountRequest({ request: webReq, env: {} });
+            } else if (url.pathname.startsWith('/api/users/by-slug/')) {
+              const slug = decodeURIComponent(url.pathname.replace('/api/users/by-slug/', ''));
+              response = await onBySlugRequest({ request: webReq, params: { slug }, env: {} });
             } else {
               response = await onCallbackRequest({ request: webReq });
             }

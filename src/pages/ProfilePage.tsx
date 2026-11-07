@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { FaceitLogo } from '../components/AuthModal';
 import { TwitchLogo } from '../components/icons/TwitchLogo';
@@ -15,9 +15,30 @@ import {
   X,
   Loader2,
   ArrowLeft,
+  Trash2,
 } from 'lucide-react';
 import type { Language } from '../translations';
 import { profileTranslations } from '../data/profileTranslations';
+
+function getDeviceInfo(): { browser: string; os: string } {
+  if (typeof navigator === 'undefined') return { browser: 'Chrome', os: 'Windows' };
+  const ua = navigator.userAgent;
+  let browser = 'Chrome';
+  if (ua.includes('Firefox')) browser = 'Firefox';
+  else if (ua.includes('Edg/')) browser = 'Edge';
+  else if (ua.includes('OPR/') || ua.includes('Opera')) browser = 'Opera';
+  else if (ua.includes('YaBrowser')) browser = 'Yandex';
+  else if (ua.includes('Brave')) browser = 'Brave';
+  else if (ua.includes('Safari') && !ua.includes('Chrome')) browser = 'Safari';
+
+  let os = 'Windows';
+  if (ua.includes('Mac OS') || ua.includes('Macintosh')) os = 'macOS';
+  else if (ua.includes('Linux')) os = 'Linux';
+  else if (ua.includes('Android')) os = 'Android';
+  else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+
+  return { browser, os };
+}
 
 interface ProfilePageProps {
   currentLang?: Language;
@@ -106,7 +127,21 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(getStoredUser);
   const [targetUser, setTargetUser] = useState<UserProfile | null>(null);
-  const [isViewOnly, setIsViewOnly] = useState<boolean>(false);
+  const [isViewOnly, setIsViewOnly] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    const path = window.location.pathname;
+    const match = path.match(/^\/id\/([^/?#]+)/) || path.match(/^\/profile\/([^/?#]+)/);
+    if (!match) return false;
+    const slug = decodeURIComponent(match[1]).toLowerCase();
+    const stored = getStoredUser();
+    if (!stored) return true;
+    const ownNick = stored.nickname?.toLowerCase();
+    const ownId = (stored.id || stored.guid)?.toLowerCase();
+    if (ownNick && ownNick === slug) return false;
+    if (ownId && ownId === slug) return false;
+    if (slug === 'zeacvo' && (ownNick === 'zeacvo' || stored.role?.toUpperCase() === 'OWNER')) return false;
+    return true;
+  });
   const [isLoadingTarget, setIsLoadingTarget] = useState<boolean>(false);
   const [targetNotFound, setTargetNotFound] = useState<boolean>(false);
 
@@ -287,6 +322,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  const isCurrentOwner =
+    currentUser?.nickname?.toLowerCase() === 'zeacvo' ||
+    currentUser?.email?.toLowerCase() === 'zeacvo@icloud.com' ||
+    currentUser?.role?.toUpperCase() === 'OWNER' ||
+    currentUser?.role?.toUpperCase() === 'CEO';
+
   // Inspect query params for public view: /profile?id=... or /profile?userId=...
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -311,10 +352,17 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       const currentNickname = currentUser?.nickname;
       const currentId = currentUser?.id || currentUser?.guid;
 
-      if (
+      const isOwnProfile = Boolean(
         (currentNickname && currentNickname.toLowerCase() === cleanId.toLowerCase()) ||
-        (currentId && currentId.toLowerCase() === cleanId.toLowerCase())
-      ) {
+        (currentId && currentId.toLowerCase() === cleanId.toLowerCase()) ||
+        (isCurrentOwner && (
+          cleanId.toLowerCase() === 'zeacvo' ||
+          cleanId.toLowerCase().startsWith('zeacvo') ||
+          cleanId.toLowerCase() === (currentNickname?.toLowerCase() ?? '')
+        ))
+      );
+
+      if (isOwnProfile) {
         // Viewing own profile
         setIsViewOnly(false);
         setTargetUser(null);
@@ -354,43 +402,58 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       setIsViewOnly(false);
       setTargetUser(null);
     }
-  }, [currentUser, locationSearch]);
+  }, [currentUser, locationSearch, isCurrentOwner]);
 
   // Dynamic Profile URL Auto-Sync:
-  // When an authenticated user visits /profile or /id without slug, auto-populate /id/<Nickname>/
+  // When an authenticated user visits /profile or /id without slug, or their own profile with different casing/old alias
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (currentUser?.nickname && !isViewOnly) {
       const currentPath = window.location.pathname;
       const targetPath = `/id/${encodeURIComponent(currentUser.nickname)}/`;
-      if (
+      const isBareProfile =
         currentPath === '/profile' ||
-        currentPath.startsWith('/profile') ||
+        currentPath === '/profile/' ||
         currentPath === '/id' ||
-        currentPath === '/id/'
-      ) {
+        currentPath === '/id/';
+
+      const slugMatch = currentPath.match(/^\/id\/([^/?#]+)/);
+      const isOwnSlug = slugMatch && (
+        decodeURIComponent(slugMatch[1]).toLowerCase() === currentUser.nickname.toLowerCase() ||
+        (isCurrentOwner && decodeURIComponent(slugMatch[1]).toLowerCase() === 'zeacvo')
+      );
+
+      if (isBareProfile || isOwnSlug) {
         if (currentPath !== targetPath) {
           window.history.replaceState({ path: targetPath }, '', targetPath);
           setLocationSearch('');
         }
       }
     }
-  }, [currentUser?.nickname, isViewOnly]);
+  }, [currentUser?.nickname, isViewOnly, isCurrentOwner]);
 
   // Display user: either targetUser (if public view) or currentUser
   const displayUser: UserProfile | null = isViewOnly ? targetUser : currentUser;
 
-  const isOwner =
-    displayUser?.nickname?.toLowerCase() === 'zeacvo' ||
-    displayUser?.email?.toLowerCase() === 'zeacvo@icloud.com' ||
-    displayUser?.role?.toUpperCase() === 'OWNER' ||
-    displayUser?.role?.toUpperCase() === 'CEO';
-
-  const isCurrentOwner =
-    currentUser?.nickname?.toLowerCase() === 'zeacvo' ||
-    currentUser?.email?.toLowerCase() === 'zeacvo@icloud.com' ||
-    currentUser?.role?.toUpperCase() === 'OWNER' ||
-    currentUser?.role?.toUpperCase() === 'CEO';
+  const isOnline = useMemo(() => {
+    if (!isViewOnly) return true;
+    if (
+      currentUser?.nickname &&
+      displayUser?.nickname &&
+      currentUser.nickname.toLowerCase() === displayUser.nickname.toLowerCase()
+    ) {
+      return true;
+    }
+    const lastSeen =
+      (displayUser as any)?.last_seen ||
+      (displayUser as any)?.lastSeen ||
+      (displayUser as any)?.updated_at;
+    if (lastSeen) {
+      const diffMs = Date.now() - new Date(lastSeen).getTime();
+      return diffMs >= 0 && diffMs < 5 * 60 * 1000;
+    }
+    return false;
+  }, [isViewOnly, currentUser?.nickname, displayUser]);
 
   const isFaceitLinked = Boolean(
     displayUser?.faceit_connected ||
@@ -436,32 +499,64 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     );
   };
 
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {}
+    localStorage.removeItem('peekly_user');
+    localStorage.removeItem('peekly_auth');
+    localStorage.removeItem('peekly_token');
+    document.cookie = 'peekly_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0;';
+    document.cookie = 'peekly_user=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0;';
+    document.cookie = 'peekly_auth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0;';
+    window.dispatchEvent(new Event('peekly_user_updated'));
+    window.dispatchEvent(new Event('storage'));
+    if (onGoHome) onGoHome();
+    else window.location.href = '/';
+  };
+
   // Handlers for Account Management
   const handleUpdateNickname = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newNickname.trim()) return;
+    const cleanNick = newNickname.trim();
+    if (!cleanNick) return;
     setIsSubmitting(true);
     try {
       const res = await fetch('/api/auth/update-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nickname: newNickname.trim() }),
+        body: JSON.stringify({ nickname: cleanNick }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
         showNotification(data.error || 'Failed to update nickname', true);
       } else {
-        setCurrentUser((prev) => (prev ? { ...prev, nickname: newNickname.trim() } : prev));
+        setCurrentUser((prev) => (prev ? { ...prev, nickname: cleanNick } : prev));
         try {
           const stored = localStorage.getItem('peekly_user');
           if (stored) {
             const parsed = JSON.parse(stored);
-            parsed.nickname = newNickname.trim();
+            parsed.nickname = cleanNick;
             localStorage.setItem('peekly_user', JSON.stringify(parsed));
           }
+          const storedAuth = localStorage.getItem('peekly_auth');
+          if (storedAuth) {
+            const parsed = JSON.parse(storedAuth);
+            parsed.nickname = cleanNick;
+            localStorage.setItem('peekly_auth', JSON.stringify(parsed));
+          }
+          document.cookie = `peekly_user=${encodeURIComponent(
+            JSON.stringify({ ...(stored ? JSON.parse(stored) : {}), nickname: cleanNick })
+          )}; path=/; max-age=31536000`;
           window.dispatchEvent(new Event('peekly_user_updated'));
           window.dispatchEvent(new Event('storage'));
         } catch {}
+
+        // Immediately update URL to /id/<cleanNick>/
+        const targetPath = `/id/${encodeURIComponent(cleanNick)}/`;
+        window.history.replaceState({ path: targetPath }, '', targetPath);
+        setLocationSearch('');
+
         setIsNicknameModalOpen(false);
         showNotification(t.successUpdated);
       }
@@ -790,37 +885,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
       {/* Main Container strictly aligned with max-w-7xl grid */}
       <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pt-28">
-        {/* Public View Header Banner (if viewing other user) */}
-        {isViewOnly && (
-          <div className="bg-[#090909] border border-[#1A1A1F] p-4 sm:p-5 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse shrink-0" />
-              <div>
-                <h2 className="text-xs font-black tracking-widest uppercase text-white">
-                  {t.publicProfileTitle}
-                </h2>
-                <p className="text-xs text-[#929292] mt-0.5">
-                  {t.viewOnlyNotice}
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={onGoHome}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 border border-[#1A1A1F] hover:border-white text-xs font-bold uppercase text-[#929292] hover:text-white transition-colors rounded-none shrink-0"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>{t.backHome}</span>
-            </button>
-          </div>
-        )}
-
-        {/* 2-Column Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Layout: Centered single card when isViewOnly, 2-column grid when private settings */}
+        <div className={isViewOnly ? "max-w-md mx-auto w-full space-y-6" : "grid grid-cols-1 lg:grid-cols-12 gap-8"}>
           {/* ========================================================= */}
-          {/* LEFT COLUMN (lg:col-span-4): Persona Card */}
+          {/* Persona Card */}
           {/* ========================================================= */}
-          <div className={`${isViewOnly ? 'lg:col-span-5' : 'lg:col-span-4'} space-y-6`}>
+          <div className={isViewOnly ? "w-full space-y-6" : "lg:col-span-4 space-y-6"}>
             <div className="bg-[#090909] border border-[#1A1A1F] p-6 relative overflow-hidden">
               {/* Persona Header: Avatar + Nickname + Status */}
               <div className="flex items-start gap-4 mb-5">
@@ -900,9 +970,13 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   {/* Статус онлайн */}
                   <div className="flex items-center gap-2 text-xs font-mono text-[#929292]">
                     <div className="w-3.5 h-3.5 flex items-center justify-center shrink-0">
-                      <span className="w-2 h-2 rounded-full bg-[#929292] shrink-0" />
+                      <span
+                        className={`w-2 h-2 rounded-full shrink-0 ${
+                          isOnline ? 'bg-white animate-pulse' : 'bg-[#555555]'
+                        }`}
+                      />
                     </div>
-                    <span className="leading-none">{t.online}</span>
+                    <span className="leading-none">{isOnline ? t.online : (t.offline || 'Не в сети')}</span>
                   </div>
 
                   {/* Дата регистрации */}
@@ -927,77 +1001,83 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 </div>
               </div>
 
-              {/* Integrations Stack: FACEIT, Twitch */}
-              <div className="flex flex-col gap-2 mt-4">
-                {/* 1. FACEIT */}
-                <div className="flex items-center justify-between p-2.5 bg-[#000000] border border-[#1A1A1F] rounded-none">
-                  <div className="flex items-center gap-2.5">
-                    <FaceitLogo className="w-4 h-4 text-[#FF5500]" />
-                    <div className="flex flex-col">
-                      <span className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
-                        FACEIT
-                      </span>
-                      <span className="font-mono text-[10px] text-[#929292]">
-                        {isFaceitLinked ? (t.connected || 'Connected') : (t.notConnected || 'Not connected')}
-                      </span>
+              {/* Integrations Stack: FACEIT, Twitch (hidden in public view if neither connected) */}
+              {(!isViewOnly || isFaceitLinked || isTwitchConnected) && (
+                <div className="flex flex-col gap-2 mt-4">
+                  {/* 1. FACEIT */}
+                  {(!isViewOnly || isFaceitLinked) && (
+                    <div className="flex items-center justify-between p-2.5 bg-[#000000] border border-[#1A1A1F] rounded-none">
+                      <div className="flex items-center gap-2.5">
+                        <FaceitLogo className="w-4 h-4 text-[#FF5500]" />
+                        <div className="flex flex-col">
+                          <span className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
+                            FACEIT
+                          </span>
+                          <span className="font-mono text-[10px] text-[#929292]">
+                            {isFaceitLinked ? (t.connected || 'Connected') : (t.notConnected || 'Not connected')}
+                          </span>
+                        </div>
+                      </div>
+                      {isFaceitLinked ? (
+                        <a
+                          href={`https://www.faceit.com/en/players/${encodeURIComponent(
+                            displayUser?.faceit_nickname || displayUser?.faceitNickname || displayUser?.nickname || 'Zeacvo'
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-7 h-7 flex items-center justify-center border border-[#222228] text-[#929292] hover:text-[#000000] hover:bg-[#FF5500] hover:border-[#FF5500] transition-colors rounded-none"
+                          title="Open FACEIT profile"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      ) : !isViewOnly ? (
+                        <a
+                          href="/api/auth/faceit/login"
+                          className="px-3 py-1 text-[10px] font-mono font-medium tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
+                        >
+                          {t.connect || (isRu ? 'Подключить' : 'Connect')}
+                        </a>
+                      ) : null}
                     </div>
-                  </div>
-                  {isFaceitLinked ? (
-                    <a
-                      href={`https://www.faceit.com/en/players/${encodeURIComponent(
-                        displayUser?.faceit_nickname || displayUser?.faceitNickname || displayUser?.nickname || 'Zeacvo'
-                      )}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-7 h-7 flex items-center justify-center border border-[#222228] text-[#929292] hover:text-[#000000] hover:bg-[#FF5500] hover:border-[#FF5500] transition-colors rounded-none"
-                      title="Open FACEIT profile"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  ) : (
-                    <a
-                      href="/api/auth/faceit/login"
-                      className="px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
-                    >
-                      {t.connect || (isRu ? 'Подключить' : 'Connect')}
-                    </a>
                   )}
-                </div>
 
-                {/* 2. TWITCH */}
-                <div className="flex items-center justify-between p-2.5 bg-[#000000] border border-[#1A1A1F] rounded-none">
-                  <div className="flex items-center gap-2.5">
-                    <TwitchLogo className="w-4 h-4" />
-                    <div className="flex flex-col">
-                      <span className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
-                        TWITCH
-                      </span>
-                      <span className="font-mono text-[10px] text-[#929292]">
-                        {isTwitchConnected ? (t.connected || 'Connected') : (t.notConnected || 'Not connected')}
-                      </span>
+                  {/* 2. TWITCH */}
+                  {(!isViewOnly || isTwitchConnected) && (
+                    <div className="flex items-center justify-between p-2.5 bg-[#000000] border border-[#1A1A1F] rounded-none">
+                      <div className="flex items-center gap-2.5">
+                        <TwitchLogo className="w-4 h-4" />
+                        <div className="flex flex-col">
+                          <span className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
+                            TWITCH
+                          </span>
+                          <span className="font-mono text-[10px] text-[#929292]">
+                            {isTwitchConnected ? (t.connected || 'Connected') : (t.notConnected || 'Not connected')}
+                          </span>
+                        </div>
+                      </div>
+                      {isTwitchConnected ? (
+                        <a
+                          href={`https://twitch.tv/${encodeURIComponent(twitchUsername!)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-7 h-7 flex items-center justify-center border border-[#222228] text-[#929292] hover:text-[#000000] hover:bg-[#FF5500] hover:border-[#FF5500] transition-colors rounded-none"
+                          title="Open Twitch Channel"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      ) : !isViewOnly ? (
+                        <button
+                          type="button"
+                          onClick={handleConnectTwitch}
+                          className="px-3 py-1 text-[10px] font-mono font-medium tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
+                        >
+                          {t.connect || (isRu ? 'Подключить' : 'Connect')}
+                        </button>
+                      ) : null}
                     </div>
-                  </div>
-                  {isTwitchConnected ? (
-                    <a
-                      href={`https://twitch.tv/${encodeURIComponent(twitchUsername!)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-7 h-7 flex items-center justify-center border border-[#222228] text-[#929292] hover:text-[#000000] hover:bg-[#FF5500] hover:border-[#FF5500] transition-colors rounded-none"
-                      title="Open Twitch Channel"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleConnectTwitch}
-                      className="px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
-                    >
-                      {t.connect || (isRu ? 'Подключить' : 'Connect')}
-                    </button>
                   )}
                 </div>
-              </div>
+              )}
 
               {/* Owner / Admin Console Button (only for Owner and not view-only) */}
               {!isViewOnly && isCurrentOwner && (
@@ -1015,7 +1095,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           {/* ========================================================= */}
           {/* RIGHT COLUMN (lg:col-span-8): Apple-Style Account Settings */}
           {/* ========================================================= */}
-          {!isViewOnly ? (
+          {!isViewOnly && (
             <div className="lg:col-span-8 space-y-6">
               {/* Card 1: Account Credentials */}
               <div className="bg-[#090909] border border-[#1A1A1F] p-6">
@@ -1152,25 +1232,38 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               {/* Card 3: Active Sessions */}
               <div className="bg-[#090909] border border-[#1A1A1F] p-6">
                 <div className="mb-4">
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                  <h2 className="text-xs font-bold tracking-wider text-white flex items-center gap-2">
                     <Laptop className="w-3.5 h-3.5 text-[#929292]" />
                     <span>{t.sessionsTitle}</span>
                   </h2>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-[#929292]" />
-                    <div>
-                      <span className="text-sm font-bold text-white block">
-                        {t.currentDevice}
-                      </span>
-                      <span className="text-xs text-[#929292]">
-                        {t.currentDeviceDesc}
-                      </span>
+                {(() => {
+                  const deviceInfo = getDeviceInfo();
+                  return (
+                    <div className="flex items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3 mb-4">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-2 h-2 rounded-full bg-white shrink-0 animate-pulse" />
+                        <div className="min-w-0">
+                          <span className="text-sm font-bold text-white block truncate">
+                            {t.currentDevice}
+                          </span>
+                          <span className="text-xs text-[#929292] block truncate">
+                            {deviceInfo.browser} ({deviceInfo.os}) • {t.activeNow || (isRu ? 'Активно сейчас' : 'Active now')}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="w-8 h-8 flex items-center justify-center border border-[#1A1A1F] text-[#929292] hover:text-[#EF4444] hover:border-[#EF4444] transition-colors rounded-none shrink-0 cursor-pointer"
+                        title={isRu ? 'Выйти из этого сеанса' : 'Sign out of this session'}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-                  </div>
-                </div>
+                  );
+                })()}
 
                 <button
                   type="button"
@@ -1188,12 +1281,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               {/* Card 4: Danger Zone */}
               <div className="bg-[#090909] border border-[#EF4444] p-6">
                 <div className="mb-4">
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-[#EF4444] flex items-center gap-2">
+                  <h2 className="text-xs font-bold tracking-wider text-[#EF4444] flex items-center gap-2">
                     <AlertTriangle className="w-3.5 h-3.5 text-[#EF4444]" />
-                    <span>{t.dangerZoneTitle || (isRu ? 'ОПАСНАЯ ЗОНА' : 'DANGER ZONE')}</span>
+                    <span>{t.dangerZoneTitle || (isRu ? 'Опасная зона' : 'Danger Zone')}</span>
                   </h2>
                   <p className="text-xs text-[#929292] mt-1 leading-relaxed">
-                    {t.deleteAccountWarning || (isRu ? 'Безвозвратное удаление вашего аккаунта и всех связанных данных.' : 'Permanently delete your account and all associated data.')}
+                    {t.deleteAccountWarning || (isRu ? 'Удаление вашего аккаунта приведет к безвозвратному удалению всех данных.' : 'Permanently delete your account and all associated data.')}
                   </p>
                 </div>
 
@@ -1203,41 +1296,10 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     setDeleteConfirmText('');
                     setIsDeleteModalOpen(true);
                   }}
-                  className="h-10 px-4 text-xs font-mono font-bold tracking-wider text-[#EF4444] border border-[#EF4444] bg-[#EF4444]/10 hover:bg-[#EF4444] hover:text-[#FFFFFF] transition-all cursor-pointer rounded-none"
+                  className="h-10 px-4 text-xs font-mono font-medium tracking-wider text-[#EF4444] border border-[#EF4444] bg-[#EF4444]/10 hover:bg-[#EF4444] hover:text-[#FFFFFF] transition-all cursor-pointer rounded-none"
                 >
-                  {t.deleteAccountBtn || t.deleteAccount || (isRu ? 'УДАЛИТЬ АККАУНТ' : 'DELETE ACCOUNT')}
+                  {t.deleteAccountBtn || t.deleteAccount || (isRu ? 'Удалить аккаунт' : 'Delete account')}
                 </button>
-              </div>
-            </div>
-          ) : (
-            /* Public View Summary Card */
-            <div className="lg:col-span-7 space-y-6">
-              <div className="bg-[#090909] border border-[#1A1A1F] p-6">
-                <div className="mb-4">
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-white">
-                    {t.publicProfileTitle}
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                  <div className="p-4 bg-[#000000] border border-[#1A1A1F]">
-                    <span className="text-[10px] uppercase text-[#929292] font-bold block mb-1">
-                      {t.region}
-                    </span>
-                    <span className="text-white font-bold">
-                      {displayUser?.country || 'BY'}
-                    </span>
-                  </div>
-
-                  <div className="p-4 bg-[#000000] border border-[#1A1A1F]">
-                    <span className="text-[10px] uppercase text-[#929292] font-bold block mb-1">
-                      {t.profileId}
-                    </span>
-                    <span className="text-[#929292] font-bold">
-                      {isOwner ? t.ownerBadge : t.freeBadge}
-                    </span>
-                  </div>
-                </div>
               </div>
             </div>
           )}
@@ -1257,7 +1319,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             >
               <X className="w-4 h-4" />
             </button>
-            <h3 className="text-base font-bold text-white uppercase mb-4">
+            <h3 className="text-base font-bold text-white mb-4">
               {t.changeNickname}
             </h3>
             <form onSubmit={handleUpdateNickname} className="space-y-4">
@@ -1279,14 +1341,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsNicknameModalOpen(false)}
-                  className="px-4 py-2 border border-[#222228] text-[#929292] hover:text-white hover:border-white text-xs uppercase cursor-pointer rounded-none"
+                  className="px-4 py-2 border border-[#222228] text-[#929292] hover:text-white hover:border-white text-xs cursor-pointer rounded-none"
                 >
                   {t.cancel}
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 bg-white text-black text-xs font-bold uppercase hover:bg-neutral-200 transition-colors cursor-pointer rounded-none"
+                  className="px-5 py-2 bg-white text-black text-xs font-bold hover:bg-neutral-200 transition-colors cursor-pointer rounded-none"
                 >
                   {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1" /> : null}
                   <span>{t.save}</span>
@@ -1310,7 +1372,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             >
               <X className="w-4 h-4" />
             </button>
-            <h3 className="text-base font-bold text-white uppercase mb-4">
+            <h3 className="text-base font-bold text-white mb-4">
               {t.changeEmail}
             </h3>
 
@@ -1333,14 +1395,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   <button
                     type="button"
                     onClick={() => setIsEmailModalOpen(false)}
-                    className="px-4 py-2 border border-[#222228] text-[#929292] hover:text-white hover:border-white text-xs uppercase cursor-pointer rounded-none"
+                    className="px-4 py-2 border border-[#222228] text-[#929292] hover:text-white hover:border-white text-xs cursor-pointer rounded-none"
                   >
                     {t.cancel}
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-5 py-2 bg-white text-black text-xs font-bold uppercase hover:bg-neutral-200 transition-colors cursor-pointer rounded-none"
+                    className="px-5 py-2 bg-white text-black text-xs font-bold hover:bg-neutral-200 transition-colors cursor-pointer rounded-none"
                   >
                     {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1" /> : null}
                     <span>{t.sendCode}</span>
@@ -1386,14 +1448,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsEmailModalOpen(false)}
-                      className="px-4 py-2 border border-[#222228] text-[#929292] hover:text-white hover:border-white text-xs uppercase cursor-pointer rounded-none"
+                      className="px-4 py-2 border border-[#222228] text-[#929292] hover:text-white hover:border-white text-xs cursor-pointer rounded-none"
                     >
                       {t.cancel}
                     </button>
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="px-5 py-2 bg-white text-black text-xs font-bold uppercase hover:bg-neutral-200 transition-colors cursor-pointer rounded-none"
+                      className="px-5 py-2 bg-white text-black text-xs font-bold hover:bg-neutral-200 transition-colors cursor-pointer rounded-none"
                     >
                       {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1" /> : null}
                       <span>{t.verifyAndSave}</span>
@@ -1419,7 +1481,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             >
               <X className="w-4 h-4" />
             </button>
-            <h3 className="text-base font-bold text-white uppercase mb-4">
+            <h3 className="text-base font-bold text-white mb-4">
               {t.changePassword}
             </h3>
             <form onSubmit={handleChangePassword} className="space-y-4">
@@ -1468,14 +1530,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsPasswordModalOpen(false)}
-                  className="px-4 py-2 border border-[#222228] text-[#929292] hover:text-white hover:border-white text-xs uppercase cursor-pointer rounded-none"
+                  className="px-4 py-2 border border-[#222228] text-[#929292] hover:text-white hover:border-white text-xs cursor-pointer rounded-none"
                 >
                   {t.cancel}
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 bg-white text-black text-xs font-bold uppercase hover:bg-neutral-200 transition-colors cursor-pointer rounded-none"
+                  className="px-5 py-2 bg-white text-black text-xs font-bold hover:bg-neutral-200 transition-colors cursor-pointer rounded-none"
                 >
                   {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1" /> : null}
                   <span>{t.save}</span>
@@ -1504,12 +1566,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               <X className="w-4 h-4" />
             </button>
 
-            <div className="flex items-center gap-2.5 text-white font-bold text-sm uppercase mb-3 font-mono">
+            <div className="flex items-center gap-2.5 text-white font-bold text-sm mb-3 font-mono">
               <KeyRound className="w-4 h-4 text-[#FF5500]" />
               <span>
                 {is2faActive
-                  ? (isRu ? 'ОТКЛЮЧЕНИЕ 2FA' : 'DISABLE 2FA')
-                  : (isRu ? 'НАСТРОЙКА 2FA' : 'SETUP 2FA')}
+                  ? (isRu ? 'Отключение 2FA' : 'Disable 2FA')
+                  : (isRu ? 'Настройка 2FA' : 'Setup 2FA')}
               </span>
             </div>
 
@@ -1673,14 +1735,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     setTwoFactorCode('');
                     setTwoFactorError(null);
                   }}
-                  className="px-4 py-2 border border-[#222228] text-[#929292] hover:text-white hover:border-white text-xs uppercase cursor-pointer rounded-none font-mono"
+                  className="px-4 py-2 border border-[#222228] text-[#929292] hover:text-white hover:border-white text-xs cursor-pointer rounded-none font-mono"
                 >
                   {t.cancel || 'Cancel'}
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting || twoFactorCode.trim().length !== 6}
-                  className={`px-5 py-2 text-xs font-bold uppercase transition-colors rounded-none font-mono ${
+                  className={`px-5 py-2 text-xs font-bold transition-colors rounded-none font-mono ${
                     twoFactorCode.trim().length === 6 && !isSubmitting
                       ? 'bg-white text-black hover:bg-[#FF5500] hover:text-black cursor-pointer'
                       : 'bg-white/10 text-neutral-500 cursor-not-allowed'
@@ -1717,24 +1779,24 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             >
               <X className="w-4 h-4" />
             </button>
-            <div className="flex items-center gap-2 text-[#EF4444] font-bold text-sm uppercase mb-3">
+            <div className="flex items-center gap-2 text-[#EF4444] font-bold text-sm mb-3">
               <AlertTriangle className="w-5 h-5 text-[#EF4444]" />
-              <span>{t.deleteAccount}</span>
+              <span>{t.deleteAccount || (isRu ? 'Удалить аккаунт' : 'Delete account')}</span>
             </div>
             <p className="text-xs text-[#929292] leading-relaxed mb-4">
-              {t.deleteAccountConfirm}
+              {t.deleteAccountConfirm || (isRu ? 'Вы уверены, что хотите удалить аккаунт? Это действие необратимо.' : 'Are you sure you want to delete your account? This action cannot be undone.')}
             </p>
             <div className="mb-6">
               <label className="block text-[11px] font-mono text-[#929292] mb-2">
-                {isRu ? 'Введите слово ' : 'Type '}
-                <strong className="text-white font-bold tracking-wider">DELETE</strong>
+                {isRu ? 'Введите ваш никнейм ' : 'Type your nickname '}
+                <strong className="text-white font-bold tracking-wider">{currentUser?.nickname || 'nickname'}</strong>
                 {isRu ? ' для подтверждения:' : ' to confirm:'}
               </label>
               <input
                 type="text"
                 value={deleteConfirmText}
                 onChange={(e) => setDeleteConfirmText(e.target.value)}
-                placeholder="DELETE"
+                placeholder={currentUser?.nickname || 'nickname'}
                 className="w-full h-10 bg-[#0F0F11] border border-white/20 focus:border-[#EF4444] text-white placeholder-neutral-600 px-3 text-xs font-mono outline-none rounded-none"
               />
             </div>
@@ -1745,22 +1807,22 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   setIsDeleteModalOpen(false);
                   setDeleteConfirmText('');
                 }}
-                className="px-4 py-2 border border-[#222228] text-[#929292] hover:text-white hover:border-white text-xs uppercase cursor-pointer rounded-none font-mono"
+                className="px-4 py-2 border border-[#222228] text-[#929292] hover:text-white hover:border-white text-xs cursor-pointer rounded-none font-mono"
               >
-                {t.cancel}
+                {t.cancel || (isRu ? 'Отмена' : 'Cancel')}
               </button>
               <button
                 type="button"
                 onClick={handleDeleteAccount}
-                disabled={isSubmitting || deleteConfirmText.trim() !== 'DELETE'}
-                className={`px-5 py-2 text-xs font-bold uppercase transition-colors rounded-none font-mono ${
-                  deleteConfirmText.trim() === 'DELETE' && !isSubmitting
+                disabled={isSubmitting || deleteConfirmText.trim() !== (currentUser?.nickname || '')}
+                className={`px-5 py-2 text-xs font-bold transition-colors rounded-none font-mono ${
+                  deleteConfirmText.trim() === (currentUser?.nickname || '') && !isSubmitting
                     ? 'bg-[#EF4444] hover:bg-red-600 text-white cursor-pointer'
                     : 'bg-[#EF4444]/10 text-[#EF4444]/40 border border-[#EF4444]/30 cursor-not-allowed'
                 }`}
               >
                 {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1" /> : null}
-                <span>{t.deleteAccount}</span>
+                <span>{t.deleteAccount || (isRu ? 'Удалить аккаунт' : 'Delete account')}</span>
               </button>
             </div>
           </div>
