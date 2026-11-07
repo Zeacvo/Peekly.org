@@ -41,6 +41,7 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
     }
 
     const body = (await request.json().catch(() => ({}))) as {
+      action?: string;
       nickname?: string;
       avatar?: string;
       userId?: string;
@@ -185,6 +186,48 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
       });
     }
 
+    if (body.action === 'disconnect_faceit') {
+      if (db) {
+        await db
+          .prepare(
+            `UPDATE users 
+             SET faceit_id = NULL, faceit_nickname = NULL, elo = NULL, level = NULL
+             WHERE id = ?`
+          )
+          .bind(userId)
+          .run();
+      } else {
+        const u = memoryAuthUsers.get(userId);
+        if (u) {
+          (u as any).faceit_id = null;
+          (u as any).faceit_nickname = null;
+          (u as any).elo = null;
+          (u as any).level = null;
+        }
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: 'FACEIT disconnected successfully.',
+          user: {
+            ...currentUser,
+            id: userId,
+            faceit_connected: false,
+            faceit_disconnected: true,
+            faceit_id: null,
+            faceit_nickname: null,
+            elo: null,
+            level: null,
+          },
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        }
+      );
+    }
+
     let updatedNickname = currentUser.nickname;
     let updatedAvatar = currentUser.avatar_url;
 
@@ -246,12 +289,14 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
     }
 
     const isFaceitLinked = Boolean(
-      currentUser.faceit_id ||
-      currentUser.faceit_nickname ||
-      currentUser.elo ||
-      currentUser.email?.toLowerCase() === 'zeacvo@icloud.com' ||
-      currentUser.nickname?.toLowerCase().includes('zeacvo') ||
-      updatedNickname.toLowerCase().includes('zeacvo')
+      (currentUser as any).faceit_disconnected
+        ? false
+        : currentUser.faceit_id ||
+          currentUser.faceit_nickname ||
+          currentUser.elo ||
+          currentUser.email?.toLowerCase() === 'zeacvo@icloud.com' ||
+          currentUser.nickname?.toLowerCase().includes('zeacvo') ||
+          updatedNickname.toLowerCase().includes('zeacvo')
     );
 
     const responseUser = {
@@ -261,7 +306,7 @@ export const onRequestPost = async (context: EventContext): Promise<Response> =>
       avatar: updatedAvatar,
       avatar_url: updatedAvatar,
       faceit_connected: isFaceitLinked,
-      faceit_nickname: currentUser.faceit_nickname || 'Zeacvo',
+      faceit_nickname: isFaceitLinked ? (currentUser.faceit_nickname || 'Zeacvo') : null,
     };
 
     return new Response(

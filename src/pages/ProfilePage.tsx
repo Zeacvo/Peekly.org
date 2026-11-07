@@ -59,6 +59,7 @@ interface UserProfile {
   elo?: number | null;
   level?: number | null;
   faceit_connected?: boolean;
+  faceit_disconnected?: boolean;
   faceit_id?: string | null;
   faceitId?: string | null;
   faceit_nickname?: string | null;
@@ -89,7 +90,7 @@ function getStoredUser(): UserProfile | null {
           parsed.nickname?.toLowerCase() === 'zeacvo' ||
           parsed.nickname?.toLowerCase() === 'zeacvo123' ||
           parsed.role?.toUpperCase() === 'OWNER';
-        if (isOwner) {
+        if (isOwner && !parsed.faceit_disconnected) {
           parsed.faceit_connected = true;
           parsed.faceit_nickname = parsed.faceit_nickname || 'Zeacvo';
           parsed.elo = parsed.elo || 1699;
@@ -109,7 +110,7 @@ function getStoredUser(): UserProfile | null {
           parsed.nickname?.toLowerCase() === 'zeacvo' ||
           parsed.nickname?.toLowerCase() === 'zeacvo123' ||
           parsed.role?.toUpperCase() === 'OWNER';
-        if (isOwner) {
+        if (isOwner && !parsed.faceit_disconnected) {
           parsed.faceit_connected = true;
           parsed.faceit_nickname = parsed.faceit_nickname || 'Zeacvo';
           parsed.elo = parsed.elo || 1699;
@@ -369,6 +370,36 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   // Inspect query params for public view: /profile?id=... or /profile?userId=...
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    // If the user is currently viewing their own settings, do not kick them out to public view or 404
+    if (!isViewOnly && (currentUser || getStoredUser())) {
+      const activeSearch = locationSearch || window.location.search;
+      const activePath = currentPath || window.location.pathname;
+      const params = new URLSearchParams(activeSearch);
+      let queryId = params.get('id') || params.get('userId') || params.get('guid');
+
+      if (!queryId) {
+        const idMatch = activePath.match(/^\/id\/([^/?#]+)/);
+        if (idMatch) queryId = decodeURIComponent(idMatch[1]);
+      }
+
+      if (queryId) {
+        const cleanId = queryId.trim().toLowerCase();
+        const stored = getStoredUser();
+        const currentNickname = (currentUser?.nickname || stored?.nickname || '').toLowerCase();
+        const currentId = (currentUser?.id || currentUser?.guid || stored?.id || stored?.guid || '').toLowerCase();
+        if (cleanId === currentNickname || cleanId === currentId || cleanId === 'zeacvo' || cleanId === 'zeacvo123') {
+          setIsViewOnly(false);
+          setTargetNotFound(false);
+          setTargetUser(null);
+          setIsLoadingTarget(false);
+          return;
+        }
+      } else {
+        return;
+      }
+    }
+
     const activeSearch = locationSearch || window.location.search;
     const activePath = currentPath || window.location.pathname;
     const params = new URLSearchParams(activeSearch);
@@ -395,7 +426,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
       const isOwnProfile = Boolean(
         (currentNickname && currentNickname.toLowerCase() === cleanId.toLowerCase()) ||
-        (currentId && currentId.toLowerCase() === cleanId.toLowerCase())
+        (currentId && currentId.toLowerCase() === cleanId.toLowerCase()) ||
+        (!isViewOnly && (cleanId.toLowerCase() === 'zeacvo' || cleanId.toLowerCase() === 'zeacvo123'))
       );
 
       if (isOwnProfile) {
@@ -440,7 +472,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       setIsViewOnly(false);
       setTargetUser(null);
     }
-  }, [currentUser, locationSearch, currentPath, isCurrentOwner]);
+  }, [currentUser, locationSearch, currentPath, isCurrentOwner, isViewOnly]);
 
   // Dynamic Profile URL Auto-Sync:
   // When an authenticated user visits /profile or /id without slug, or their own profile with different casing/old alias
@@ -494,23 +526,28 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   }, [isViewOnly, currentUser?.nickname, displayUser]);
 
   const isFaceitLinked = Boolean(
-    displayUser?.faceit_connected ||
-      displayUser?.faceit_nickname ||
-      displayUser?.faceitNickname ||
-      displayUser?.faceit_id ||
-      displayUser?.faceitId ||
-      (displayUser?.elo && Number(displayUser.elo) > 0) ||
-      displayUser?.email?.toLowerCase() === 'zeacvo@icloud.com' ||
-      displayUser?.nickname?.toLowerCase() === 'zeacvo' ||
-      displayUser?.nickname?.toLowerCase() === 'zeacvo123' ||
-      displayUser?.nickname?.toLowerCase().startsWith('zeacvo')
+    !displayUser?.faceit_disconnected &&
+      (displayUser?.faceit_connected === true ||
+        (displayUser?.faceit_connected !== false &&
+          Boolean(
+            displayUser?.faceit_nickname ||
+              displayUser?.faceitNickname ||
+              displayUser?.faceit_id ||
+              displayUser?.faceitId ||
+              (displayUser?.elo && Number(displayUser.elo) > 0) ||
+              (!displayUser?.faceit_disconnected &&
+                (displayUser?.email?.toLowerCase() === 'zeacvo@icloud.com' ||
+                  displayUser?.nickname?.toLowerCase() === 'zeacvo' ||
+                  displayUser?.nickname?.toLowerCase() === 'zeacvo123'))
+          )))
   );
 
   const faceitProfileHandle =
     displayUser?.faceit_nickname ||
     displayUser?.faceitNickname ||
+    (!displayUser?.faceit_disconnected &&
     (displayUser?.email?.toLowerCase() === 'zeacvo@icloud.com' ||
-    displayUser?.nickname?.toLowerCase().startsWith('zeacvo')
+      displayUser?.nickname?.toLowerCase().startsWith('zeacvo'))
       ? 'Zeacvo'
       : displayUser?.nickname || '');
 
@@ -568,6 +605,70 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     else window.location.href = '/';
   };
 
+  const handleDisconnectFaceit = async () => {
+    try {
+      setIsSubmitting(true);
+      await fetch('/api/auth/update-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(currentUser?.id ? { 'X-User-Id': currentUser.id } : {}),
+          ...(currentUser?.nickname ? { 'X-User-Nickname': currentUser.nickname } : {}),
+          ...(currentUser?.email ? { 'X-User-Email': currentUser.email } : {}),
+        },
+        body: JSON.stringify({
+          action: 'disconnect_faceit',
+          userId: currentUser?.id,
+          currentNickname: currentUser?.nickname,
+          userEmail: currentUser?.email,
+        }),
+      });
+
+      const updatedUser: UserProfile = {
+        ...currentUser,
+        nickname: currentUser?.nickname || 'Zeacvo',
+        faceit_connected: false,
+        faceit_disconnected: true,
+        faceit_id: null,
+        faceitId: null,
+        faceit_nickname: null,
+        faceitNickname: null,
+        elo: null,
+        level: null,
+      };
+
+      setCurrentUser(updatedUser);
+
+      try {
+        const stored = localStorage.getItem('peekly_user');
+        const parsed = stored ? JSON.parse(stored) : {};
+        const toSave = {
+          ...parsed,
+          ...updatedUser,
+          faceit_connected: false,
+          faceit_disconnected: true,
+          faceit_id: null,
+          faceitId: null,
+          faceit_nickname: null,
+          faceitNickname: null,
+          elo: null,
+          level: null,
+        };
+        localStorage.setItem('peekly_user', JSON.stringify(toSave));
+        localStorage.setItem('peekly_auth', JSON.stringify(toSave));
+        document.cookie = `peekly_user=${encodeURIComponent(JSON.stringify(toSave))}; path=/; max-age=31536000`;
+        window.dispatchEvent(new Event('peekly_user_updated'));
+        window.dispatchEvent(new Event('storage'));
+      } catch {}
+
+      showNotification(isRu ? 'FACEIT успешно отвязан' : 'FACEIT disconnected successfully');
+    } catch {
+      showNotification(isRu ? 'Ошибка при отключении FACEIT' : 'Error disconnecting FACEIT', true);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Handlers for Account Management
   const handleUpdateNickname = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -610,16 +711,24 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           currentUser?.email?.toLowerCase() === 'zeacvo@icloud.com' ||
           currentUser?.role?.toUpperCase() === 'OWNER';
 
+        const isFaceitDisconnected = Boolean(currentUser?.faceit_disconnected);
+
         const updatedUser: UserProfile = {
           ...currentUser,
           nickname: cleanNick,
-          faceit_connected: isOwnerAccount ? true : (currentUser?.faceit_connected ?? true),
-          faceit_nickname: isOwnerAccount ? 'Zeacvo' : (currentUser?.faceit_nickname || cleanNick),
+          faceit_connected: isFaceitDisconnected ? false : (isOwnerAccount ? true : (currentUser?.faceit_connected ?? true)),
+          faceit_disconnected: isFaceitDisconnected,
+          faceit_nickname: isFaceitDisconnected ? null : (isOwnerAccount ? 'Zeacvo' : (currentUser?.faceit_nickname || cleanNick)),
           role: isOwnerAccount ? 'OWNER' : (currentUser?.role || 'USER'),
           plan: isOwnerAccount ? 'OWNER' : (currentUser?.plan || 'FREE'),
         };
 
         setCurrentUser(updatedUser);
+        setIsViewOnly(false);
+        setTargetNotFound(false);
+        setTargetUser(null);
+        setIsLoadingTarget(false);
+
         try {
           const stored = localStorage.getItem('peekly_user');
           const parsed = stored ? JSON.parse(stored) : {};
@@ -635,14 +744,15 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           window.dispatchEvent(new Event('storage'));
         } catch {}
 
-        // Immediately update URL to /id/<cleanNick>/
+        // Update URL quietly without flipping view
         const targetPath = `/id/${encodeURIComponent(cleanNick)}/`;
         window.history.replaceState({ path: targetPath }, '', targetPath);
+        setCurrentPath(targetPath);
         setLocationSearch('');
 
         setIsNicknameModalOpen(false);
         setNicknameModalError(null);
-        showNotification(t.successUpdated);
+        showNotification(isRu ? 'Никнейм успешно сохранён' : 'Nickname saved successfully');
       }
     } catch {
       // Offline / dev fallback: update local session
@@ -651,14 +761,22 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
         cleanNick.toLowerCase() === 'zeacvo123' ||
         currentUser?.email?.toLowerCase() === 'zeacvo@icloud.com';
 
+      const isFaceitDisconnected = Boolean(currentUser?.faceit_disconnected);
+
       const updatedUser: UserProfile = {
         ...currentUser,
         nickname: cleanNick,
-        faceit_connected: isOwnerAccount ? true : (currentUser?.faceit_connected ?? true),
-        faceit_nickname: isOwnerAccount ? 'Zeacvo' : (currentUser?.faceit_nickname || cleanNick),
+        faceit_connected: isFaceitDisconnected ? false : (isOwnerAccount ? true : (currentUser?.faceit_connected ?? true)),
+        faceit_disconnected: isFaceitDisconnected,
+        faceit_nickname: isFaceitDisconnected ? null : (isOwnerAccount ? 'Zeacvo' : (currentUser?.faceit_nickname || cleanNick)),
       };
 
       setCurrentUser(updatedUser);
+      setIsViewOnly(false);
+      setTargetNotFound(false);
+      setTargetUser(null);
+      setIsLoadingTarget(false);
+
       try {
         const stored = localStorage.getItem('peekly_user');
         const parsed = stored ? JSON.parse(stored) : {};
@@ -675,10 +793,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
       const targetPath = `/id/${encodeURIComponent(cleanNick)}/`;
       window.history.replaceState({ path: targetPath }, '', targetPath);
+      setCurrentPath(targetPath);
       setLocationSearch('');
       setIsNicknameModalOpen(false);
       setNicknameModalError(null);
-      showNotification(t.successUpdated);
+      showNotification(isRu ? 'Никнейм успешно сохранён' : 'Nickname saved successfully');
     } finally {
       setIsSubmitting(false);
     }
@@ -1136,15 +1255,28 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         </div>
                       </div>
                       {isFaceitLinked ? (
-                        <a
-                          href={`https://www.faceit.com/en/players/${encodeURIComponent(faceitProfileHandle)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-7 h-7 flex items-center justify-center border border-[#222228] text-[#929292] hover:text-[#000000] hover:bg-[#FF5500] hover:border-[#FF5500] transition-colors rounded-none"
-                          title="Open FACEIT profile"
-                        >
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
+                        <div className="flex items-center gap-1.5">
+                          {!isViewOnly && (
+                            <button
+                              type="button"
+                              onClick={handleDisconnectFaceit}
+                              disabled={isSubmitting}
+                              className="px-2.5 py-1 text-[10px] font-mono font-medium tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
+                              title={isRu ? 'Отвязать FACEIT' : 'Disconnect FACEIT'}
+                            >
+                              {isRu ? 'Отвязать' : 'Disconnect'}
+                            </button>
+                          )}
+                          <a
+                            href={`https://www.faceit.com/en/players/${encodeURIComponent(faceitProfileHandle)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-7 h-7 flex items-center justify-center border border-[#222228] text-[#929292] hover:text-[#000000] hover:bg-[#FF5500] hover:border-[#FF5500] transition-colors rounded-none"
+                            title="Open FACEIT profile"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        </div>
                       ) : !isViewOnly ? (
                         <a
                           href="/api/auth/faceit/login"
