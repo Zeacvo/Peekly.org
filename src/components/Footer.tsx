@@ -87,22 +87,17 @@ export const Footer: React.FC<FooterProps> = ({
 
         {/* Right Column: Navigation Links & Copyright */}
         <div className="flex flex-col items-start md:items-end text-left md:text-right gap-1.5 text-[12px]">
-          {/* Row 1: Terms of Service Link */}
-          <a
-            href="/terms"
-            onClick={(e) => {
-              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-              e.preventDefault();
-              if (onOpenTerms) onOpenTerms();
-              else {
-                history.pushState(null, '', '/terms');
-                window.dispatchEvent(new PopStateEvent('popstate'));
-              }
+          {/* Row 1: Localized Changelog Link */}
+          <button
+            type="button"
+            onClick={() => {
+              if (onOpenChangelog) onOpenChangelog();
+              else window.location.hash = '#changelog';
             }}
             className="text-xs text-[#929292] hover:text-white transition-colors cursor-pointer bg-transparent border-none p-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
           >
-            {termsLabelMap[currentLang] || 'Terms of Service'}
-          </a>
+            {t.footer.changelog || t.nav.changelog}
+          </button>
 
           {/* Row 2: Privacy Policy Link */}
           <a
@@ -121,19 +116,24 @@ export const Footer: React.FC<FooterProps> = ({
             {privacyLabelMap[currentLang] || 'Privacy Policy'}
           </a>
 
-          {/* Row 3: Localized Changelog Link */}
-          <button
-            type="button"
-            onClick={() => {
-              if (onOpenChangelog) onOpenChangelog();
-              else window.location.hash = '#changelog';
+          {/* Row 3: Terms of Service Link */}
+          <a
+            href="/terms"
+            onClick={(e) => {
+              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              e.preventDefault();
+              if (onOpenTerms) onOpenTerms();
+              else {
+                history.pushState(null, '', '/terms');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }
             }}
             className="text-xs text-[#929292] hover:text-white transition-colors cursor-pointer bg-transparent border-none p-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
           >
-            {t.footer.changelog || t.nav.changelog}
-          </button>
+            {termsLabelMap[currentLang] || 'Terms of Service'}
+          </a>
 
-          {/* Row 4: Copyright */}
+          {/* Row 4: Copyright (at the very bottom) */}
           <p className="text-[11px] text-[#929292] font-sans whitespace-nowrap m-0 mt-1">
             © 2026 Peekly. {t.footer.allRightsReserved || t.footer.rights}
           </p>

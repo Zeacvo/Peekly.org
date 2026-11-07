@@ -1083,10 +1083,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     return (
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 pt-36 text-center text-white">
         <AlertTriangle className="w-10 h-10 mx-auto text-[#FFFFFF] mb-4" />
-        <h2 className="text-xl font-bold mb-2">{t.userNotFound}</h2>
-        <p className="text-[#929292] text-sm mb-6">
-          {t.userNotFoundDesc || (isRu ? 'Запрошенный профиль не существует или был удалён.' : 'The requested profile identifier does not exist or has been removed.')}
-        </p>
+        <h2 className="text-xl font-bold mb-6">{t.userNotFound}</h2>
         <button
           type="button"
           onClick={onGoHome}
@@ -1261,7 +1258,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                               type="button"
                               onClick={handleDisconnectFaceit}
                               disabled={isSubmitting}
-                              className="px-2.5 py-1 text-[10px] font-mono font-medium tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
+                              className="h-7 px-2.5 flex items-center justify-center text-[10px] font-mono font-medium tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
                               title={isRu ? 'Отвязать FACEIT' : 'Disconnect FACEIT'}
                             >
                               {isRu ? 'Отвязать' : 'Disconnect'}
@@ -1280,7 +1277,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       ) : !isViewOnly ? (
                         <a
                           href="/api/auth/faceit/login"
-                          className="px-3 py-1 text-[10px] font-mono font-medium tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
+                          className="h-7 px-3 flex items-center justify-center text-[10px] font-mono font-medium tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
                         >
                           {t.connect || (isRu ? 'Подключить' : 'Connect')}
                         </a>
@@ -1316,7 +1313,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         <button
                           type="button"
                           onClick={handleConnectTwitch}
-                          className="px-3 py-1 text-[10px] font-mono font-medium tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
+                          className="h-7 px-3 flex items-center justify-center text-[10px] font-mono font-medium tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
                         >
                           {t.connect || (isRu ? 'Подключить' : 'Connect')}
                         </button>
