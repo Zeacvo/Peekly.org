@@ -43,24 +43,7 @@ export function calculateFaceitLevel(elo: number): number {
 export const INITIAL_PLAYERS: PlayerUser[] = [];
 
 // Persistent in-memory fallback store across runtime requests
-const defaultZeacvoPlayer: PlayerUser = {
-  guid: '0a9c2d71-e6eb-437d-bc74-661aed437813',
-  nickname: 'Zeacvo',
-  email: 'zeacvo@icloud.com',
-  avatar: '',
-  country: 'BY',
-  elo: 1699,
-  level: 8,
-  created_at: '2026-11-03T13:21:20.036Z',
-  last_login_at: '2026-11-05T08:51:24.000Z',
-  plan: 'FREE',
-  role: 'OWNER',
-  is_faceit_linked: true,
-};
-
-const memoryUsers = new Map<string, PlayerUser>([
-  [defaultZeacvoPlayer.guid, defaultZeacvoPlayer]
-]);
+const memoryUsers = new Map<string, PlayerUser>();
 
 export async function upsertPlayer(
   env: Record<string, unknown> | undefined,
@@ -393,11 +376,7 @@ export async function deletePlayersByIds(
   } | undefined;
 
   let count = 0;
-  // Filter out any attempt to delete the CEO / Owner
-  const safeIds = ids.filter((id) => {
-    const val = String(id || '').trim().toLowerCase();
-    return val !== 'zeacvo' && val !== 'zeacvo@icloud.com' && !val.includes('zeacvo');
-  });
+  const safeIds = ids.filter((id) => Boolean(String(id || '').trim()));
 
   if (safeIds.length === 0) return 0;
 

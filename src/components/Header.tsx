@@ -300,7 +300,7 @@ export const Header: React.FC<HeaderProps> = ({
                 aria-expanded={userDropdownOpen}
                 aria-haspopup="menu"
                 aria-label="User account menu"
-                className="relative flex items-center justify-center w-10 h-10 bg-[#000000] hover:bg-white/[0.06] border border-[#222228] hover:border-white transition-all rounded-none cursor-pointer overflow-hidden p-0 focus-visible:ring-1 focus-visible:ring-white shrink-0"
+                className="relative flex items-center justify-center w-11 h-11 bg-[#000000] hover:bg-white/[0.06] border border-[#222228] hover:border-white transition-all rounded-none cursor-pointer overflow-hidden p-0 focus-visible:ring-1 focus-visible:ring-white shrink-0"
               >
                 <UserAvatar user={userSession} size={20} className="w-5 h-5 text-[#FFFFFF]" imgClassName="w-full h-full object-cover" />
               </button>
@@ -331,12 +331,15 @@ export const Header: React.FC<HeaderProps> = ({
                       type="button"
                       onClick={() => {
                         setUserDropdownOpen(false);
-                        const profileSlug = userSession.nickname || userSession.id;
-                        if (onOpenProfile) onOpenProfile(profileSlug);
-                        else {
+                        const stored = getStoredUser();
+                        const profileSlug = stored?.nickname || userSession?.nickname || stored?.id || userSession?.id;
+                        if (onOpenProfile) {
+                          onOpenProfile(profileSlug);
+                        } else {
                           try {
                             const targetUrl = profileSlug ? `/id/${encodeURIComponent(profileSlug)}/` : '/profile';
                             history.pushState(null, '', targetUrl);
+                            window.dispatchEvent(new CustomEvent('peekly:navigate'));
                             window.dispatchEvent(new PopStateEvent('popstate'));
                           } catch {
                             window.location.href = profileSlug ? `/id/${encodeURIComponent(profileSlug)}/` : '/profile';
@@ -369,7 +372,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onOpenAuthModal}
-              className="inline-flex items-center justify-center text-center h-10 px-5 sm:px-6 rounded-none bg-black text-white hover:border-white border border-[#222228] font-mono text-xs font-bold tracking-wider transition-colors shrink-0 cursor-pointer focus-visible:ring-1 focus-visible:ring-white"
+              className="inline-flex items-center justify-center text-center h-11 px-6 rounded-none bg-black text-white hover:border-white border border-[#222228] font-sans text-sm font-bold tracking-normal transition-colors shrink-0 cursor-pointer focus-visible:ring-1 focus-visible:ring-white leading-none box-border"
               title={authT.signInTitle}
             >
               <span>{authT.nav_sign_in}</span>
@@ -384,7 +387,7 @@ export const Header: React.FC<HeaderProps> = ({
               aria-expanded={installDropdownOpen}
               aria-haspopup="menu"
               aria-label="Install extension options"
-              className="inline-flex items-center justify-center text-center h-10 px-4 sm:px-5 rounded-none btn-header-install font-mono text-xs font-bold tracking-wider cursor-pointer active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white"
+              className="inline-flex items-center justify-center text-center h-11 px-6 rounded-none btn-header-install font-sans text-sm font-bold tracking-normal cursor-pointer active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white leading-none box-border"
             >
               <span>{t.nav.install}</span>
             </button>

@@ -212,6 +212,7 @@ export const App: React.FC = () => {
   const [isAccountPrivacy, setIsAccountPrivacy] = useState<boolean>(() => checkRoutes().isAccountPrivacy);
   const [isAdmin, setIsAdmin] = useState<boolean>(() => checkRoutes().isAdmin);
   const [isProfile, setIsProfile] = useState<boolean>(() => checkRoutes().isProfile);
+  const [profileKey, setProfileKey] = useState<number>(0);
   const [isLogin, setIsLogin] = useState<boolean>(() => checkRoutes().isLogin);
   const [isRegister, setIsRegister] = useState<boolean>(() => checkRoutes().isRegister);
   const [isNotFound, setIsNotFound] = useState<boolean>(() => checkRoutes().isNotFound);
@@ -240,6 +241,7 @@ export const App: React.FC = () => {
       const routes = checkRoutes();
       setIsAdmin(routes.isAdmin);
       setIsProfile(routes.isProfile);
+      setProfileKey((k) => k + 1);
       setIsLogin(routes.isLogin);
       setIsRegister(routes.isRegister);
       setIsTerms(routes.isTerms);
@@ -256,11 +258,13 @@ export const App: React.FC = () => {
     try {
       window.addEventListener('hashchange', handleLocationChange);
       window.addEventListener('popstate', handleLocationChange);
+      window.addEventListener('peekly:navigate', handleLocationChange);
     } catch {}
     return () => {
       try {
         window.removeEventListener('hashchange', handleLocationChange);
         window.removeEventListener('popstate', handleLocationChange);
+        window.removeEventListener('peekly:navigate', handleLocationChange);
       } catch {}
     };
   }, []);
@@ -417,11 +421,14 @@ export const App: React.FC = () => {
     setIsLogin(false);
     setIsRegister(false);
     setIsProfile(true);
+    setProfileKey((k) => k + 1);
     try {
       const targetUrl = guid
         ? (guid.includes('-') ? `/profile?id=${encodeURIComponent(guid)}` : `/id/${encodeURIComponent(guid)}/`)
         : '/profile';
       history.pushState(null, '', targetUrl);
+      window.dispatchEvent(new CustomEvent('peekly:navigate'));
+      window.dispatchEvent(new PopStateEvent('popstate'));
     } catch {}
     try {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -484,6 +491,7 @@ export const App: React.FC = () => {
             />
           ) : isProfile ? (
             <ProfilePage
+              key={`profile-${profileKey}`}
               currentLang={currentLang}
               onGoHome={handleGoHome}
               onOpenAdmin={() => {

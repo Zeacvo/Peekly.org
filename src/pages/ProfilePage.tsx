@@ -307,18 +307,28 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     return () => clearInterval(interval);
   }, [isViewOnly]);
 
+  const [currentPath, setCurrentPath] = useState(() =>
+    typeof window !== 'undefined' ? window.location.pathname : ''
+  );
   const [locationSearch, setLocationSearch] = useState(() =>
     typeof window !== 'undefined' ? window.location.search : ''
   );
 
-  // Listen for browser navigation (back/forward)
+  // Listen for browser navigation (back/forward) and custom navigation
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
       setLocationSearch(window.location.search);
+      const stored = getStoredUser();
+      if (stored) setCurrentUser(stored);
     };
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener('peekly:navigate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('peekly:navigate', handlePopState);
+    };
   }, []);
 
   const isCurrentOwner =
@@ -330,16 +340,18 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   // Inspect query params for public view: /profile?id=... or /profile?userId=...
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
+    const activeSearch = locationSearch || window.location.search;
+    const activePath = currentPath || window.location.pathname;
+    const params = new URLSearchParams(activeSearch);
     let queryId = params.get('id') || params.get('userId') || params.get('guid');
 
     // Also support /id/:slug or /id/:slug/ or /profile/:usernameOrId
     if (!queryId) {
-      const idMatch = window.location.pathname.match(/^\/id\/([^/?#]+)/);
+      const idMatch = activePath.match(/^\/id\/([^/?#]+)/);
       if (idMatch) {
         queryId = decodeURIComponent(idMatch[1]);
       } else {
-        const pathMatch = window.location.pathname.match(/^\/profile\/([^/?#]+)/);
+        const pathMatch = activePath.match(/^\/profile\/([^/?#]+)/);
         if (pathMatch) {
           queryId = decodeURIComponent(pathMatch[1]);
         }
@@ -348,8 +360,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
     if (queryId && queryId.trim()) {
       const cleanId = queryId.trim();
-      const currentNickname = currentUser?.nickname;
-      const currentId = currentUser?.id || currentUser?.guid;
+      const stored = getStoredUser();
+      const currentNickname = currentUser?.nickname || stored?.nickname;
+      const currentId = currentUser?.id || currentUser?.guid || stored?.id || stored?.guid;
 
       const isOwnProfile = Boolean(
         (currentNickname && currentNickname.toLowerCase() === cleanId.toLowerCase()) ||
@@ -360,6 +373,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
         // Viewing own profile
         setIsViewOnly(false);
         setTargetUser(null);
+        setTargetNotFound(false);
+        setIsLoadingTarget(false);
       } else {
         // Fetch target user public profile by slug or id
         setIsLoadingTarget(true);
@@ -396,34 +411,35 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       setIsViewOnly(false);
       setTargetUser(null);
     }
-  }, [currentUser, locationSearch, isCurrentOwner]);
+  }, [currentUser, locationSearch, currentPath, isCurrentOwner]);
 
   // Dynamic Profile URL Auto-Sync:
   // When an authenticated user visits /profile or /id without slug, or their own profile with different casing/old alias
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (currentUser?.nickname && !isViewOnly) {
-      const currentPath = window.location.pathname;
+      const activePath = currentPath || window.location.pathname;
       const targetPath = `/id/${encodeURIComponent(currentUser.nickname)}/`;
       const isBareProfile =
-        currentPath === '/profile' ||
-        currentPath === '/profile/' ||
-        currentPath === '/id' ||
-        currentPath === '/id/';
+        activePath === '/profile' ||
+        activePath === '/profile/' ||
+        activePath === '/id' ||
+        activePath === '/id/';
 
-      const slugMatch = currentPath.match(/^\/id\/([^/?#]+)/);
+      const slugMatch = activePath.match(/^\/id\/([^/?#]+)/);
       const isOwnSlug = slugMatch && (
         decodeURIComponent(slugMatch[1]).toLowerCase() === currentUser.nickname.toLowerCase()
       );
 
       if (isBareProfile || isOwnSlug) {
-        if (currentPath !== targetPath) {
+        if (activePath !== targetPath) {
           window.history.replaceState({ path: targetPath }, '', targetPath);
           setLocationSearch('');
+          setCurrentPath(targetPath);
         }
       }
     }
-  }, [currentUser?.nickname, isViewOnly, isCurrentOwner]);
+  }, [currentUser?.nickname, isViewOnly, currentPath]);
 
   // Display user: either targetUser (if public view) or currentUser
   const displayUser: UserProfile | null = isViewOnly ? targetUser : currentUser;
