@@ -384,9 +384,9 @@ export const Header: React.FC<HeaderProps> = ({
               aria-expanded={installDropdownOpen}
               aria-haspopup="menu"
               aria-label="Install extension options"
-              className="inline-flex items-center justify-center text-center h-10 px-4 sm:px-5 rounded-none btn-header-install font-mono text-xs font-bold uppercase tracking-wider cursor-pointer active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white"
+              className="inline-flex items-center justify-center text-center h-10 px-4 sm:px-5 rounded-none btn-header-install font-mono text-xs font-bold tracking-wider cursor-pointer active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white"
             >
-              <span>{t.nav.install.toUpperCase()}</span>
+              <span>{t.nav.install}</span>
             </button>
 
             {/* Browser Install Dropdown Menu */}

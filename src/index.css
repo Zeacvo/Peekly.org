@@ -131,7 +131,7 @@ button, a, [role="button"], .cursor-pointer {
   font-size: 12px !important;
   font-weight: 700 !important;
   letter-spacing: 0.05em !important;
-  text-transform: uppercase !important;
+  text-transform: none !important;
   transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease !important;
   box-shadow: none !important;
 }
@@ -174,7 +174,7 @@ button, a, [role="button"], .cursor-pointer {
   font-size: 12px !important;
   font-weight: 700 !important;
   letter-spacing: 0.05em !important;
-  text-transform: uppercase !important;
+  text-transform: none !important;
   transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease !important;
   box-shadow: none !important;
 }
@@ -218,7 +218,7 @@ button, a, [role="button"], .cursor-pointer {
   font-size: 12px !important;
   font-weight: 700 !important;
   letter-spacing: 0.05em !important;
-  text-transform: uppercase !important;
+  text-transform: none !important;
   transition: all 0.15s ease-in-out !important;
   cursor: pointer !important;
   text-decoration: none !important;
@@ -264,7 +264,7 @@ button, a, [role="button"], .cursor-pointer {
   font-size: 12px !important;
   font-weight: 700 !important;
   letter-spacing: 0.05em !important;
-  text-transform: uppercase !important;
+  text-transform: none !important;
   transition: all 0.15s ease-in-out !important;
   cursor: pointer !important;
   text-decoration: none !important;
@@ -307,7 +307,7 @@ button, a, [role="button"], .cursor-pointer {
   font-size: 12px !important;
   font-weight: 700 !important;
   letter-spacing: 0.05em !important;
-  text-transform: uppercase !important;
+  text-transform: none !important;
   transition: all 0.15s ease-in-out !important;
   cursor: pointer !important;
   text-decoration: none !important;

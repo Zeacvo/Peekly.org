@@ -114,19 +114,19 @@ export function saveLanguagePreference(lang: Language): void {
 }
 
 export const bottomCtaTitleMap: Record<Language, string> = {
-  en: 'READY TO DOMINATE?',
-  ru: 'ГОТОВ ДОМИНИРОВАТЬ?',
+  en: 'Ready to dominate?',
+  ru: 'Готов доминировать?',
   zh: '准备好主宰比赛了吗？',
-  de: 'BEREIT ZU DOMINIEREN?',
-  pl: 'GOTOWY ZDOMINOWAĆ?',
-  fr: 'PRÊT À DOMINER ?',
-  es: '¿LISTO PARA DOMINAR?',
-  da: 'KLAR TIL AT DOMINERE?',
-  pt: 'PRONTO PARA DOMINAR?',
-  fi: 'VALMIS HALLITSEMAAN?',
-  sv: 'REDO ATT DOMINERA?',
-  tr: 'HÜKMETMEYE HAZIR MISINIZ?',
-  uk: 'ГОТОВИЙ ДОМІНУВАТИ?',
+  de: 'Bereit zu dominieren?',
+  pl: 'Gotowy zdominować?',
+  fr: 'Prêt à dominer ?',
+  es: '¿Listo para dominar?',
+  da: 'Klar til at dominere?',
+  pt: 'Pronto para dominar?',
+  fi: 'Valmis hallitsemaan?',
+  sv: 'Redo att dominera?',
+  tr: 'Hükmetmeye hazır mısınız?',
+  uk: 'Готовий домінувати?',
   ar: 'هل أنت مستعد للسيطرة؟',
   ja: '支配する準備はできていますか？',
   ko: '지배할 준비가 되셨습니까?',
@@ -205,7 +205,7 @@ export const translations: Record<Language, Translations> = {
     },
     "hero": {
       "badge": "Google Chrome Extension",
-      "title": "DOMINATE THE LOBBY",
+      "title": "Dominate the lobby",
       "subtitle": "High-performance matchroom intelligence, player analytics, and automation overlays for competitive FACEIT CS2.",
       "cta": "Add to Chrome",
       "note": "Manifest V3 • 100% FACEIT Anti-Cheat Safe"
@@ -302,7 +302,7 @@ export const translations: Record<Language, Translations> = {
     },
     "hero": {
       "badge": "Расширение для Google Chrome",
-      "title": "ДОМИНИРУЙ В ЛОББИ",
+      "title": "Доминируй в лобби",
       "subtitle": "Высокопроизводительная разведка лобби, аналитика игроков и оверлеи автоматизации для соревновательного FACEIT CS2.",
       "cta": "Установить в Chrome",
       "note": "Manifest V3 • 100% безопасно для FACEIT Anti-Cheat"
@@ -496,7 +496,7 @@ export const translations: Record<Language, Translations> = {
     },
     "hero": {
       "badge": "Google Chrome Erweiterung",
-      "title": "DOMINIERE DIE LOBBY",
+      "title": "Dominiere die Lobby",
       "subtitle": "Hochleistungs-Matchroom-Intelligence, Spieleranalysen und Automatisierungs-Overlays für FACEIT CS2.",
       "cta": "Zu Chrome hinzufügen",
       "note": "Manifest V3 • 100% FACEIT Anti-Cheat sicher"
@@ -593,7 +593,7 @@ export const translations: Record<Language, Translations> = {
     },
     "hero": {
       "badge": "Rozszerzenie Google Chrome",
-      "title": "ZDOMINUJ LOBBY",
+      "title": "Zdominuj lobby",
       "subtitle": "Zaawansowana analityka pokoju meczowego, statystyki graczy i nakładki automatyzacji dla FACEIT CS2.",
       "cta": "Dodaj do Chrome",
       "note": "Manifest V3 • W 100% bezpieczne dla FACEIT Anti-Cheat"
@@ -690,7 +690,7 @@ export const translations: Record<Language, Translations> = {
     },
     "hero": {
       "badge": "Extension Google Chrome",
-      "title": "DOMINEZ LE LOBBY",
+      "title": "Dominez le lobby",
       "subtitle": "Intelligence de matchroom haute performance, analyses de joueurs et overlays d'automatisation pour FACEIT CS2.",
       "cta": "Ajouter à Chrome",
       "note": "Manifest V3 • 100% conforme FACEIT Anti-Cheat"
@@ -787,7 +787,7 @@ export const translations: Record<Language, Translations> = {
     },
     "hero": {
       "badge": "Extensión de Google Chrome",
-      "title": "DOMINA LA SALA",
+      "title": "Domina la sala",
       "subtitle": "Inteligencia de sala de partidas de alto rendimiento, analíticas de jugadores y superposiciones de automatización para FACEIT CS2.",
       "cta": "Añadir a Chrome",
       "note": "Manifest V3 • 100% seguro para FACEIT Anti-Cheat"
@@ -884,7 +884,7 @@ export const translations: Record<Language, Translations> = {
     },
     "hero": {
       "badge": "Google Chrome Udvidelse",
-      "title": "DOMINÉR LOBBYEN",
+      "title": "Dominér lobbyen",
       "subtitle": "Højtydende matchroom-efterretning, spilleranalyse og automatiserings-overlays til FACEIT CS2.",
       "cta": "Tilføj til Chrome",
       "note": "Manifest V3 • 100% FACEIT Anti-Cheat sikker"
@@ -981,7 +981,7 @@ export const translations: Record<Language, Translations> = {
     },
     "hero": {
       "badge": "Extensão Google Chrome",
-      "title": "DOMINE O LOBBY",
+      "title": "Domine o lobby",
       "subtitle": "Inteligência de matchroom de alta performance, análise de jogadores e overlays de automação para FACEIT CS2.",
       "cta": "Adicionar ao Chrome",
       "note": "Manifest V3 • 100% seguro para FACEIT Anti-Cheat"
@@ -1078,7 +1078,7 @@ export const translations: Record<Language, Translations> = {
     },
     "hero": {
       "badge": "Google Chrome -laajennus",
-      "title": "HALLITSE AULAA",
+      "title": "Hallitse aulaa",
       "subtitle": "Huipputason otteluhuoneen analytiikka, pelaajatilastot ja automaatio-overlayt FACEIT CS2:lle.",
       "cta": "Lisää Chromeen",
       "note": "Manifest V3 • 100% FACEIT Anti-Cheat yhteensopiva"
@@ -1175,7 +1175,7 @@ export const translations: Record<Language, Translations> = {
     },
     "hero": {
       "badge": "Google Chrome-tillägg",
-      "title": "DOMINERA LOBBYN",
+      "title": "Dominera lobbyn",
       "subtitle": "Högpresterande matchrumsanalys, spelarstatistik och automatiseringsöverlägg för FACEIT CS2.",
       "cta": "Lägg till i Chrome",
       "note": "Manifest V3 • 100% säkert för FACEIT Anti-Cheat"
@@ -1272,7 +1272,7 @@ export const translations: Record<Language, Translations> = {
     },
     "hero": {
       "badge": "Google Chrome Uzantısı",
-      "title": "LOBİYE HÜKMET",
+      "title": "Lobiye hükmet",
       "subtitle": "FACEIT CS2 için yüksek performanslı maç odası istihbaratı, oyuncu analitiği ve otomasyon arayüzleri.",
       "cta": "Chrome a Ekle",
       "note": "Manifest V3 • %100 FACEIT Anti-Cheat Uyumlu"
@@ -1369,7 +1369,7 @@ export const translations: Record<Language, Translations> = {
     },
     "hero": {
       "badge": "Розширення для Google Chrome",
-      "title": "ДОМІНУЙ У ЛОББІ",
+      "title": "Домінуй у лоббі",
       "subtitle": "Високопродуктивна розвідка лобі, аналітика гравців та оверлеї автоматизації для FACEIT CS2.",
       "cta": "Додати в Chrome",
       "note": "Manifest V3 • 100% безпечно для FACEIT Anti-Cheat"

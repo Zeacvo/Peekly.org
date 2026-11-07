@@ -12,7 +12,7 @@ export const BROWSERS: BrowserItem[] = [
   {
     id: 'chrome',
     name: 'Chrome',
-    heroName: 'CHROME',
+    heroName: 'Chrome',
     url: 'https://chromewebstore.google.com/detail/peekly-for-faceit/cmfgneodcjfofdcglbbhcghijgcjcokk',
     icon: (className = 'w-7 h-7 shrink-0 fill-current') => (
       <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -23,7 +23,7 @@ export const BROWSERS: BrowserItem[] = [
   {
     id: 'firefox',
     name: 'Firefox',
-    heroName: 'FIREFOX',
+    heroName: 'Firefox',
     url: 'https://addons.mozilla.org/en-US/firefox/addon/peekly-for-faceit/',
     icon: (className = 'w-7 h-7 shrink-0 fill-current') => (
       <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -34,7 +34,7 @@ export const BROWSERS: BrowserItem[] = [
   {
     id: 'opera',
     name: 'Opera',
-    heroName: 'OPERA',
+    heroName: 'Opera',
     url: 'https://chromewebstore.google.com/detail/peekly-for-faceit/cmfgneodcjfofdcglbbhcghijgcjcokk',
     icon: (className = 'w-7 h-7 shrink-0 fill-current') => (
       <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -45,7 +45,7 @@ export const BROWSERS: BrowserItem[] = [
   {
     id: 'edge',
     name: 'Edge',
-    heroName: 'EDGE',
+    heroName: 'Edge',
     url: 'https://chromewebstore.google.com/detail/peekly-for-faceit/cmfgneodcjfofdcglbbhcghijgcjcokk',
     icon: (className = 'w-7 h-7 shrink-0 fill-current') => (
       <svg className={className} viewBox="0 0 512 512" fill="currentColor" aria-hidden="true">
@@ -56,7 +56,7 @@ export const BROWSERS: BrowserItem[] = [
   {
     id: 'brave',
     name: 'Brave',
-    heroName: 'BRAVE',
+    heroName: 'Brave',
     url: 'https://chromewebstore.google.com/detail/peekly-for-faceit/cmfgneodcjfofdcglbbhcghijgcjcokk',
     icon: (className = 'w-7 h-7 shrink-0 fill-current') => (
       <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -67,7 +67,7 @@ export const BROWSERS: BrowserItem[] = [
   {
     id: 'yandex',
     name: 'Yandex',
-    heroName: 'YANDEX',
+    heroName: 'Yandex',
     url: 'https://chromewebstore.google.com/detail/peekly-for-faceit/cmfgneodcjfofdcglbbhcghijgcjcokk',
     icon: (className = 'w-7 h-7 shrink-0 fill-current') => (
       <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

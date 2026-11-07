@@ -10,7 +10,7 @@ export const HeroCtaButtons: React.FC = () => {
             key={browser.id}
             type="button"
             onClick={() => window.open(browser.url, '_blank', 'noopener,noreferrer')}
-            className="w-full h-12 bg-[#FFFFFF] hover:bg-[#FF5500] text-[#000000] border border-[#FFFFFF] rounded-none flex items-center justify-center gap-2 font-mono text-xs font-extrabold uppercase tracking-wider transition-all duration-150 cursor-pointer select-none group"
+            className="w-full h-12 bg-[#FFFFFF] hover:bg-[#FF5500] text-[#000000] border border-[#FFFFFF] rounded-none flex items-center justify-center gap-2 font-mono text-xs font-extrabold tracking-wider transition-all duration-150 cursor-pointer select-none group"
           >
             <span className="text-black group-hover:text-black transition-colors shrink-0 flex items-center justify-center">
               {browser.icon('w-5 h-5 shrink-0 fill-current')}

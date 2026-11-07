@@ -139,7 +139,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     const ownId = (stored.id || stored.guid)?.toLowerCase();
     if (ownNick && ownNick === slug) return false;
     if (ownId && ownId === slug) return false;
-    if (slug === 'zeacvo' && (ownNick === 'zeacvo' || stored.role?.toUpperCase() === 'OWNER')) return false;
     return true;
   });
   const [isLoadingTarget, setIsLoadingTarget] = useState<boolean>(false);
@@ -354,12 +353,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
       const isOwnProfile = Boolean(
         (currentNickname && currentNickname.toLowerCase() === cleanId.toLowerCase()) ||
-        (currentId && currentId.toLowerCase() === cleanId.toLowerCase()) ||
-        (isCurrentOwner && (
-          cleanId.toLowerCase() === 'zeacvo' ||
-          cleanId.toLowerCase().startsWith('zeacvo') ||
-          cleanId.toLowerCase() === (currentNickname?.toLowerCase() ?? '')
-        ))
+        (currentId && currentId.toLowerCase() === cleanId.toLowerCase())
       );
 
       if (isOwnProfile) {
@@ -419,8 +413,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
       const slugMatch = currentPath.match(/^\/id\/([^/?#]+)/);
       const isOwnSlug = slugMatch && (
-        decodeURIComponent(slugMatch[1]).toLowerCase() === currentUser.nickname.toLowerCase() ||
-        (isCurrentOwner && decodeURIComponent(slugMatch[1]).toLowerCase() === 'zeacvo')
+        decodeURIComponent(slugMatch[1]).toLowerCase() === currentUser.nickname.toLowerCase()
       );
 
       if (isBareProfile || isOwnSlug) {
@@ -836,7 +829,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     return (
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 pt-36 text-center text-white">
         <Loader2 className="w-8 h-8 mx-auto animate-spin text-[#FFFFFF] mb-4" />
-        <p className="text-xs uppercase tracking-wider text-[#929292]">
+        <p className="text-xs text-[#929292]">
           {t.checkingAuth}
         </p>
       </div>
@@ -847,14 +840,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     return (
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 pt-36 text-center text-white">
         <AlertTriangle className="w-10 h-10 mx-auto text-[#FFFFFF] mb-4" />
-        <h2 className="text-xl font-bold uppercase mb-2">{t.userNotFound}</h2>
+        <h2 className="text-xl font-bold mb-2">{t.userNotFound}</h2>
         <p className="text-[#929292] text-sm mb-6">
-          The requested profile identifier does not exist or has been removed.
+          {t.userNotFoundDesc || (isRu ? 'Запрошенный профиль не существует или был удалён.' : 'The requested profile identifier does not exist or has been removed.')}
         </p>
         <button
           type="button"
           onClick={onGoHome}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-black text-xs font-bold uppercase hover:bg-neutral-200 transition-colors rounded-none"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-black text-xs font-bold hover:bg-[#FF5500] hover:text-black transition-colors rounded-none cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>{t.backHome}</span>
@@ -963,8 +956,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
                 {/* Nickname & Network Status */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
-                  <h1 className="text-lg font-bold font-mono text-[#FFFFFF] tracking-wider uppercase truncate">
-                    {displayUser?.nickname || 'ZEACVO'}
+                  <h1 className="text-lg font-bold font-mono text-[#FFFFFF] tracking-normal truncate">
+                    {displayUser?.nickname || 'Zeacvo'}
                   </h1>
 
                   {/* Статус онлайн */}
@@ -1048,7 +1041,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         <TwitchLogo className="w-4 h-4" />
                         <div className="flex flex-col">
                           <span className="font-mono text-xs font-bold text-[#FFFFFF] tracking-wider">
-                            TWITCH
+                            Twitch
                           </span>
                           <span className="font-mono text-[10px] text-[#929292]">
                             {isTwitchConnected ? (t.connected || 'Connected') : (t.notConnected || 'Not connected')}
@@ -1100,7 +1093,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               {/* Card 1: Account Credentials */}
               <div className="bg-[#090909] border border-[#1A1A1F] p-6">
                 <div className="mb-4">
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-white">
+                  <h2 className="text-xs font-bold tracking-wide text-white">
                     {t.credentialsTitle}
                   </h2>
                 </div>
@@ -1109,7 +1102,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   {/* Nickname row */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3">
                     <div>
-                      <span className="text-[10px] uppercase text-[#929292] font-bold tracking-wider block mb-1">
+                      <span className="text-[10px] text-[#929292] font-bold tracking-wide block mb-1">
                         {t.nicknameLabel}
                       </span>
                       <span className="text-sm font-bold text-white">
@@ -1131,7 +1124,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   {/* Email row */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3">
                     <div>
-                      <span className="text-[10px] uppercase text-[#929292] font-bold tracking-wider block mb-1">
+                      <span className="text-[10px] text-[#929292] font-bold tracking-wide block mb-1">
                         {t.emailLabel}
                       </span>
                       <span className="text-sm font-medium text-white break-all">
@@ -1158,7 +1151,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               {/* Card 2: Password & Security */}
               <div className="bg-[#090909] border border-[#1A1A1F] p-6">
                 <div className="mb-4">
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                  <h2 className="text-xs font-bold tracking-wide text-white flex items-center gap-2">
                     <KeyRound className="w-3.5 h-3.5 text-[#929292]" />
                     <span>{t.securityTitle}</span>
                   </h2>
@@ -1168,7 +1161,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   {/* Password Row */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3">
                     <div>
-                      <span className="text-[10px] uppercase text-[#929292] font-bold tracking-wider block mb-1">
+                      <span className="text-[10px] text-[#929292] font-bold tracking-wide block mb-1">
                         {t.passwordLabel}
                       </span>
                       <span className="text-sm text-neutral-300 font-medium tracking-widest">
@@ -1192,8 +1185,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   {/* 2FA Row */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3">
                     <div>
-                      <span className="text-[10px] uppercase text-[#929292] font-bold tracking-wider block mb-1">
-                        {t.twoFactorTitle || (isRu ? 'ДВУХЭТАПНАЯ АУТЕНТИФИКАЦИЯ (2FA)' : 'TWO-FACTOR AUTHENTICATION (2FA)')}
+                      <span className="text-[10px] text-[#929292] font-bold tracking-wide block mb-1">
+                        {t.twoFactorTitle || (isRu ? 'Двухэтапная аутентификация (2FA)' : 'Two-Factor Authentication (2FA)')}
                       </span>
                       <div className="flex items-center gap-2">
                         <div
@@ -1207,8 +1200,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                           }`}
                         >
                           {is2faActive
-                            ? (t.twoFactorActive || (isRu ? 'АКТИВНА' : 'ACTIVE'))
-                            : (t.twoFactorDisabled || (isRu ? 'ОТКЛЮЧЕНА' : 'DISABLED'))}
+                            ? (t.twoFactorActive || (isRu ? 'Включена' : 'Active'))
+                            : (t.twoFactorDisabled || (isRu ? 'Отключена' : 'Disabled'))}
                         </span>
                       </div>
                     </div>
@@ -1222,8 +1215,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       className="btn-action-secondary shrink-0"
                     >
                       {is2faActive
-                        ? (t.twoFactorDisable || (isRu ? 'ОТКЛЮЧИТЬ' : 'DISABLE'))
-                        : (t.twoFactorConfigure || (isRu ? 'НАСТРОИТЬ' : 'CONFIGURE'))}
+                        ? (t.twoFactorDisable || (isRu ? 'Отключить' : 'Disable'))
+                        : (t.twoFactorConfigure || (isRu ? 'Настроить' : 'Configure'))}
                     </button>
                   </div>
                 </div>
@@ -1324,7 +1317,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             </h3>
             <form onSubmit={handleUpdateNickname} className="space-y-4">
               <div>
-                <label className="text-[10px] uppercase text-[#929292] font-bold block mb-1.5">
+                <label className="text-[10px] text-[#929292] font-bold block mb-1.5">
                   {t.newNickname}
                 </label>
                 <input
@@ -1379,7 +1372,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             {emailStep === 'input' ? (
               <form onSubmit={handleSendEmailOtp} className="space-y-4">
                 <div>
-                  <label className="text-[10px] uppercase text-[#929292] font-bold block mb-1.5">
+                  <label className="text-[10px] text-[#929292] font-bold block mb-1.5">
                     {t.newEmail}
                   </label>
                   <input
@@ -1422,7 +1415,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 )}
 
                 <div>
-                  <label className="text-[10px] uppercase text-[#929292] font-bold block mb-1.5">
+                  <label className="text-[10px] text-[#929292] font-bold block mb-1.5">
                     {t.verificationCode}
                   </label>
                   <input
@@ -1486,7 +1479,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             </h3>
             <form onSubmit={handleChangePassword} className="space-y-4">
               <div>
-                <label className="text-[10px] uppercase text-[#929292] font-bold block mb-1.5">
+                <label className="text-[10px] text-[#929292] font-bold block mb-1.5">
                   {t.oldPassword}
                 </label>
                 <input
@@ -1499,7 +1492,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               </div>
 
               <div>
-                <label className="text-[10px] uppercase text-[#929292] font-bold block mb-1.5">
+                <label className="text-[10px] text-[#929292] font-bold block mb-1.5">
                   {t.newPassword}
                 </label>
                 <input
@@ -1513,7 +1506,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               </div>
 
               <div>
-                <label className="text-[10px] uppercase text-[#929292] font-bold block mb-1.5">
+                <label className="text-[10px] text-[#929292] font-bold block mb-1.5">
                   {t.confirmNewPassword}
                 </label>
                 <input
@@ -1598,7 +1591,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
                 <div className="mb-4 p-3 bg-[#090909] border border-[#1A1A1F] flex items-center justify-between">
                   <div className="min-w-0 mr-3">
-                    <span className="text-[10px] uppercase text-[#929292] font-mono block">
+                    <span className="text-[10px] text-[#929292] font-mono block">
                       {isRu ? 'Секретный ключ (Base32)' : 'Secret Key (Base32)'}
                     </span>
                     <span className="font-mono text-xs text-white tracking-widest select-all break-all">
@@ -1704,7 +1697,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               className="space-y-4"
             >
               <div>
-                <label className="block text-[10px] uppercase text-[#929292] font-mono font-bold tracking-wider mb-2">
+                <label className="block text-[10px] text-[#929292] font-mono font-bold tracking-wide mb-2">
                   {isRu ? '6-значный код подтверждения' : '6-digit verification code'}
                 </label>
                 <input

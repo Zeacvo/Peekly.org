@@ -32,7 +32,7 @@ export const AccountPrivacy: React.FC<AccountPrivacyProps> = ({ currentLang, onB
   const isRu = currentLang === 'ru' || currentLang === 'uk';
   const isRtl = currentLang === 'ar';
   const backLabel = backLabelMap[currentLang] || backLabelMap.en;
-  const ctaLabel = (translations[currentLang] || translations.en).hero.cta.toUpperCase();
+  const ctaLabel = (translations[currentLang] || translations.en).hero.cta;
 
   useEffect(() => {
     const prevTitle = document.title;
@@ -210,7 +210,7 @@ export const AccountPrivacy: React.FC<AccountPrivacyProps> = ({ currentLang, onB
             href="https://chromewebstore.google.com/detail/peekly-for-faceit/cmfgneodcjfofdcglbbhcghijgcjcokk"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-3 sm:gap-3.5 px-6 sm:px-8 py-3.5 sm:py-4 bg-white text-black font-sans text-xs md:text-sm font-bold tracking-wider uppercase rounded-none border border-white hover:bg-neutral-200 transition-colors duration-150 btn-chrome-action cursor-pointer shadow-2xl active:scale-95 w-full sm:w-auto max-w-xs sm:max-w-none"
+            className="inline-flex items-center justify-center gap-3 sm:gap-3.5 px-6 sm:px-8 py-3.5 sm:py-4 bg-white text-black font-sans text-xs md:text-sm font-bold tracking-wider rounded-none border border-white hover:bg-neutral-200 transition-colors duration-150 btn-chrome-action cursor-pointer shadow-2xl active:scale-95 w-full sm:w-auto max-w-xs sm:max-w-none"
           >
             <ChromeLogo className="w-5 h-5 sm:w-6 sm:h-6 shrink-0 fill-current" />
             <span>{ctaLabel}</span>

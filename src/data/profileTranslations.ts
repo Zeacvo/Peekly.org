@@ -7,6 +7,7 @@ export interface ProfileTranslation {
   viewOnlyNotice: string;
   backHome: string;
   userNotFound: string;
+  userNotFoundDesc?: string;
   checkingAuth: string;
 
   // Persona Card
@@ -95,11 +96,12 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
   // UKRAINIAN (Українська)
   // ==========================================
   uk: {
-    title: 'ПРОФІЛЬ',
-    publicProfileTitle: 'ПУБЛІЧНИЙ ПРОФІЛЬ ГРАВЦЯ',
+    title: 'Профіль',
+    publicProfileTitle: 'Публічний профіль гравця',
     viewOnlyNotice: 'Ви переглядаєте відкриту картку гравця. Зміна налаштувань доступна лише власнику акаунта.',
-    backHome: '< НА ГОЛОВНУ',
+    backHome: 'На головну',
     userNotFound: 'Гравця не знайдено або видалено.',
+    userNotFoundDesc: 'Запитуваний профіль не існує або був видалений.',
     checkingAuth: 'Завантаження профілю...',
 
     online: 'В мережі',
@@ -107,7 +109,7 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     memberSince: 'Зареєстрований',
     ownerBadge: 'OWNER',
     freeBadge: 'FREE TIER',
-    adminConsole: 'КОНСОЛЬ АДМІНІСТРАТОРА ↗',
+    adminConsole: 'Консоль адміністратора ↗',
     changeAvatar: 'Змінити аватар',
     removeAvatar: 'Видалити фото',
     avatarModalTitle: 'Посилання на аватар',
@@ -172,11 +174,12 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
   // RUSSIAN (Русский)
   // ==========================================
   ru: {
-    title: 'ПРОФИЛЬ',
-    publicProfileTitle: 'ПУБЛИЧНЫЙ ПРОФИЛЬ ИГРОКА',
+    title: 'Профиль',
+    publicProfileTitle: 'Публичный профиль игрока',
     viewOnlyNotice: 'Вы просматриваете открытую карточку игрока. Изменение настроек доступно только владельцу аккаунта.',
-    backHome: '< НА ГЛАВНУЮ',
+    backHome: 'На главную',
     userNotFound: 'Пользователь не найден или был удалён.',
+    userNotFoundDesc: 'Запрошенный профиль не существует или был удалён.',
     checkingAuth: 'Загрузка профиля...',
 
     online: 'В сети',
@@ -257,11 +260,12 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
   // ENGLISH
   // ==========================================
   en: {
-    title: 'PROFILE',
-    publicProfileTitle: 'PUBLIC PLAYER PROFILE',
+    title: 'Profile',
+    publicProfileTitle: 'Public player profile',
     viewOnlyNotice: 'You are viewing a public player profile. Account settings can only be modified by the owner.',
-    backHome: '< BACK HOME',
-    userNotFound: 'Player profile not found or removed.',
+    backHome: 'Back to home',
+    userNotFound: 'User not found or removed.',
+    userNotFoundDesc: 'The requested profile identifier does not exist or has been removed.',
     checkingAuth: 'Loading profile...',
 
     online: 'Online',
@@ -269,7 +273,7 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     memberSince: 'Registered',
     ownerBadge: 'OWNER',
     freeBadge: 'FREE TIER',
-    adminConsole: 'ADMIN CONSOLE ↗',
+    adminConsole: 'Admin console ↗',
     changeAvatar: 'Change Avatar',
     removeAvatar: 'Remove photo',
     avatarModalTitle: 'Avatar URL',
@@ -287,39 +291,39 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     region: 'Region',
     verified: 'Verified',
     notLinked: 'Not Linked',
-    profileId: 'PROFILE ID',
-    copyProfileLink: 'COPY LINK',
-    linkCopied: 'COPIED!',
+    profileId: 'Profile ID',
+    copyProfileLink: 'Copy link',
+    linkCopied: 'Copied!',
 
-    credentialsTitle: 'ACCOUNT CREDENTIALS',
-    nicknameLabel: 'PLAYER NICKNAME',
-    changeNickname: 'CHANGE NICKNAME',
-    emailLabel: 'PRIMARY EMAIL',
-    changeEmail: 'CHANGE EMAIL',
+    credentialsTitle: 'Account credentials',
+    nicknameLabel: 'Player nickname',
+    changeNickname: 'Change nickname',
+    emailLabel: 'Primary email',
+    changeEmail: 'Change email',
 
-    securityTitle: 'PASSWORD & SECURITY',
-    passwordLabel: 'PASSWORD',
-    changePassword: 'CHANGE PASSWORD',
+    securityTitle: 'Password & security',
+    passwordLabel: 'Password',
+    changePassword: 'Change password',
 
-    sessionsTitle: 'ACTIVE SESSIONS',
-    currentDevice: 'CURRENT DEVICE',
+    sessionsTitle: 'Active sessions',
+    currentDevice: 'Current device',
     currentDeviceDesc: 'Chrome (Windows) • Active now',
     activeNow: 'Active now',
-    terminateOtherSessions: 'TERMINATE ALL OTHER SESSIONS',
+    terminateOtherSessions: 'Terminate all other sessions',
     sessionsTerminatedSuccess: 'All other sessions have been terminated.',
 
-    dangerZoneTitle: 'DANGER ZONE',
+    dangerZoneTitle: 'Danger zone',
     dangerZoneSubtitle: 'Irreversible account operations',
-    deleteAccount: 'DELETE ACCOUNT',
-    deleteAccountBtn: 'DELETE ACCOUNT',
+    deleteAccount: 'Delete account',
+    deleteAccountBtn: 'Delete account',
     deleteAccountWarning: 'Deleting your account permanently removes all personal data, sessions, and telemetry.',
     deleteAccountConfirm: 'Are you sure you want to delete your account? This action cannot be undone.',
 
-    twoFactorTitle: 'TWO-FACTOR AUTHENTICATION (2FA)',
-    twoFactorDisabled: 'DISABLED',
-    twoFactorActive: 'ACTIVE',
-    twoFactorConfigure: 'CONFIGURE',
-    twoFactorDisable: 'DISABLE',
+    twoFactorTitle: 'Two-factor authentication (2FA)',
+    twoFactorDisabled: 'Disabled',
+    twoFactorActive: 'Active',
+    twoFactorConfigure: 'Configure',
+    twoFactorDisable: 'Disable',
     removePhoto: 'Remove',
 
     save: 'Save',
@@ -345,8 +349,9 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     title: 'PROFIL',
     publicProfileTitle: 'ÖFFENTLICHES SPIELERPROFIL',
     viewOnlyNotice: 'Sie sehen ein öffentliches Spielerprofil. Einstellungen können nur vom Kontoinhaber geändert werden.',
-    backHome: '< ZUR STARTSEITE',
+    backHome: 'Zur Startseite',
     userNotFound: 'Spielerprofil nicht gefunden oder entfernt.',
+    userNotFoundDesc: 'Das angeforderte Profil existiert nicht oder wurde entfernt.',
     checkingAuth: 'Profil wird geladen...',
 
     online: 'Online',
@@ -420,8 +425,9 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     title: 'PROFIL',
     publicProfileTitle: 'PUBLICZNY PROFIL GRACZA',
     viewOnlyNotice: 'Przeglądasz profil publiczny. Zmiana ustawień jest dostępna tylko dla właściciela konta.',
-    backHome: '< STRONA GŁÓWNA',
+    backHome: 'Strona główna',
     userNotFound: 'Profil gracza nie został znaleziony.',
+    userNotFoundDesc: 'Żądany profil nie istnieje lub został usunięty.',
     checkingAuth: 'Ładowanie profilu...',
 
     online: 'Online',
@@ -496,8 +502,9 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     title: 'PROFIL',
     publicProfileTitle: 'PROFIL PUBLIC DU JOUEUR',
     viewOnlyNotice: 'Vous consultez un profil public. Les paramètres ne peuvent être modifiés que par le propriétaire.',
-    backHome: '< RETOUR À L\'ACCUEIL',
+    backHome: 'Retour à l\'accueil',
     userNotFound: 'Profil joueur introuvable ou supprimé.',
+    userNotFoundDesc: 'Le profil demandé n\'existe pas ou a été supprimé.',
     checkingAuth: 'Chargement du profil...',
 
     online: 'En ligne',
@@ -571,8 +578,9 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     title: 'PERFIL',
     publicProfileTitle: 'PERFIL PÚBLICO DEL JUGADOR',
     viewOnlyNotice: 'Estás viendo un perfil público. Los ajustes solo pueden ser modificados por el propietario.',
-    backHome: '< VOLVER AL INICIO',
+    backHome: 'Volver al inicio',
     userNotFound: 'Perfil de jugador no encontrado o eliminado.',
+    userNotFoundDesc: 'El perfil solicitado no existe o ha sido eliminado.',
     checkingAuth: 'Cargando perfil...',
 
     online: 'En línea',
@@ -646,8 +654,9 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     title: 'PROFIL',
     publicProfileTitle: 'OFFENTLIG SPILLERPROFIL',
     viewOnlyNotice: 'Du ser en offentlig profil. Indstillinger kan kun ændres af kontoejeren.',
-    backHome: '< TILBAGE TIL START',
+    backHome: 'Tilbage til start',
     userNotFound: 'Spillerprofil ikke fundet.',
+    userNotFoundDesc: 'Den anmodede profil findes ikke eller er blevet fjernet.',
     checkingAuth: 'Indlæser profil...',
 
     online: 'Online',
@@ -721,8 +730,9 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     title: 'PERFIL',
     publicProfileTitle: 'PERFIL PÚBLICO DO JOGADOR',
     viewOnlyNotice: 'Você está visualizando um perfil público. Alterações só podem ser feitas pelo titular da conta.',
-    backHome: '< VOLTAR AO INÍCIO',
+    backHome: 'Voltar ao início',
     userNotFound: 'Perfil de jogador não encontrado.',
+    userNotFoundDesc: 'O perfil solicitado não existe ou foi removido.',
     checkingAuth: 'Carregando perfil...',
 
     online: 'Online',
@@ -796,8 +806,9 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     title: 'PROFIILI',
     publicProfileTitle: 'JULKINEN PELAAJAPROFIILI',
     viewOnlyNotice: 'Tarkastelet julkista profiilia. Vain tilin omistaja voi muuttaa asetuksia.',
-    backHome: '< TAKAISIN ALKUUN',
+    backHome: 'Takaisin alkuun',
     userNotFound: 'Pelaajaprofiilia ei löytynyt.',
+    userNotFoundDesc: 'Pyydettyä profiilia ei ole olemassa tai se on poistettu.',
     checkingAuth: 'Ladataan profiilia...',
 
     online: 'Paikalla',
@@ -871,8 +882,9 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     title: 'PROFIL',
     publicProfileTitle: 'OFFENTLIG SPELARPROFIL',
     viewOnlyNotice: 'Du visar en offentlig profil. Inställningar kan endast ändras av kontoinnehavaren.',
-    backHome: '< TILLBAKA TILL START',
+    backHome: 'Tillbaka till start',
     userNotFound: 'Spelarprofilen hittades inte.',
+    userNotFoundDesc: 'Den begärda profilen finns inte eller har tagits bort.',
     checkingAuth: 'Laddar profil...',
 
     online: 'Online',
@@ -946,8 +958,9 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     title: 'PROFİL',
     publicProfileTitle: 'HERKESE AÇIK OYUNCU PROFİLİ',
     viewOnlyNotice: 'Herkese açık bir profili görüntülüyorsunuz. Yalnızca hesap sahibi değişiklik yapabilir.',
-    backHome: '< ANA SAYFAYA DÖN',
+    backHome: 'Ana sayfaya dön',
     userNotFound: 'Oyuncu profili bulunamadı veya silindi.',
+    userNotFoundDesc: 'İstenen profil mevcut değil veya kaldırılmış.',
     checkingAuth: 'Profil yükleniyor...',
 
     online: 'Çevrim içi',
@@ -1021,8 +1034,9 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     title: '个人资料',
     publicProfileTitle: '玩家公开资料',
     viewOnlyNotice: '您正在查看公开资料。只有账户所有者可以修改设置。',
-    backHome: '< 返回首页',
+    backHome: '返回首页',
     userNotFound: '未找到玩家资料或已被删除。',
+    userNotFoundDesc: '请求的个人资料不存在或已被删除。',
     checkingAuth: '正在加载个人资料...',
 
     online: '在线',
@@ -1096,8 +1110,9 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     title: 'الملف الشخصي',
     publicProfileTitle: 'الملف الشخصي العام للاعب',
     viewOnlyNotice: 'أنت تعرض ملفاً عاماً. يمكن لمالك الحساب فقط تعديل الإعدادات.',
-    backHome: '< العودة للرئيسية',
+    backHome: 'العودة للرئيسية',
     userNotFound: 'لم يتم العثور على ملف اللاعب.',
+    userNotFoundDesc: 'الملف الشخصي المطلوب غير موجود أو تمت إزالته.',
     checkingAuth: 'جارٍ تحميل الملف الشخصي...',
 
     online: 'متصل',
@@ -1171,8 +1186,9 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     title: 'プロフィール',
     publicProfileTitle: '公開プレイヤープロフィール',
     viewOnlyNotice: '公開プロフィールを閲覧中です。設定変更はアカウント所有者のみ可能です。',
-    backHome: '< ホームに戻る',
+    backHome: 'ホームに戻る',
     userNotFound: 'プレイヤープロフィールが見つかりません。',
+    userNotFoundDesc: 'リクエストされたプロフィールは存在しないか、削除されました。',
     checkingAuth: 'プロフィール読み込み中...',
 
     online: 'オンライン',
@@ -1246,8 +1262,9 @@ export const profileTranslations: Record<Language, ProfileTranslation> = {
     title: '프로필',
     publicProfileTitle: '공개 플레이어 프로필',
     viewOnlyNotice: '공개 프로필을 조회 중입니다. 설정 변경은 계정 소유자만 가능합니다.',
-    backHome: '< 홈으로 돌아가기',
+    backHome: '홈으로 돌아가기',
     userNotFound: '플레이어 프로필을 찾을 수 없습니다.',
+    userNotFoundDesc: '요청한 프로필이 존재하지 않거나 삭제되었습니다.',
     checkingAuth: '프로필 불러오는 중...',
 
     online: '온라인',
