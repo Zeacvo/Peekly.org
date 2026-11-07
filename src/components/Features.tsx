@@ -572,6 +572,12 @@ export const Features: React.FC<FeaturesProps> = ({ currentLang, onSelectFeature
                 key={item.id}
                 role="button"
                 tabIndex={0}
+                onMouseEnter={() => {
+                  import('./FeatureDetailPage');
+                }}
+                onTouchStart={() => {
+                  import('./FeatureDetailPage');
+                }}
                 onClick={() => onSelectFeature(item.id)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {

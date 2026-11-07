@@ -246,6 +246,20 @@ export const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // Preload FeatureDetailPage immediately after initial mount so clicking any feature card opens instantaneously (0ms)
+    if (typeof window !== 'undefined') {
+      const preload = () => {
+        import('./components/FeatureDetailPage');
+      };
+      if ('requestIdleCallback' in window) {
+        (window as Window & { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback?.(preload);
+      } else {
+        setTimeout(preload, 50);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     const handleLocationChange = () => {
       const routes = checkRoutes();
       setIsAdmin(routes.isAdmin);
@@ -314,7 +328,7 @@ export const App: React.FC = () => {
       }
     } catch {}
     try {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'instant' });
     } catch {}
   };
 
@@ -334,7 +348,7 @@ export const App: React.FC = () => {
       history.pushState(null, '', '/changelog');
     } catch {}
     try {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'instant' });
     } catch {}
   };
 
@@ -354,7 +368,7 @@ export const App: React.FC = () => {
       history.pushState(null, '', '/privacy');
     } catch {}
     try {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'instant' });
     } catch {}
   };
 
@@ -374,7 +388,7 @@ export const App: React.FC = () => {
       history.pushState(null, '', '/terms');
     } catch {}
     try {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'instant' });
     } catch {}
   };
 
@@ -394,7 +408,7 @@ export const App: React.FC = () => {
       history.pushState(null, '', '/login');
     } catch {}
     try {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'instant' });
     } catch {}
   };
 
@@ -414,7 +428,7 @@ export const App: React.FC = () => {
       history.pushState(null, '', '/register');
     } catch {}
     try {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'instant' });
     } catch {}
   };
 
@@ -440,7 +454,7 @@ export const App: React.FC = () => {
       window.dispatchEvent(new PopStateEvent('popstate'));
     } catch {}
     try {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'instant' });
     } catch {}
   };
 
@@ -461,7 +475,7 @@ export const App: React.FC = () => {
       history.pushState(null, '', '/');
     } catch {}
     try {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'instant' });
     } catch {}
   };
 
@@ -483,7 +497,7 @@ export const App: React.FC = () => {
               history.pushState(null, '', '/admin');
             } catch {}
             try {
-              window.scrollTo({ top: 0, behavior: 'smooth' });
+              window.scrollTo({ top: 0, behavior: 'instant' });
             } catch {}
           }}
         />
@@ -510,7 +524,7 @@ export const App: React.FC = () => {
                   history.pushState(null, '', '/admin');
                 } catch {}
                 try {
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  window.scrollTo({ top: 0, behavior: 'instant' });
                 } catch {}
               }}
             />
