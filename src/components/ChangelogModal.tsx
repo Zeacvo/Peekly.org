@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { X, Check, Terminal } from 'lucide-react';
+import { translations } from '../translations';
 import type { Language } from '../translations';
 
 interface ChangelogModalProps {
@@ -7,6 +8,44 @@ interface ChangelogModalProps {
   onClose: () => void;
   currentLang?: Language;
 }
+
+const closeLabelMap: Record<Language, string> = {
+  en: 'Close',
+  ru: 'Закрыть',
+  uk: 'Закрити',
+  de: 'Schließen',
+  pl: 'Zamknij',
+  fr: 'Fermer',
+  es: 'Cerrar',
+  da: 'Luk',
+  pt: 'Fechar',
+  fi: 'Sulje',
+  sv: 'Stäng',
+  tr: 'Kapat',
+  zh: '关闭',
+  ar: 'إغلاق',
+  ja: '閉じる',
+  ko: '닫기',
+};
+
+const releaseHighlightsMap: Record<Language, string> = {
+  en: 'Release highlights & architecture:',
+  ru: 'Основные нововведения и возможности:',
+  uk: 'Основні нововведення та можливості:',
+  de: 'Release-Highlights und Architektur:',
+  pl: 'Główne nowości i architektura:',
+  fr: 'Points forts de la version et architecture :',
+  es: 'Aspectos destacados y arquitectura:',
+  da: 'Højdepunkter og arkitektur:',
+  pt: 'Destaques do lançamento e arquitetura:',
+  fi: 'Julkaisun kohokohdat ja arkkitehtuuri:',
+  sv: 'Höjdpunkter och arkitektur:',
+  tr: 'Sürüm öne çıkanları ve mimari:',
+  zh: '版本亮点与架构：',
+  ar: 'أبرز مميزات الإصدار والهندسة:',
+  ja: 'リリースのハイライトとアーキテクチャ:',
+  ko: '릴리스 주요 특징 및 아키텍처:',
+};
 
 export const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose, currentLang = 'en' }) => {
   useEffect(() => {
@@ -29,49 +68,17 @@ export const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose,
 
   if (!isOpen) return null;
 
-  const isRu = currentLang === 'ru';
+  const t = translations[currentLang] || translations.en;
 
   const changes = [
     {
-      title: isRu ? 'Первый публичный релиз' : 'Initial Public Release',
-      desc: isRu ? 'Полнофункциональный релиз расширения для соревновательного FACEIT CS2.' : 'Complete competitive intelligence and automation extension suite for FACEIT CS2.'
+      title: t.changelogPage?.initialReleaseTitle || 'Initial Public Release 1.0.0',
+      desc: t.changelogPage?.initialReleaseDesc || 'Full-featured tactical interface extension suite for competitive FACEIT CS2.',
     },
-    {
-      title: 'Map Pool Radar Chart',
-      desc: isRu ? 'Тактическая паутина винрейтов маппула команд с глубиной анализа в 30 матчей.' : 'Tactical team map pool winrate radar chart analyzing depth of last 30 competitive matches.'
-    },
-    {
-      title: 'Match Player Stats Overlay',
-      desc: isRu ? 'Отображение боевых метрик игроков (K/R, ADR, PCR) прямо в лобби матча.' : 'Direct matchroom HUD overlay rendering K/R, ADR, and PCR combat metrics.'
-    },
-    {
-      title: 'Auto-Accept Match & Auto-Checkin',
-      desc: isRu ? 'Автоподтверждение готовности к матчу с нулевой задержкой и настраиваемым таймером.' : 'Zero-latency match ready check confirmation with configurable response timer.'
-    },
-    {
-      title: 'Lobby Focus Mode & Visual Noise Filter',
-      desc: isRu ? 'Фокусировка на главном: скрытие лишних баннеров и визуального шума FACEIT.' : 'Distraction-free lobby mode suppressing noise and highlighting essential match intel.'
-    },
-    {
-      title: 'Party Grouping Detection & Premade Nodes',
-      desc: isRu ? 'Определение сыгранных пати и стаков соперника с графом взаимосвязей.' : 'Identification of premade stacks and party constellations in the opposing roster.'
-    },
-    {
-      title: 'Auto-Copy Server IP upon Match Launch',
-      desc: isRu ? 'Мгновенное копирование команды connect в буфер обмена при распределении сервера.' : 'Instant clipboard sync of the console connect command upon server allocation.'
-    },
-    {
-      title: 'Player Profile Peak ELO Tracker',
-      desc: isRu ? 'Отслеживание максимального пика ELO и динамики роста рейтинга игрока.' : 'Peak rating progression tracker and tier advancement indicators on profiles.'
-    },
-    {
-      title: 'Tactical Match History & Map Winrates',
-      desc: isRu ? 'Расширенная таблица истории матчей с детальной статистикой по каждой карте.' : 'Comprehensive match history logs with per-map winrates and rating adjustments.'
-    },
-    {
-      title: 'Instant GOTV Demo Downloader',
-      desc: isRu ? 'Прямое скачивание .DEM записей матча в 1 клик через CDN-серверы FACEIT.' : 'One-click direct .DEM replay downloads via high-speed FACEIT CDN relays.'
-    }
+    ...(t.features?.items?.map((item) => ({
+      title: item.title,
+      desc: item.desc,
+    })) || []),
   ];
 
   return (
@@ -87,14 +94,14 @@ export const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose,
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#111111] shrink-0">
           <div className="flex items-center space-x-3">
             <Terminal className="w-4 h-4 text-[#FF5500]" />
-            <span className="font-mono text-xs uppercase tracking-widest text-neutral-400">
-              {isRu ? 'ИСТОРИЯ ВЕРСИЙ // CHANGELOG' : 'SYSTEM // CHANGELOG'}
+            <span className="font-mono text-xs text-neutral-400">
+              {t.nav.changelog}
             </span>
           </div>
           <button
             onClick={onClose}
             className="text-neutral-400 hover:text-white transition-colors p-1 rounded-none hover:bg-white/10 cursor-pointer"
-            aria-label="Close"
+            aria-label={closeLabelMap[currentLang] || 'Close'}
           >
             <X className="w-5 h-5" />
           </button>
@@ -105,25 +112,25 @@ export const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose,
           {/* Version Banner */}
           <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
             <div className="flex items-center space-x-3">
-              <span className="px-2.5 py-1 bg-white text-black font-mono font-black text-sm tracking-wider rounded-none">
+              <span className="px-2.5 py-1 bg-white text-black font-mono font-bold text-sm tracking-wide rounded-none">
                 v1.0.0
               </span>
-              <span className="text-white font-bold text-base sm:text-lg tracking-tight font-sans">
-                {isRu ? 'Публичный релиз v1.0.0' : 'Public Release v1.0.0'}
+              <span className="text-white font-bold text-base sm:text-lg tracking-normal font-sans">
+                {t.changelogPage?.version || 'Version 1.0.0'}
               </span>
             </div>
             <div className="flex items-center space-x-2">
               <span className="w-2 h-2 rounded-full bg-[#FF5500] animate-pulse"></span>
               <span className="font-mono text-xs text-neutral-400">
-                October 10, 2026
+                2026
               </span>
             </div>
           </div>
 
           {/* Release Notes List */}
           <div className="space-y-3.5">
-            <div className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 mb-2">
-              {isRu ? 'ОСНОВНЫЕ НОВОВВЕДЕНИЯ И ВОЗМОЖНОСТИ:' : 'RELEASE HIGHLIGHTS & ARCHITECTURE:'}
+            <div className="text-[11px] font-mono text-neutral-400 mb-2">
+              {releaseHighlightsMap[currentLang] || 'Release highlights & architecture:'}
             </div>
 
             {changes.map((item, idx) => (
@@ -135,7 +142,7 @@ export const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose,
                   <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                 </div>
                 <div className="space-y-0.5 flex-1 min-w-0">
-                  <div className="text-xs sm:text-sm font-bold text-white tracking-tight">
+                  <div className="text-xs sm:text-sm font-bold text-white tracking-normal font-sans">
                     {item.title}
                   </div>
                   <div className="text-xs text-neutral-400 leading-relaxed font-sans">
@@ -148,8 +155,8 @@ export const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose,
 
           {/* Footer note */}
           <div className="pt-4 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-neutral-500">
-            <span>PEEKLY ARCHITECTURE ENGINE</span>
-            <span>BUILD: 2026.10.10</span>
+            <span>Peekly Engine</span>
+            <span>v1.0.0</span>
           </div>
         </div>
 
@@ -157,9 +164,9 @@ export const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose,
         <div className="px-6 py-4 bg-[#111111] border-t border-white/10 flex items-center justify-end shrink-0">
           <button
             onClick={onClose}
-            className="px-5 py-2 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer rounded-none"
+            className="btn-brand-interactive px-5 py-2 text-xs font-semibold cursor-pointer rounded-none"
           >
-            {isRu ? 'ЗАКРЫТЬ' : 'CLOSE'}
+            {closeLabelMap[currentLang] || 'Close'}
           </button>
         </div>
       </div>

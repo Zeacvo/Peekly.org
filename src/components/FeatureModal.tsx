@@ -1,8 +1,66 @@
 import React, { useEffect } from 'react';
 import { X, ExternalLink, Cpu, CheckCircle2, ShieldCheck, Zap } from 'lucide-react';
 import type { Language } from '../translations';
+import { translations } from '../translations';
 import { featureDetailsByLang } from '../data/featureDetails';
 import { PeeklyLogo } from './PeeklyLogo';
+
+const closeLabelMap: Record<Language, string> = {
+  en: 'Close',
+  ru: 'Закрыть',
+  uk: 'Закрити',
+  de: 'Schließen',
+  pl: 'Zamknij',
+  fr: 'Fermer',
+  es: 'Cerrar',
+  da: 'Luk',
+  pt: 'Fechar',
+  fi: 'Sulje',
+  sv: 'Stäng',
+  tr: 'Kapat',
+  zh: '关闭',
+  ar: 'إغلاق',
+  ja: '閉じる',
+  ko: '닫기',
+};
+
+const systemSpecsLabelMap: Record<Language, string> = {
+  en: 'System specifications:',
+  ru: 'Тактические спецификации:',
+  uk: 'Тактичні специфікації:',
+  de: 'Systemspezifikationen:',
+  pl: 'Specyfikacja systemu:',
+  fr: 'Spécifications du système :',
+  es: 'Especificaciones del sistema:',
+  da: 'Systemspecifikationer:',
+  pt: 'Especificações do sistema:',
+  fi: 'Järjestelmätiedot:',
+  sv: 'Systemspecifikationer:',
+  tr: 'Sistem özellikleri:',
+  zh: '系统规格：',
+  ar: 'مواصفات النظام:',
+  ja: 'システム仕様:',
+  ko: '시스템 사양:',
+};
+
+const antiCheatLabelMap: Record<Language, string> = {
+  en: 'Anti-Cheat',
+  ru: 'Безопасность',
+  uk: 'Безпека',
+  de: 'Anti-Cheat',
+  pl: 'Bezpieczeństwo',
+  fr: 'Anti-Triche',
+  es: 'Anti-Trampas',
+  da: 'Anti-Cheat',
+  pt: 'Anti-Cheat',
+  fi: 'Anti-Cheat',
+  sv: 'Anti-Cheat',
+  tr: 'Anti-Cheat',
+  zh: '反作弊',
+  ar: 'مكافحة الغش',
+  ja: 'アンチチート',
+  ko: '안티치트',
+};
 
 interface FeatureModalProps {
   featureId: string | null;
@@ -44,6 +102,7 @@ export const FeatureModal: React.FC<FeatureModalProps> = ({
   if (!details) return null;
 
   const isRu = currentLang === 'ru';
+  const t = translations[currentLang] || translations.en;
 
   // Specific formulas and algorithmic logic per feature
   const formulasMap: Record<string, { label: string; code: string; notes?: string }> = {
@@ -215,23 +274,23 @@ export const FeatureModal: React.FC<FeatureModalProps> = ({
 
           {/* Tactical Specs Table */}
           <div>
-            <div className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 mb-2">
-              {isRu ? 'ТАКТИЧЕСКИЕ СПЕЦИФИКАЦИИ:' : 'SYSTEM SPECIFICATIONS:'}
+            <div className="text-[11px] font-mono text-neutral-400 mb-2">
+              {systemSpecsLabelMap[currentLang] || 'System specifications:'}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {details.specs.map((s, idx) => (
                 <div key={idx} className="p-3 bg-[#111111] border border-[#1f1f1f]">
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500">{s.label}</div>
+                  <div className="text-[10px] font-mono text-neutral-500">{s.label}</div>
                   <div className="text-xs sm:text-sm font-mono font-bold text-white mt-1 truncate">{s.value}</div>
                 </div>
               ))}
               <div className="p-3 bg-[#111111] border border-[#1f1f1f]">
-                <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500">
-                  {isRu ? 'БЕЗОПАСНОСТЬ' : 'ANTI-CHEAT'}
+                <div className="text-[10px] font-mono text-neutral-500">
+                  {antiCheatLabelMap[currentLang] || 'Anti-Cheat'}
                 </div>
                 <div className="text-xs sm:text-sm font-mono font-bold text-[#FF5500] mt-1 flex items-center space-x-1.5">
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>100% SAFE</span>
+                  <span>100% Safe</span>
                 </div>
               </div>
             </div>
@@ -243,24 +302,24 @@ export const FeatureModal: React.FC<FeatureModalProps> = ({
         <div className="px-5 sm:px-7 py-4 bg-[#111111] border-t border-white/10 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-2 text-xs font-mono text-neutral-400 hidden sm:flex">
             <Zap className="w-3.5 h-3.5 text-[#FF5500]" />
-            <span>MANIFEST V3 EXTENSION</span>
+            <span>Manifest V3 extension</span>
           </div>
           
           <div className="flex items-center space-x-3 w-full sm:w-auto justify-end">
             <button
               onClick={onClose}
-              className="px-4 py-2.5 bg-transparent border border-white/20 text-neutral-300 font-mono text-xs uppercase tracking-wider hover:text-white hover:border-white transition-colors cursor-pointer rounded-none"
+              className="px-4 py-2.5 bg-transparent border border-white/20 text-neutral-300 font-sans text-xs hover:text-white hover:border-white transition-colors cursor-pointer rounded-none"
             >
-              {isRu ? 'ЗАКРЫТЬ' : 'CLOSE'}
+              {closeLabelMap[currentLang] || 'Close'}
             </button>
             <a
               href="https://chromewebstore.google.com/detail/peekly-for-faceit/cmfgneodcjfofdcglbbhcghijgcjcokk"
               target="_blank"
               rel="noreferrer"
-              className="group inline-flex items-center space-x-2.5 px-5 py-2.5 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider hover:bg-black hover:border hover:border-white hover:text-white transition-all cursor-pointer rounded-none"
+              className="btn-brand-interactive group inline-flex items-center space-x-2.5 px-5 py-2.5 font-sans font-bold text-xs cursor-pointer rounded-none"
             >
-              <PeeklyLogo size={18} className="text-black group-hover:text-[#FF5500] transition-colors duration-200" />
-              <span>{isRu ? 'УСТАНОВИТЬ В CHROME' : 'ADD TO CHROME'}</span>
+              <PeeklyLogo size={18} className="text-black group-hover:text-black transition-colors duration-200" />
+              <span>{t.hero.cta}</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
           </div>

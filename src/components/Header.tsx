@@ -19,6 +19,44 @@ interface HeaderProps {
   onOpenAuthModal?: () => void;
 }
 
+const myProfileLabelMap: Record<Language, string> = {
+  en: 'My profile',
+  ru: 'Мой профиль',
+  uk: 'Мій профіль',
+  de: 'Mein Profil',
+  pl: 'Mój profil',
+  fr: 'Mon profil',
+  es: 'Mi perfil',
+  da: 'Min profil',
+  pt: 'Meu perfil',
+  fi: 'Oma profiili',
+  sv: 'Min profil',
+  tr: 'Profilim',
+  zh: '我的个人资料',
+  ar: 'ملفي الشخصي',
+  ja: 'マイプロフィール',
+  ko: '내 프로필',
+};
+
+const signOutLabelMap: Record<Language, string> = {
+  en: 'Sign out',
+  ru: 'Выйти из аккаунта',
+  uk: 'Вийти з акаунта',
+  de: 'Abmelden',
+  pl: 'Wyloguj się',
+  fr: 'Se déconnecter',
+  es: 'Cerrar sesión',
+  da: 'Log ud',
+  pt: 'Sair da conta',
+  fi: 'Kirjaudu ulos',
+  sv: 'Logga ut',
+  tr: 'Çıkış yap',
+  zh: '退出登录',
+  ar: 'تسجيل الخروج',
+  ja: 'ログアウト',
+  ko: '로그아웃',
+};
+
 interface UserSession {
   id?: string;
   nickname: string;
@@ -90,7 +128,39 @@ export const Header: React.FC<HeaderProps> = ({
 
   const t = translations[currentLang] || translations.en;
   const authT = getAuthTranslations(currentLang);
-  const isRu = currentLang === 'ru';
+
+  const toggleLangDropdown = () => {
+    setLangDropdownOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        setUserDropdownOpen(false);
+        setInstallDropdownOpen(false);
+      }
+      return next;
+    });
+  };
+
+  const toggleUserDropdown = () => {
+    setUserDropdownOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        setLangDropdownOpen(false);
+        setInstallDropdownOpen(false);
+      }
+      return next;
+    });
+  };
+
+  const toggleInstallDropdown = () => {
+    setInstallDropdownOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        setLangDropdownOpen(false);
+        setUserDropdownOpen(false);
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     const syncUser = () => {
@@ -226,6 +296,9 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={() => {
+                setLangDropdownOpen(false);
+                setUserDropdownOpen(false);
+                setInstallDropdownOpen(false);
                 if (onOpenChangelog) onOpenChangelog();
               }}
               className="group inline-flex items-center gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
@@ -244,7 +317,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="relative inline-flex items-center shrink-0" ref={dropdownRef}>
               <button
                 type="button"
-                onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+                onClick={toggleLangDropdown}
                 className="group inline-flex items-center gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
                 aria-label="Select language"
                 aria-expanded={langDropdownOpen}
@@ -277,6 +350,8 @@ export const Header: React.FC<HeaderProps> = ({
                         onClick={() => {
                           onLanguageChange(lang.code);
                           setLangDropdownOpen(false);
+                          setUserDropdownOpen(false);
+                          setInstallDropdownOpen(false);
                         }}
                         className={`w-full text-left px-3.5 py-2 font-sans text-xs md:text-[13px] leading-none whitespace-nowrap rounded-none transition-colors duration-150 border-0 cursor-pointer ${
                           isSelected
@@ -297,7 +372,7 @@ export const Header: React.FC<HeaderProps> = ({
             {userSession ? (
               <button
                 type="button"
-                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                onClick={toggleUserDropdown}
                 aria-expanded={userDropdownOpen}
                 aria-haspopup="menu"
                 aria-label="User account menu"
@@ -308,7 +383,12 @@ export const Header: React.FC<HeaderProps> = ({
             ) : (
               <button
                 type="button"
-                onClick={onOpenAuthModal}
+                onClick={() => {
+                  setLangDropdownOpen(false);
+                  setUserDropdownOpen(false);
+                  setInstallDropdownOpen(false);
+                  if (onOpenAuthModal) onOpenAuthModal();
+                }}
                 className="inline-flex items-center justify-center text-center h-11 px-6 rounded-none bg-black text-white hover:border-white border border-[#222228] font-sans text-[15px] font-semibold tracking-normal transition-colors shrink-0 cursor-pointer focus-visible:ring-1 focus-visible:ring-white leading-none box-border"
                 title={authT.signInTitle}
               >
@@ -342,6 +422,8 @@ export const Header: React.FC<HeaderProps> = ({
                     type="button"
                     onClick={() => {
                       setUserDropdownOpen(false);
+                      setLangDropdownOpen(false);
+                      setInstallDropdownOpen(false);
                       const stored = getStoredUser();
                       const profileSlug = stored?.nickname || userSession?.nickname || stored?.id || userSession?.id;
                       if (onOpenProfile) {
@@ -360,7 +442,7 @@ export const Header: React.FC<HeaderProps> = ({
                     className="btn-brand-interactive h-10 gap-2 font-semibold text-sm"
                   >
                     <DefaultUserAvatar size={14} className="w-3.5 h-3.5 shrink-0" />
-                    <span>{isRu ? 'Мой профиль' : 'My profile'}</span>
+                    <span>{myProfileLabelMap[currentLang] || 'My profile'}</span>
                   </button>
 
                   {/* 2. Sign Out (Gray Button) */}
@@ -368,11 +450,13 @@ export const Header: React.FC<HeaderProps> = ({
                     type="button"
                     onClick={() => {
                       setUserDropdownOpen(false);
+                      setLangDropdownOpen(false);
+                      setInstallDropdownOpen(false);
                       handleLogout();
                     }}
                     className="btn-brand-signout h-10 font-medium text-sm"
                   >
-                    <span>{isRu ? 'Выйти из аккаунта' : 'Sign out'}</span>
+                    <span>{signOutLabelMap[currentLang] || 'Sign out'}</span>
                   </button>
                 </div>
               </div>
@@ -383,7 +467,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="relative inline-flex items-center shrink-0" ref={installDropdownRef}>
             <button
               type="button"
-              onClick={() => setInstallDropdownOpen(!installDropdownOpen)}
+              onClick={toggleInstallDropdown}
               aria-expanded={installDropdownOpen}
               aria-haspopup="menu"
               aria-label="Install extension options"

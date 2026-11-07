@@ -106,7 +106,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onLoginSuccess,
 }) => {
   const t = getAuthTranslations(currentLang);
-  const isRu = currentLang === 'ru';
   const [view, setView] = useState<'login' | 'register'>('login');
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [regStep, setRegStep] = useState<'form' | 'verify'>('form');
@@ -374,7 +373,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             }
           } catch {}
         }
-        setError(data?.error || (isRu ? 'Неверный адрес электронной почты или пароль.' : 'Invalid email or password.'));
+        setError(data?.error || t.invalidCredentialsError);
         setIsLoading(false);
         return;
       }
@@ -419,7 +418,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const handleVerify2FA = (e: React.FormEvent) => {
     e.preventDefault();
     if (twoFactorCode.trim().length !== 6) {
-      setError(isRu ? 'Введите 6-значный код подтверждения' : 'Enter a 6-digit verification code');
+      setError(t.enterSixDigitCode);
       return;
     }
     setIsLoading(true);
@@ -428,11 +427,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     const isValid = verifyTOTPToken(twoFactorCode, pending2faSecret);
     if (!isValid) {
       setIsLoading(false);
-      setError(
-        isRu
-          ? 'Неверный код подтверждения. Проверьте время на телефоне.'
-          : 'Invalid verification code. Check device clock.'
-      );
+      setError(t.invalidCode);
       return;
     }
 
@@ -956,13 +951,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <div className="w-10 h-10 border border-[#1A1A1F] bg-[#090909] flex items-center justify-center mb-3">
                 <KeyRound className="w-5 h-5 text-[#FF5500]" />
               </div>
-              <h2 className="text-lg font-bold font-mono uppercase tracking-wider text-white mb-1">
-                {isRu ? 'Двухэтапная аутентификация' : 'Two-Factor Authentication'}
+              <h2 className="text-lg font-bold font-mono tracking-normal text-white mb-1">
+                {t.twoFactorTitle}
               </h2>
               <p className="text-xs font-mono text-[#929292] leading-relaxed max-w-[320px]">
-                {isRu
-                  ? 'Введите 6-значный код из Google Authenticator, Яндекс Ключ или Aegis'
-                  : 'Enter the 6-digit code from your authenticator app'}
+                {t.twoFactorDesc}
               </p>
             </div>
 
@@ -992,7 +985,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
               }`}
             >
-              {isLoading ? t.pleaseWait : (isRu ? 'ПОДТВЕРДИТЬ И ВОЙТИ' : 'VERIFY & SIGN IN')}
+              {isLoading ? t.pleaseWait : t.verifyAndSignIn}
             </button>
 
             <button
@@ -1004,7 +997,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               }}
               className="text-xs font-mono text-neutral-400 hover:text-white transition cursor-pointer text-center"
             >
-              ← {isRu ? 'Назад к паролю' : 'Back to password'}
+              ← {t.backToPassword}
             </button>
           </form>
         )}

@@ -45,6 +45,14 @@ export interface AuthTranslation {
   reqUppercase: string;
   reqSpecial: string;
   passwordTip: string;
+  // 2FA & Login Errors
+  invalidCredentialsError: string;
+  enterSixDigitCode: string;
+  invalidCode: string;
+  twoFactorTitle: string;
+  twoFactorDesc: string;
+  verifyAndSignIn: string;
+  backToPassword: string;
 }
 
 export const authTranslations: Record<Language, AuthTranslation> = {
@@ -92,6 +100,13 @@ export const authTranslations: Record<Language, AuthTranslation> = {
     reqUppercase: 'Хотя бы одна заглавная буква',
     reqSpecial: 'Хотя бы один спецсимвол',
     passwordTip: 'Не используйте пароли от других сайтов.',
+    invalidCredentialsError: 'Неверный адрес электронной почты или пароль.',
+    enterSixDigitCode: 'Введите 6-значный код подтверждения',
+    invalidCode: 'Неверный код подтверждения',
+    twoFactorTitle: 'Двухэтапная аутентификация',
+    twoFactorDesc: 'Введите 6-значный код из вашего приложения-аутентификатора для завершения входа.',
+    verifyAndSignIn: 'Подтвердить и войти',
+    backToPassword: 'Назад к паролю',
   },
 
   // ==========================================
@@ -138,6 +153,13 @@ export const authTranslations: Record<Language, AuthTranslation> = {
     reqUppercase: 'At least one uppercase letter',
     reqSpecial: 'At least one special character',
     passwordTip: 'Avoid using a password that you use with other websites or that might be easy for someone else to guess.',
+    invalidCredentialsError: 'Invalid email or password.',
+    enterSixDigitCode: 'Enter a 6-digit verification code',
+    invalidCode: 'Invalid verification code',
+    twoFactorTitle: 'Two-Factor Authentication',
+    twoFactorDesc: 'Enter the 6-digit code from your authenticator app to complete sign in.',
+    verifyAndSignIn: 'Verify & sign in',
+    backToPassword: 'Back to password',
   },
 
   // ==========================================
@@ -184,6 +206,13 @@ export const authTranslations: Record<Language, AuthTranslation> = {
     reqUppercase: 'Щонайменше одна велика літера',
     reqSpecial: 'Щонайменше один спецсимвол',
     passwordTip: 'Уникайте використання паролів від інших сайтів.',
+    invalidCredentialsError: 'Невірна адреса електронної пошти або пароль.',
+    enterSixDigitCode: 'Введіть 6-значний код підтвердження',
+    invalidCode: 'Невірний код підтвердження',
+    twoFactorTitle: 'Двофакторна автентифікація',
+    twoFactorDesc: 'Введіть 6-значний код із вашого додатку-автентифікатора для завершення входу.',
+    verifyAndSignIn: 'Підтвердити та увійти',
+    backToPassword: 'Назад до пароля',
   },
 
   // ==========================================
@@ -230,6 +259,13 @@ export const authTranslations: Record<Language, AuthTranslation> = {
     reqUppercase: 'Mindestens ein Großbuchstabe',
     reqSpecial: 'Mindestens ein Sonderzeichen',
     passwordTip: 'Vermeiden Sie Passwörter, die Sie anderweitig nutzen.',
+    invalidCredentialsError: 'Ungültige E-Mail-Adresse oder Passwort.',
+    enterSixDigitCode: 'Geben Sie einen 6-stelligen Bestätigungscode ein',
+    invalidCode: 'Ungültiger Bestätigungscode',
+    twoFactorTitle: 'Zwei-Faktor-Authentifizierung',
+    twoFactorDesc: 'Geben Sie den 6-stelligen Code aus Ihrer Authentifikator-App ein, um die Anmeldung abzuschließen.',
+    verifyAndSignIn: 'Bestätigen und anmelden',
+    backToPassword: 'Zurück zum Passwort',
   },
 
   // ==========================================
@@ -276,6 +312,13 @@ export const authTranslations: Record<Language, AuthTranslation> = {
     reqUppercase: 'Co najmniej jedna wielka litera',
     reqSpecial: 'Co najmniej jeden znak specjalny',
     passwordTip: 'Unikaj haseł używanych w innych serwisach.',
+    invalidCredentialsError: 'Nieprawidłowy adres e-mail lub hasło.',
+    enterSixDigitCode: 'Wprowadź 6-cyfrowy kod weryfikacyjny',
+    invalidCode: 'Nieprawidłowy kod weryfikacyjny',
+    twoFactorTitle: 'Uwierzytelnianie dwuskładnikowe',
+    twoFactorDesc: 'Wprowadź 6-cyfrowy kod z aplikacji uwierzytelniającej, aby ukończyć logowanie.',
+    verifyAndSignIn: 'Zweryfikuj i zaloguj się',
+    backToPassword: 'Powrót do hasła',
   },
 
   // ==========================================
@@ -322,6 +365,13 @@ export const authTranslations: Record<Language, AuthTranslation> = {
     reqUppercase: 'Au moins une majuscule',
     reqSpecial: 'Au moins un caractère spécial',
     passwordTip: 'Évitez d’utiliser un mot de passe déjà utilisé ailleurs.',
+    invalidCredentialsError: 'Adresse e-mail ou mot de passe invalide.',
+    enterSixDigitCode: 'Entrez un code de vérification à 6 chiffres',
+    invalidCode: 'Code de vérification invalide',
+    twoFactorTitle: 'Authentification à deux facteurs',
+    twoFactorDesc: 'Entrez le code à 6 chiffres de votre application d\'authentification pour terminer la connexion.',
+    verifyAndSignIn: 'Vérifier et se connecter',
+    backToPassword: 'Retour au mot de passe',
   },
 
   // ==========================================
@@ -368,6 +418,13 @@ export const authTranslations: Record<Language, AuthTranslation> = {
     reqUppercase: 'Al menos una mayúscula',
     reqSpecial: 'Al menos un carácter especial',
     passwordTip: 'Evita contraseñas que uses en otros sitios.',
+    invalidCredentialsError: 'Correo electrónico o contraseña no válidos.',
+    enterSixDigitCode: 'Ingresa un código de verificación de 6 dígitos',
+    invalidCode: 'Código de verificación no válido',
+    twoFactorTitle: 'Autenticación de dos factores',
+    twoFactorDesc: 'Ingresa el código de 6 dígitos de tu aplicación de autenticación para completar el inicio de sesión.',
+    verifyAndSignIn: 'Verificar e iniciar sesión',
+    backToPassword: 'Volver a la contraseña',
   },
 
   // ==========================================
@@ -414,6 +471,13 @@ export const authTranslations: Record<Language, AuthTranslation> = {
     reqUppercase: 'Mindst ét stort bogstav',
     reqSpecial: 'Mindst ét specialtegn',
     passwordTip: 'Undgå adgangskoder du bruger andre steder.',
+    invalidCredentialsError: 'Ugyldig e-mail eller adgangskode.',
+    enterSixDigitCode: 'Indtast en 6-cifret bekræftelseskode',
+    invalidCode: 'Ugyldig bekræftelseskode',
+    twoFactorTitle: 'Totrinsgodkendelse',
+    twoFactorDesc: 'Indtast den 6-cifrede kode fra din godkender-app for at fuldføre login.',
+    verifyAndSignIn: 'Bekræft og log ind',
+    backToPassword: 'Tilbage til adgangskode',
   },
 
   // ==========================================
@@ -460,6 +524,13 @@ export const authTranslations: Record<Language, AuthTranslation> = {
     reqUppercase: 'Pelo menos uma letra maiúscula',
     reqSpecial: 'Pelo menos um caractere especial',
     passwordTip: 'Evite usar senhas já cadastradas em outros sites.',
+    invalidCredentialsError: 'E-mail ou senha inválidos.',
+    enterSixDigitCode: 'Digite um código de verificação de 6 dígitos',
+    invalidCode: 'Código de verificação inválido',
+    twoFactorTitle: 'Autenticação de dois fatores',
+    twoFactorDesc: 'Digite o código de 6 dígitos do seu aplicativo autenticador para concluir o login.',
+    verifyAndSignIn: 'Verificar e entrar',
+    backToPassword: 'Voltar para a senha',
   },
 
   // ==========================================
@@ -506,6 +577,13 @@ export const authTranslations: Record<Language, AuthTranslation> = {
     reqUppercase: 'Vähintään yksi iso kirjain',
     reqSpecial: 'Vähintään yksi erikoismerkki',
     passwordTip: 'Vältä muiden sivustojen salasanoja.',
+    invalidCredentialsError: 'Virheellinen sähköpostiosoite tai salasana.',
+    enterSixDigitCode: 'Anna 6-numeroinen vahvistuskoodi',
+    invalidCode: 'Virheellinen vahvistuskoodi',
+    twoFactorTitle: 'Kaksivaiheinen todennus',
+    twoFactorDesc: 'Anna 6-numeroinen koodi todennussovelluksestasi kirjautuaksesi sisään.',
+    verifyAndSignIn: 'Vahvista ja kirjaudu',
+    backToPassword: 'Takaisin salasanaan',
   },
 
   // ==========================================
@@ -552,6 +630,13 @@ export const authTranslations: Record<Language, AuthTranslation> = {
     reqUppercase: 'Minst en stor bokstav',
     reqSpecial: 'Minst ett specialtecken',
     passwordTip: 'Undvik lösenord som du använder på andra sajter.',
+    invalidCredentialsError: 'Ogiltig e-postadress eller lösenord.',
+    enterSixDigitCode: 'Ange en 6-siffrig verifieringskod',
+    invalidCode: 'Ogiltig verifieringskod',
+    twoFactorTitle: 'Tvåfaktorsautentisering',
+    twoFactorDesc: 'Ange den 6-siffriga koden från din autentiseringsapp för att slutföra inloggningen.',
+    verifyAndSignIn: 'Verifiera och logga in',
+    backToPassword: 'Tillbaka till lösenord',
   },
 
   // ==========================================
@@ -598,6 +683,13 @@ export const authTranslations: Record<Language, AuthTranslation> = {
     reqUppercase: 'En az bir büyük harf',
     reqSpecial: 'En az bir özel karakter',
     passwordTip: 'Başka sitelerde kullandığınız şifreleri kullanmaktan kaçının.',
+    invalidCredentialsError: 'Geçersiz e-posta veya şifre.',
+    enterSixDigitCode: '6 haneli doğrulama kodunu girin',
+    invalidCode: 'Geçersiz doğrulama kodu',
+    twoFactorTitle: 'İki Faktörlü Kimlik Doğrulama',
+    twoFactorDesc: 'Girişi tamamlamak için kimlik doğrulama uygulamanızdaki 6 haneli kodu girin.',
+    verifyAndSignIn: 'Doğrula ve giriş yap',
+    backToPassword: 'Şifreye geri dön',
   },
 
   // ==========================================
@@ -644,6 +736,13 @@ export const authTranslations: Record<Language, AuthTranslation> = {
     reqUppercase: '至少包含一个大写字母',
     reqSpecial: '至少包含一个特殊字符',
     passwordTip: '避免使用在其他网站相同的密码。',
+    invalidCredentialsError: '电子邮件或密码无效。',
+    enterSixDigitCode: '输入 6 位验证码',
+    invalidCode: '验证码无效',
+    twoFactorTitle: '双重身份验证',
+    twoFactorDesc: '输入身份验证器应用中的 6 位验证码以完成登录。',
+    verifyAndSignIn: '验证并登录',
+    backToPassword: '返回输入密码',
   },
 
   // ==========================================
@@ -690,6 +789,13 @@ export const authTranslations: Record<Language, AuthTranslation> = {
     reqUppercase: 'حرف كبير واحد على الأقل',
     reqSpecial: 'رمز خاص واحد على الأقل',
     passwordTip: 'تجنب استخدام كلمة مرور تستخدمها في مواقع أخرى.',
+    invalidCredentialsError: 'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
+    enterSixDigitCode: 'أدخل رمز التحقق المكون من 6 أرقام',
+    invalidCode: 'رمز التحقق غير صالح',
+    twoFactorTitle: 'المصادقة الثنائية',
+    twoFactorDesc: 'أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة لإكمال تسجيل الدخول.',
+    verifyAndSignIn: 'تحقق وتسجيل الدخول',
+    backToPassword: 'العودة إلى كلمة المرور',
   },
 
   // ==========================================
@@ -736,6 +842,13 @@ export const authTranslations: Record<Language, AuthTranslation> = {
     reqUppercase: '少なくとも1つの大文字',
     reqSpecial: '少なくとも1つの特殊文字',
     passwordTip: '他のサイトと同じパスワードは避けてください。',
+    invalidCredentialsError: 'メールアドレスまたはパスワードが無効です。',
+    enterSixDigitCode: '6桁の認証コードを入力してください',
+    invalidCode: '認証コードが無効です',
+    twoFactorTitle: '2段階認証',
+    twoFactorDesc: 'サインインを完了するには、認証アプリに表示されている6桁のコードを入力してください。',
+    verifyAndSignIn: '認証してログイン',
+    backToPassword: 'パスワード入力に戻る',
   },
 
   // ==========================================
@@ -782,6 +895,13 @@ export const authTranslations: Record<Language, AuthTranslation> = {
     reqUppercase: '대문자 1개 이상',
     reqSpecial: '특수문자 1개 이상',
     passwordTip: '다른 사이트에서 사용하는 비밀번호는 피하세요.',
+    invalidCredentialsError: '이메일 또는 비밀번호가 올바르지 않습니다.',
+    enterSixDigitCode: '6자리 인증 코드를 입력하세요',
+    invalidCode: '인증 코드가 올바르지 않습니다',
+    twoFactorTitle: '2단계 인증',
+    twoFactorDesc: '로그인을 완료하려면 인증 앱의 6자리 인증 코드를 입력하세요.',
+    verifyAndSignIn: '인증 및 로그인',
+    backToPassword: '비밀번호로 돌아가기',
   },
 };
 

@@ -152,7 +152,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   }, []);
 
   const t = profileTranslations[activeLang] || profileTranslations.en;
-  const isRu = activeLang === 'ru';
 
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(getStoredUser);
   const [targetUser, setTargetUser] = useState<UserProfile | null>(null);
@@ -582,11 +581,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   const twitchUsername = displayUser?.twitchUsername || displayUser?.twitch_username || null;
 
   const handleConnectTwitch = () => {
-    showNotification(
-      isRu
-        ? 'Интеграция Twitch находится в разработке'
-        : 'Twitch integration coming soon'
-    );
+    showNotification(t.twitchComingSoon);
   };
 
   const handleLogout = async () => {
@@ -661,9 +656,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
         window.dispatchEvent(new Event('storage'));
       } catch {}
 
-      showNotification(isRu ? 'FACEIT успешно отвязан' : 'FACEIT disconnected successfully');
+      showNotification(t.faceitDisconnectedSuccess);
     } catch {
-      showNotification(isRu ? 'Ошибка при отключении FACEIT' : 'Error disconnecting FACEIT', true);
+      showNotification(t.faceitDisconnectError, true);
     } finally {
       setIsSubmitting(false);
     }
@@ -675,11 +670,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     const cleanNick = newNickname.trim();
     if (!cleanNick) return;
     if (!/^[a-zA-Z0-9_-]{3,20}$/.test(cleanNick)) {
-      setNicknameModalError(
-        isRu
-          ? 'Никнейм должен содержать от 3 до 20 символов (буквы, цифры, _, -).'
-          : 'Nickname must be 3-20 characters (letters, numbers, _, -).'
-      );
+      setNicknameModalError(t.nicknameRequirements);
       return;
     }
     setNicknameModalError(null);
@@ -752,7 +743,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
         setIsNicknameModalOpen(false);
         setNicknameModalError(null);
-        showNotification(isRu ? 'Никнейм успешно сохранён' : 'Nickname saved successfully');
+        showNotification(t.nicknameSavedSuccess);
       }
     } catch {
       // Offline / dev fallback: update local session
@@ -797,7 +788,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       setLocationSearch('');
       setIsNicknameModalOpen(false);
       setNicknameModalError(null);
-      showNotification(isRu ? 'Никнейм успешно сохранён' : 'Nickname saved successfully');
+      showNotification(t.nicknameSavedSuccess);
     } finally {
       setIsSubmitting(false);
     }
@@ -920,7 +911,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
         });
       }
 
-      showNotification(isRu ? 'Аватар сброшен до стандартного' : 'Avatar reset to default');
+      showNotification(t.avatarResetSuccess);
     } catch (err) {
       console.error('Failed to reset avatar', err);
       showNotification('Failed to reset avatar', true);
@@ -1182,12 +1173,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                           type="button"
                           onClick={handleResetAvatar}
                           className="mt-2.5 w-20 flex items-center justify-center gap-1.5 text-[11px] font-mono font-medium text-[#71717A] hover:text-[#EF4444] transition-colors cursor-pointer bg-transparent border-none p-0 focus:outline-none mx-auto"
-                          title={isRu ? 'Сбросить аватар до стандартного' : 'Reset avatar to default'}
+                          title={t.resetAvatar}
                         >
                           <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
-                          <span className="leading-none whitespace-nowrap">{t.removePhoto || (isRu ? 'Удалить' : 'Remove')}</span>
+                          <span className="leading-none whitespace-nowrap">{t.removePhoto}</span>
                         </button>
                       )}
                     </div>
@@ -1259,9 +1250,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                               onClick={handleDisconnectFaceit}
                               disabled={isSubmitting}
                               className="h-7 px-2.5 flex items-center justify-center text-[10px] font-mono font-medium tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
-                              title={isRu ? 'Отвязать FACEIT' : 'Disconnect FACEIT'}
+                              title={t.disconnectFaceitTitle}
                             >
-                              {isRu ? 'Отвязать' : 'Disconnect'}
+                              {t.disconnect}
                             </button>
                           )}
                           <a
@@ -1279,7 +1270,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                           href="/api/auth/faceit/login"
                           className="h-7 px-3 flex items-center justify-center text-[10px] font-mono font-medium tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
                         >
-                          {t.connect || (isRu ? 'Подключить' : 'Connect')}
+                          {t.connect}
                         </a>
                       ) : null}
                     </div>
@@ -1315,7 +1306,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                           onClick={handleConnectTwitch}
                           className="h-7 px-3 flex items-center justify-center text-[10px] font-mono font-medium tracking-wider text-[#929292] hover:text-[#000000] bg-transparent hover:bg-[#FF5500] border border-[#222228] hover:border-[#FF5500] transition-colors rounded-none cursor-pointer"
                         >
-                          {t.connect || (isRu ? 'Подключить' : 'Connect')}
+                          {t.connect}
                         </button>
                       ) : null}
                     </div>
@@ -1437,7 +1428,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#000000] border border-[#1A1A1F] gap-3">
                     <div>
                       <span className="text-[10px] text-[#929292] font-bold tracking-wide block mb-1">
-                        {t.twoFactorTitle || (isRu ? 'Двухэтапная аутентификация (2FA)' : 'Two-Factor Authentication (2FA)')}
+                        {t.twoFactorTitle}
                       </span>
                       <div className="flex items-center gap-2">
                         <div
@@ -1450,9 +1441,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                             is2faActive ? 'text-[#00E676]' : 'text-[#929292]'
                           }`}
                         >
-                          {is2faActive
-                            ? (t.twoFactorActive || (isRu ? 'Включена' : 'Active'))
-                            : (t.twoFactorDisabled || (isRu ? 'Отключена' : 'Disabled'))}
+                          {is2faActive ? t.twoFactorActive : t.twoFactorDisabled}
                         </span>
                       </div>
                     </div>
@@ -1465,9 +1454,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       }}
                       className="btn-action-secondary shrink-0"
                     >
-                      {is2faActive
-                        ? (t.twoFactorDisable || (isRu ? 'Отключить' : 'Disable'))
-                        : (t.twoFactorConfigure || (isRu ? 'Настроить' : 'Configure'))}
+                      {is2faActive ? t.twoFactorDisable : t.twoFactorConfigure}
                     </button>
                   </div>
                 </div>
@@ -1493,7 +1480,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                             {t.currentDevice}
                           </span>
                           <span className="text-xs text-[#929292] block truncate">
-                            {deviceInfo.browser} ({deviceInfo.os}) • {t.activeNow || (isRu ? 'Активно сейчас' : 'Active now')}
+                            {deviceInfo.browser} ({deviceInfo.os}) • {t.activeNow}
                           </span>
                         </div>
                       </div>
@@ -1501,7 +1488,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         type="button"
                         onClick={handleLogout}
                         className="w-8 h-8 flex items-center justify-center border border-[#1A1A1F] text-[#929292] hover:text-[#EF4444] hover:border-[#EF4444] transition-colors rounded-none shrink-0 cursor-pointer"
-                        title={isRu ? 'Выйти из этого сеанса' : 'Sign out of this session'}
+                        title={t.signOutSession}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -1527,10 +1514,10 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 <div className="mb-4">
                   <h2 className="text-xs font-bold tracking-wider text-[#EF4444] flex items-center gap-2">
                     <AlertTriangle className="w-3.5 h-3.5 text-[#EF4444]" />
-                    <span>{t.dangerZoneTitle || (isRu ? 'Опасная зона' : 'Danger Zone')}</span>
+                    <span>{t.dangerZoneTitle}</span>
                   </h2>
                   <p className="text-xs text-[#929292] mt-1 leading-relaxed">
-                    {t.deleteAccountWarning || (isRu ? 'Удаление вашего аккаунта приведет к безвозвратному удалению всех данных.' : 'Permanently delete your account and all associated data.')}
+                    {t.deleteAccountWarning}
                   </p>
                 </div>
 
@@ -1542,7 +1529,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   }}
                   className="h-10 px-4 text-xs font-mono font-medium tracking-wider text-[#EF4444] border border-[#EF4444] bg-[#EF4444]/10 hover:bg-[#EF4444] hover:text-[#FFFFFF] transition-all cursor-pointer rounded-none"
                 >
-                  {t.deleteAccountBtn || t.deleteAccount || (isRu ? 'Удалить аккаунт' : 'Delete account')}
+                  {t.deleteAccountBtn}
                 </button>
               </div>
             </div>
@@ -1821,20 +1808,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             <div className="flex items-center gap-2.5 text-white font-bold text-sm mb-3 font-mono">
               <KeyRound className="w-4 h-4 text-[#FF5500]" />
               <span>
-                {is2faActive
-                  ? (isRu ? 'Отключение 2FA' : 'Disable 2FA')
-                  : (isRu ? 'Настройка 2FA' : 'Setup 2FA')}
+                {is2faActive ? t.twoFactorDisableTitle : t.twoFactorSetupTitle}
               </span>
             </div>
 
             <p className="text-xs text-[#929292] leading-relaxed mb-4">
-              {is2faActive
-                ? (isRu
-                    ? 'Для отключения двухэтапной аутентификации введите 6-значный код из вашего приложения-аутентификатора (Google Authenticator, Яндекс Ключ, Aegis или 1Password).'
-                    : 'To disable two-factor authentication, enter the 6-digit code from your authenticator app.')
-                : (isRu
-                    ? 'Отсканируйте QR-код в приложении-аутентификаторе (Google Authenticator, Яндекс Ключ, Aegis или 1Password) или введите секретный ключ вручную, затем введите 6-значный код для активации.'
-                    : 'Scan the QR code with your authenticator app (Google Authenticator, Aegis, 1Password) or enter the secret key manually, then enter the 6-digit code to activate.')}
+              {is2faActive ? t.twoFactorDisableDesc : t.twoFactorSetupDesc}
             </p>
 
             {!is2faActive && otpauthUri && (
@@ -1851,7 +1830,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 <div className="mb-4 p-3 bg-[#090909] border border-[#1A1A1F] flex items-center justify-between">
                   <div className="min-w-0 mr-3">
                     <span className="text-[10px] text-[#929292] font-mono block">
-                      {isRu ? 'Секретный ключ (Base32)' : 'Secret Key (Base32)'}
+                      {t.secretKey}
                     </span>
                     <span className="font-mono text-xs text-white tracking-widest select-all break-all">
                       {tempSecret.match(/.{1,4}/g)?.join(' ') || tempSecret}
@@ -1861,11 +1840,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     type="button"
                     onClick={() => {
                       navigator.clipboard.writeText(tempSecret);
-                      showNotification(isRu ? 'Ключ скопирован' : 'Key copied');
+                      showNotification(t.keyCopied);
                     }}
                     className="shrink-0 px-2.5 py-1 text-[10px] font-mono border border-[#222228] text-[#929292] hover:text-white hover:border-white transition-colors cursor-pointer"
                   >
-                    {isRu ? 'Копировать' : 'Copy'}
+                    {t.copy}
                   </button>
                 </div>
               </>
@@ -1876,7 +1855,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 e.preventDefault();
                 if (twoFactorCode.trim().length !== 6) {
                   setTwoFactorError(
-                    isRu ? 'Введите корректный 6-значный код' : 'Enter a valid 6-digit code'
+                    t.enterValidCode
                   );
                   return;
                 }
@@ -1907,14 +1886,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     setIsTwoFactorModalOpen(false);
                     setTwoFactorCode('');
                     showNotification(
-                      isRu ? '2FA успешно активирована' : '2FA successfully activated'
+                      t.twoFactorActivatedSuccess
                     );
                   } else {
                     setIsSubmitting(false);
                     setTwoFactorError(
-                      isRu
-                        ? 'Неверный код подтверждения. Проверьте время на телефоне.'
-                        : 'Invalid verification code. Check device clock.'
+                      t.invalidVerificationCode
                     );
                   }
                 } else {
@@ -1942,13 +1919,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     setIsSubmitting(false);
                     setIsTwoFactorModalOpen(false);
                     setTwoFactorCode('');
-                    showNotification(isRu ? '2FA отключена' : '2FA disabled');
+                    showNotification(t.twoFactorDisabledSuccess);
                   } else {
                     setIsSubmitting(false);
                     setTwoFactorError(
-                      isRu
-                        ? 'Неверный код подтверждения. Проверьте время на телефоне.'
-                        : 'Invalid verification code. Check device clock.'
+                      t.invalidVerificationCode
                     );
                   }
                 }
@@ -1957,7 +1932,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             >
               <div>
                 <label className="block text-[10px] text-[#929292] font-mono font-bold tracking-wide mb-2">
-                  {isRu ? '6-значный код подтверждения' : '6-digit verification code'}
+                  {t.sixDigitCode}
                 </label>
                 <input
                   type="text"
@@ -2004,9 +1979,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1" />
                   ) : null}
                   <span>
-                    {is2faActive
-                      ? (isRu ? 'Подтвердить отключение' : 'Confirm Disable')
-                      : (isRu ? 'Активировать 2FA' : 'Activate 2FA')}
+                    {is2faActive ? t.confirmDisable : t.activate2FA}
                   </span>
                 </button>
               </div>
@@ -2033,16 +2006,16 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             </button>
             <div className="flex items-center gap-2 text-[#EF4444] font-bold text-sm mb-3">
               <AlertTriangle className="w-5 h-5 text-[#EF4444]" />
-              <span>{t.deleteAccount || (isRu ? 'Удалить аккаунт' : 'Delete account')}</span>
+              <span>{t.deleteAccount}</span>
             </div>
             <p className="text-xs text-[#929292] leading-relaxed mb-4">
-              {t.deleteAccountConfirm || (isRu ? 'Вы уверены, что хотите удалить аккаунт? Это действие необратимо.' : 'Are you sure you want to delete your account? This action cannot be undone.')}
+              {t.deleteAccountConfirm}
             </p>
             <div className="mb-6">
               <label className="block text-[11px] font-mono text-[#929292] mb-2">
-                {isRu ? 'Введите ваш никнейм ' : 'Type your nickname '}
+                {t.typeNicknamePrefix}
                 <strong className="text-white font-bold tracking-wider">{currentUser?.nickname || 'nickname'}</strong>
-                {isRu ? ' для подтверждения:' : ' to confirm:'}
+                {t.typeNicknameSuffix}
               </label>
               <input
                 type="text"
@@ -2061,7 +2034,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 }}
                 className="px-4 py-2 border border-[#222228] text-[#929292] hover:text-white hover:border-white text-xs cursor-pointer rounded-none font-mono"
               >
-                {t.cancel || (isRu ? 'Отмена' : 'Cancel')}
+                {t.cancel}
               </button>
               <button
                 type="button"
@@ -2074,7 +2047,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 }`}
               >
                 {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1" /> : null}
-                <span>{t.deleteAccount || (isRu ? 'Удалить аккаунт' : 'Delete account')}</span>
+                <span>{t.deleteAccount}</span>
               </button>
             </div>
           </div>
