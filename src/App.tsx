@@ -172,6 +172,10 @@ const checkRoutes = () => {
       const id = window.location.hash.replace('#feature/', '');
       return { isAdmin: false, isProfile: false, isLogin: false, isRegister: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: id, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }
+    const featurePathMatch = path.match(/^\/(?:features?)\/([a-z0-9-]+)/);
+    if (featurePathMatch) {
+      return { isAdmin: false, isProfile: false, isLogin: false, isRegister: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: featurePathMatch[1], isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
+    }
     if (path === '/auth/extension-success') {
       return { isAdmin: false, isProfile: false, isLogin: false, isRegister: false, isTerms: false, isPrivacy: false, isAccountPrivacy: false, isChangelog: false, featureId: null, isNotFound: false, isAuthError: false, authErrorStatus: '400', authErrorMessage: '' };
     }

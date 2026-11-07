@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import type { Language } from '../translations';
-import { translations } from '../translations';
-import { ChromeLogo } from './ChromeLogo';
+import { InstallExtensionButton } from './InstallExtensionButton';
 import { termsTranslations } from '../data/termsTranslations';
 
 interface TermsPageProps {
@@ -32,7 +31,6 @@ const backLabelMap: Record<Language, string> = {
 export const TermsPage: React.FC<TermsPageProps> = ({ currentLang, onBack }) => {
   const t = termsTranslations[currentLang] || termsTranslations.en;
   const isRtl = currentLang === 'ar';
-  const ctaLabel = (translations[currentLang] || translations.en).hero.cta;
 
   // Synchronize document title
   useEffect(() => {
@@ -228,17 +226,9 @@ export const TermsPage: React.FC<TermsPageProps> = ({ currentLang, onBack }) => 
         </div>
       </div>
 
-      {/* 4. Bottom Prominent Action CTA Button (Matches Changelog & Privacy 1:1) */}
-      <div className="w-full flex justify-center mt-12 mb-12">
-        <a
-          href="https://chromewebstore.google.com/detail/peekly-for-faceit/cmfgneodcjfofdcglbbhcghijgcjcokk"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-3 sm:gap-3.5 px-5 sm:px-7 py-3 sm:py-3.5 bg-white text-black font-sans text-xs md:text-sm font-bold tracking-wider rounded-none border border-white hover:bg-[#FF5500] hover:text-black hover:border-white transition-colors duration-150 btn-chrome-action cursor-pointer shadow-2xl active:scale-95 w-full sm:w-auto max-w-xs sm:max-w-none"
-        >
-          <ChromeLogo className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 shrink-0 fill-current" />
-          <span>{ctaLabel}</span>
-        </a>
+      {/* 4. Bottom Prominent Action CTA Button with Browser Dropdown */}
+      <div className="w-full flex justify-center mt-12 mb-16">
+        <InstallExtensionButton currentLang={currentLang} />
       </div>
     </div>
   );
