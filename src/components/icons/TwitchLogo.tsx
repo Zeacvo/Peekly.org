@@ -1,11 +1,12 @@
 import React from 'react';
 
-export const TwitchLogo: React.FC<{ className?: string }> = ({
+export const TwitchLogo: React.FC<{ className?: string; fill?: string }> = ({
   className = 'w-4 h-4',
+  fill = '#9146FF',
 }) => (
   <svg
     viewBox="0 0 24 24"
-    fill="currentColor"
+    fill={fill}
     className={`shrink-0 ${className}`}
     aria-hidden="true"
   >

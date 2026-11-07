@@ -300,24 +300,9 @@ export const Header: React.FC<HeaderProps> = ({
                 aria-expanded={userDropdownOpen}
                 aria-haspopup="menu"
                 aria-label="User account menu"
-                className="group flex items-center gap-2 h-10 px-3 bg-[#090909] hover:bg-white/[0.06] border border-[#222228] hover:border-white text-xs transition-all rounded-none cursor-pointer focus-visible:ring-1 focus-visible:ring-white shrink-0"
+                className="relative flex items-center justify-center w-10 h-10 bg-[#000000] hover:bg-white/[0.06] border border-[#222228] hover:border-white transition-all rounded-none cursor-pointer overflow-hidden p-0 focus-visible:ring-1 focus-visible:ring-white shrink-0"
               >
-                {/* Avatar / Icon */}
-                <div className="w-6 h-6 rounded-none bg-[#000000] border border-[#222228] overflow-hidden shrink-0 flex items-center justify-center">
-                  <UserAvatar user={userSession} size={16} className="w-4 h-4 text-[#FFFFFF]" />
-                </div>
-
-                {/* Nickname */}
-                <span className="font-bold text-white text-xs max-w-[120px] truncate leading-none">
-                  {userSession.nickname}
-                </span>
-
-                {/* Dropdown Chevron */}
-                <ChevronDown
-                  className={`w-3.5 h-3.5 shrink-0 text-neutral-400 group-hover:text-white transition-transform duration-150 ${
-                    userDropdownOpen ? 'rotate-180' : ''
-                  }`}
-                />
+                <UserAvatar user={userSession} size={20} className="w-5 h-5 text-[#FFFFFF]" imgClassName="w-full h-full object-cover" />
               </button>
 
               {/* User Dropdown Menu */}
@@ -330,22 +315,14 @@ export const Header: React.FC<HeaderProps> = ({
                   {/* Profile Header */}
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-none bg-[#000000] border border-[#222228] overflow-hidden shrink-0 flex items-center justify-center">
-                      <UserAvatar user={userSession} size={24} className="w-6 h-6 text-[#FFFFFF]" />
+                      <UserAvatar user={userSession} size={20} className="w-5 h-5 text-[#FFFFFF]" imgClassName="w-full h-full object-cover" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="font-bold text-white text-sm truncate leading-snug">
                         {userSession.nickname}
                       </div>
-                      {userSession.email && (
-                        <div className="text-xs text-[#929292] truncate leading-snug">
-                          {userSession.email}
-                        </div>
-                      )}
                     </div>
                   </div>
-
-                  {/* Divider */}
-                  <div className="border-t border-[#1A1A1F] my-0.5" />
 
                   {/* Navigation Links: Exactly 2 Actions */}
                   <div className="flex flex-col gap-2">
