@@ -132,13 +132,13 @@ export const LinkSuccessPage: React.FC<LinkSuccessPageProps> = ({
   return (
     <div
       dir={isRtl ? 'rtl' : 'ltr'}
-      className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center pt-20 sm:pt-24 pb-8 z-10 animate-apple-reveal font-sans"
+      className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center py-4 sm:py-6 z-10 animate-apple-reveal font-sans"
     >
-      <div className="bg-[#090909] border border-[#1A1A1F] rounded-none p-8 sm:p-10 max-w-[440px] w-full text-center flex flex-col items-center select-none shadow-2xl">
+      <div className="bg-[#090909] border border-[#1A1A1F] rounded-none p-6 sm:p-8 max-w-[420px] w-full text-center flex flex-col items-center select-none shadow-2xl">
         {/* White checkmark badge */}
-        <div className="w-12 h-12 rounded-full border-2 border-white flex items-center justify-center mb-5 text-white shrink-0">
+        <div className="w-11 h-11 rounded-full border-2 border-white flex items-center justify-center mb-4 text-white shrink-0">
           <svg
-            className="w-6 h-6 text-white"
+            className="w-5 h-5 text-white"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -151,7 +151,7 @@ export const LinkSuccessPage: React.FC<LinkSuccessPageProps> = ({
         </div>
 
         {/* Title: Sentence-case, no caps, ending with a period */}
-        <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight mb-6">
+        <h1 className="text-base sm:text-lg font-bold text-white tracking-tight mb-5">
           {t.title}
         </h1>
 
@@ -160,7 +160,7 @@ export const LinkSuccessPage: React.FC<LinkSuccessPageProps> = ({
           <button
             type="button"
             onClick={handleHomeOrClose}
-            className="px-6 py-3 bg-white text-black font-semibold text-sm border border-white rounded-none transition-colors duration-150 hover:bg-[#FF5500] hover:border-[#FF5500] hover:text-white cursor-pointer min-w-[140px] focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
+            className="px-5 py-2.5 bg-white text-black font-semibold text-xs border border-white rounded-none transition-colors duration-150 hover:bg-[#FF5500] hover:border-[#FF5500] hover:text-white cursor-pointer min-w-[130px] focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
           >
             {t.goHome}
           </button>
@@ -173,7 +173,7 @@ export const LinkSuccessPage: React.FC<LinkSuccessPageProps> = ({
                 window.location.href = '/profile';
               }
             }}
-            className="px-6 py-3 bg-[#090909] text-white font-semibold text-sm border border-[#1A1A1F] rounded-none transition-colors duration-150 hover:border-[#FF5500] hover:text-[#FF5500] cursor-pointer min-w-[140px] inline-flex items-center justify-center focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
+            className="px-5 py-2.5 bg-[#090909] text-white font-semibold text-xs border border-[#1A1A1F] rounded-none transition-colors duration-150 hover:border-[#FF5500] hover:text-[#FF5500] cursor-pointer min-w-[130px] inline-flex items-center justify-center focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
           >
             {t.goToProfile}
           </button>

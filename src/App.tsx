@@ -508,7 +508,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#000000] text-white selection:bg-[#FF5500] selection:text-black font-sans antialiased relative">
+    <div className={`flex flex-col bg-[#000000] text-white selection:bg-[#FF5500] selection:text-black font-sans antialiased relative ${isLinkSuccess ? 'h-screen max-h-screen overflow-hidden' : 'min-h-screen'}`}>
       {/* 1. Fixed Header (hidden on login and register pages) */}
       {!isLogin && !isRegister && (
         <Header 
@@ -532,8 +532,8 @@ export const App: React.FC = () => {
       )}
 
       {/* Main Content: Dynamic View Routing with Lazy Suspense */}
-      <main className={`min-h-screen flex-1 flex flex-col w-full relative z-10 ${isNotFound || isAuthError ? 'overflow-hidden' : ''}`}>
-        <Suspense fallback={<div className="min-h-screen flex-1 flex flex-col w-full bg-black" />}>
+      <main className={`flex-1 flex flex-col w-full relative z-10 ${isLinkSuccess ? 'min-h-0 justify-center items-center pt-16 sm:pt-20 overflow-y-auto' : 'min-h-screen'} ${isNotFound || isAuthError ? 'overflow-hidden' : ''}`}>
+        <Suspense fallback={<div className={`${isLinkSuccess ? 'flex-1' : 'min-h-screen flex-1'} flex flex-col w-full bg-black`} />}>
           {isLinkSuccess ? (
             <LinkSuccessPage
               currentLang={currentLang}
@@ -636,6 +636,7 @@ export const App: React.FC = () => {
           onOpenPrivacy={handleOpenPrivacy}
           onOpenTerms={handleOpenTerms}
           onGoHome={handleGoHome}
+          compact={isLinkSuccess}
         />
       )}
 

@@ -10,6 +10,7 @@ interface FooterProps {
   onOpenTerms?: () => void;
   onGoHome?: () => void;
   hideChangelog?: boolean;
+  compact?: boolean;
 }
 
 const termsLabelMap: Record<Language, string> = {
@@ -54,16 +55,17 @@ export const Footer: React.FC<FooterProps> = ({
   currentLang, 
   onOpenPrivacy,
   onOpenTerms,
-  onGoHome 
+  onGoHome,
+  compact = false
 }) => {
   const t = translations[currentLang] || translations.en;
 
   return (
-    <footer className="w-full bg-[#000000] border-t border-[#1A1A1F] relative z-10 mt-auto py-8 sm:py-10">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6 text-xs text-[#929292]">
+    <footer className={`w-full bg-[#000000] border-t border-[#1A1A1F] relative z-10 shrink-0 ${compact ? 'py-3 sm:py-4' : 'mt-auto py-8 sm:py-10'}`}>
+      <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-start sm:items-end justify-between ${compact ? 'gap-2 sm:gap-4' : 'gap-6'} text-xs text-[#929292]`}>
         
         {/* Left Column: Logo & Legal Disclaimer */}
-        <div className="flex flex-col items-start text-left max-w-md gap-3">
+        <div className={`flex flex-col items-start text-left max-w-md ${compact ? 'gap-1' : 'gap-3'}`}>
           <div 
             onClick={onGoHome}
             role="button"
@@ -80,13 +82,13 @@ export const Footer: React.FC<FooterProps> = ({
             <PeeklyLogo size={14} className="group-hover:text-[#FF5500] transition-colors" />
             <span className="font-bold tracking-wider uppercase font-sans text-white">Peekly</span>
           </div>
-          <p className="text-left text-[11px] text-[#929292] leading-relaxed m-0">
+          <p className={`text-left ${compact ? 'text-[10px] leading-snug' : 'text-[11px] leading-relaxed'} text-[#929292] m-0`}>
             {t.footer.disclaimer}
           </p>
         </div>
 
         {/* Right Column: Navigation Links & Copyright */}
-        <div className="flex flex-col items-start sm:items-end text-left sm:text-right gap-1.5 text-[12px]">
+        <div className={`flex flex-col items-start sm:items-end text-left sm:text-right ${compact ? 'gap-1 text-[11px]' : 'gap-1.5 text-[12px]'}`}>
           {/* Row 1: Privacy Policy Link */}
           <a
             href="/privacy"
