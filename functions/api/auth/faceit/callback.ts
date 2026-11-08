@@ -533,7 +533,13 @@ export async function onRequest(context: EventContext): Promise<Response> {
   // Extract PKCE verifier from state parameter (or cookie fallback)
   let verifier = '';
   if (stateVerifier) {
-    verifier = stateVerifier.startsWith('v_') ? stateVerifier.substring(2) : stateVerifier;
+    if (stateVerifier.startsWith('ext_')) {
+      verifier = stateVerifier.substring(4);
+    } else if (stateVerifier.startsWith('v_')) {
+      verifier = stateVerifier.substring(2);
+    } else {
+      verifier = stateVerifier;
+    }
   } else {
     const cookieHeader = context.request.headers.get('Cookie') || '';
     const match = cookieHeader.match(/faceit_verifier=([^;]+)/);
@@ -704,9 +710,6 @@ export async function onRequest(context: EventContext): Promise<Response> {
     const isCeo =
       nickname.toLowerCase() === 'zeacvo' || userEmail.toLowerCase() === 'zeacvo@icloud.com';
 
-    // Redirect to profile page on successful authentication
-    const targetUrl = new URL('/profile', context.request.url).toString();
-
     const sessionData = {
       id: userRecord.guid,
       guid: userRecord.guid,
@@ -722,6 +725,22 @@ export async function onRequest(context: EventContext): Promise<Response> {
       created_at: userRecord.created_at,
       plan: 'FREE',
     };
+
+    // If request originates from extension, redirect to link success completion page
+    const isExtension =
+      url.searchParams.get('src') === 'ext' ||
+      url.searchParams.get('redirect_popup') === 'true' ||
+      (stateVerifier && stateVerifier.startsWith('ext_'));
+
+    let targetUrl: string;
+    if (isExtension) {
+      const linkSuccessUrl = new URL('/link/success', context.request.url);
+      linkSuccessUrl.searchParams.set('src', 'ext');
+      linkSuccessUrl.searchParams.set('data', encodeURIComponent(JSON.stringify(sessionData)));
+      targetUrl = linkSuccessUrl.toString();
+    } else {
+      targetUrl = new URL('/profile', context.request.url).toString();
+    }
     const cookieValue = encodeURIComponent(JSON.stringify(sessionData));
 
     const headers = new Headers();
