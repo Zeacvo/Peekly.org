@@ -423,18 +423,14 @@ a:hover[class*="hover:bg-[#FF5500]"] {
 @keyframes appleReveal {
   0% {
     opacity: 0;
-    transform: translateY(16px) scale(0.98);
-  }
-  30% {
-    opacity: 0;
-    transform: translateY(16px) scale(0.98);
+    transform: translateY(4px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
 .animate-apple-reveal {
-  animation: appleReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: appleReveal 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

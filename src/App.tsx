@@ -6,6 +6,8 @@ import { Footer } from './components/Footer';
 import { getSafeInitialLanguage, saveLanguagePreference } from './translations';
 import type { Language } from './translations';
 
+import { FeatureDetailPage } from './components/FeatureDetailPage';
+
 const AuthModal = lazy(() =>
   import('./components/AuthModal').then((m) => ({ default: m.AuthModal }))
 );
@@ -13,9 +15,6 @@ const ProfilePage = lazy(() =>
   import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage }))
 );
 
-const FeatureDetailPage = lazy(() =>
-  import('./components/FeatureDetailPage').then((m) => ({ default: m.FeatureDetailPage }))
-);
 const ChangelogPage = lazy(() =>
   import('./components/ChangelogPage').then((m) => ({ default: m.ChangelogPage }))
 );
@@ -243,20 +242,6 @@ export const App: React.FC = () => {
         } catch {}
       }
     } catch {}
-  }, []);
-
-  useEffect(() => {
-    // Preload FeatureDetailPage immediately after initial mount so clicking any feature card opens instantaneously (0ms)
-    if (typeof window !== 'undefined') {
-      const preload = () => {
-        import('./components/FeatureDetailPage');
-      };
-      if ('requestIdleCallback' in window) {
-        (window as Window & { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback?.(preload);
-      } else {
-        setTimeout(preload, 50);
-      }
-    }
   }, []);
 
   useEffect(() => {
