@@ -826,6 +826,104 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
       );
     }
 
+    case 'extendedLevels': {
+      // 011: EXTENDED SKILL LEVELS
+      // 0.0 - 1.0s: Modal shell fades and scales smoothly
+      // 1.0 - 2.8s: Ranks (20, 15, 11) cascade in sequentially with animated badges
+      // 2.8 - 3.8s: Rating badges stabilize into static Card 11 preview
+
+      const modalProgress = Math.min(1, t / 1.0);
+      const modalEase = 1 - Math.pow(1 - modalProgress, 2.5);
+
+      const row1Progress = Math.max(0, Math.min(1, (t - 0.8) / 0.8));
+      const row1Ease = 1 - Math.pow(1 - row1Progress, 2.5);
+
+      const row2Progress = Math.max(0, Math.min(1, (t - 1.4) / 0.8));
+      const row2Ease = 1 - Math.pow(1 - row2Progress, 2.5);
+
+      const row3Progress = Math.max(0, Math.min(1, (t - 2.0) / 0.8));
+      const row3Ease = 1 - Math.pow(1 - row3Progress, 2.5);
+
+      return (
+        <svg 
+          role="img"
+          aria-label="Feature animation illustration"
+          className="w-full h-full max-w-xl object-contain" 
+          width="300"
+          height="180"
+          viewBox="0 0 300 180" 
+          fill="none"
+          style={{ transform: 'translateZ(0)', willChange: 'transform' }}
+        >
+          <rect width="300" height="180" fill="#0d0d0d" />
+
+          {/* Main Skill Levels Modal Window */}
+          <g opacity={modalEase}>
+            <rect x="25" y="16" width="250" height="148" fill="#0d0d0d" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+
+            {/* Header Line */}
+            <line x1="25" y1="40" x2="275" y2="40" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+            <rect x="38" y="26" width="60" height="6" fill="#ffffff" />
+            <path d="M 256 25 L 264 33 M 264 25 L 256 33" stroke="#555555" strokeWidth="1.2" strokeLinecap="round" />
+
+            {/* Right scrollbar */}
+            <rect x="268" y="44" width="2" height="114" fill="#181818" />
+            <rect x="268" y="50" width="2" height="38" fill="#444444" />
+          </g>
+
+          {/* Row 1: Elite Rank Level 20 */}
+          {row1Ease > 0 && (
+            <g transform={`translate(${38 + (1 - row1Ease) * 12}, 48)`} opacity={row1Ease}>
+              <circle cx="14" cy="14" r="12" fill="#141414" stroke="#ffffff" strokeWidth="1.5" />
+              <circle cx="14" cy="14" r="8" fill="#1e1e1e" />
+              <text x="14" y="17.5" textAnchor="middle" fill="#ffffff" fontSize="9" fontWeight="bold" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">20</text>
+              
+              <rect x="36" y="9" width="46" height="6" fill="#ffffff" />
+              <circle cx="90" cy="12" r="1.5" fill="#666666" />
+              <rect x="98" y="9.5" width={40 * row1Ease} height="5" fill="#888888" />
+              
+              <rect x="162" y="5" width="58" height="18" fill="#161616" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
+              <rect x="170" y="11" width="42" height="6" fill="#ffffff" />
+            </g>
+          )}
+
+          <line x1="38" y1="80" x2="260" y2="80" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+
+          {/* Row 2: Elite Rank Level 15 */}
+          {row2Ease > 0 && (
+            <g transform={`translate(${38 + (1 - row2Ease) * 12}, 86)`} opacity={row2Ease}>
+              <circle cx="14" cy="13" r="12" fill="#141414" stroke="#888888" strokeWidth="1.2" />
+              <circle cx="14" cy="13" r="8" fill="#1c1c1c" />
+              <text x="14" y="16.5" textAnchor="middle" fill="#888888" fontSize="8.5" fontWeight="bold" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">15</text>
+              
+              <rect x="36" y="9" width="44" height="5" fill="#777777" />
+              <circle cx="88" cy="11.5" r="1.5" fill="#555555" />
+              <rect x="96" y="9.5" width={48 * row2Ease} height="4" fill="#555555" />
+            </g>
+          )}
+
+          <line x1="38" y1="116" x2="260" y2="116" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+
+          {/* Row 3: Entry Elite Rank Level 11 */}
+          {row3Ease > 0 && (
+            <g transform={`translate(${38 + (1 - row3Ease) * 12}, 122)`} opacity={row3Ease}>
+              <circle cx="14" cy="13" r="12" fill="#141414" stroke="#666666" strokeWidth="1" />
+              <circle cx="14" cy="13" r="8" fill="#1a1a1a" />
+              <text x="14" y="16.5" textAnchor="middle" fill="#666666" fontSize="8.5" fontWeight="bold" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">11</text>
+              
+              <rect x="36" y="9" width="42" height="5" fill="#555555" />
+              <circle cx="86" cy="11.5" r="1.5" fill="#444444" />
+              <rect x="94" y="9.5" width={48 * row3Ease} height="4" fill="#444444" />
+            </g>
+          )}
+
+          {/* Bottom subtle divider and LEARN MORE bar */}
+          <line x1="25" y1="150" x2="275" y2="150" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+          <rect x="38" y="154" width="56" height="5" fill="#444444" />
+        </svg>
+      );
+    }
+
     default:
       return null;
   }

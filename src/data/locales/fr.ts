@@ -230,5 +230,28 @@ export const frFeatures: Record<string, HumanFeatureData> = {
       }
     ],
     "audience": "Compétiteurs souhaitant optimiser rationnellement leur sélection de cartes sur CS2."
+  },
+  "extendedLevels": {
+    "id": "extendedLevels",
+    "number": "11",
+    "title": "Niveaux de compétence 1–20",
+    "category": "PROFIL",
+    "summary": "Affiche les rangs d'élite 11–20 par paliers de 250 ELO et remplace la fenêtre des niveaux.",
+    "overview": "Remplace l'échelle standard de 1 à 10 sur FACEIT par un système compétitif élargi de 20 divisions avec des paliers précis de 250 points ELO. Les joueurs de haut niveau ne sont plus limités au niveau 10 et profitent d'insignes exclusifs du niveau 11 au niveau 20 ainsi que d'une fenêtre détaillée des paliers directement dans l'interface.",
+    "benefits": [
+      {
+        "title": "20 divisions compétitives",
+        "desc": "Une hiérarchie fidèle pour les joueurs à haut ELO au lieu d'un niveau 10 générique."
+      },
+      {
+        "title": "Paliers précis de 250 ELO",
+        "desc": "Chaque division dispose d'un objectif clair pour progresser vers le palier supérieur."
+      },
+      {
+        "title": "Fenêtre de niveaux modernisée",
+        "desc": "Accès instantané à l'ensemble des divisions du niveau 1 à 20 et Challenger en un clic."
+      }
+    ],
+    "audience": "Joueurs à plus de 2 000 ELO souhaitant une progression transparente et gratifiante au-delà du niveau 10."
   }
 };

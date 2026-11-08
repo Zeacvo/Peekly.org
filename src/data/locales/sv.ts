@@ -230,5 +230,28 @@ export const svFeatures: Record<string, HumanFeatureData> = {
       }
     ],
     "audience": "Spelare som vill hantera sin kartpool strategiskt med stöd av tillförlitlig data."
+  },
+  "extendedLevels": {
+    "id": "extendedLevels",
+    "number": "11",
+    "title": "Utökade färdighetsnivåer 1–20",
+    "category": "PROFIL",
+    "summary": "Visar elitgrader 11–20 med steg om 250 ELO och ersätter standardmodalen för nivåer.",
+    "overview": "Ersätter den klassiska skalan 1–10 på FACEIT med ett utökat tävlingssystem bestående av 20 divisioner med tydliga steg om 250 ELO-poäng. Högrankade spelare begränsas inte längre till nivå 10, utan får dedikerade elitbrickor för nivå 11 till 20 och en uppdaterad nivåmodal direkt i plattformen.",
+    "benefits": [
+      {
+        "title": "20 tävlingsdivisioner",
+        "desc": "Rättvis indelning för spelare med hög ELO istället för ett enda gemensamt tak."
+      },
+      {
+        "title": "Tydliga 250 ELO-steg",
+        "desc": "Varje division har en transparent tröskel för avancemang till nästa grad."
+      },
+      {
+        "title": "Moderniserad nivåmodal",
+        "desc": "Snabb överblick över alla nivåer från 1 till 20 samt Challenger-divisionen."
+      }
+    ],
+    "audience": "Spelare med över 2 000 ELO som söker en transparent och motiverande progression bortom nivå 10."
   }
 };

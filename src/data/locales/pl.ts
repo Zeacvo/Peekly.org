@@ -230,5 +230,28 @@ export const plFeatures: Record<string, HumanFeatureData> = {
       }
     ],
     "audience": "Gracze stawiający na przemyślany dobór map w oparciu o rzetelne statystyki."
+  },
+  "extendedLevels": {
+    "id": "extendedLevels",
+    "number": "11",
+    "title": "Rozszerzone poziomy 1–20",
+    "category": "PROFIL",
+    "summary": "Wyświetla elitarne rangi 11–20 z krokami co 250 ELO i zastępuje okno poziomów FACEIT.",
+    "overview": "Zastępuje standardową 10-stopniową skalę FACEIT rozszerzonym systemem 20 dywizji turniejowych z precyzyjnymi progami co 250 punktów ELO. Gracze z wysokim ratingiem nie zatrzymują się na poziomie 10, zyskując unikalne odznaki poziomów 11–20 i ulepszone okno przedziałów rankingowych bezpośrednio w interfejsie platformy.",
+    "benefits": [
+      {
+        "title": "20 dywizji rankingowych",
+        "desc": "Uczciwy i przejrzysty podział graczy wysokiego szczebla zamiast jednego poziomu 10."
+      },
+      {
+        "title": "Kroki co 250 ELO",
+        "desc": "Każda dywizja ma czytelny i jasny próg wymagany do awansu na kolejny poziom."
+      },
+      {
+        "title": "Nowoczesne okno poziomów",
+        "desc": "Błyskawiczny dostęp do pełnego zestawienia rang od 1 do 20 oraz dywizji Challenger."
+      }
+    ],
+    "audience": "Gracze z rankingiem powyżej 2000 ELO poszukujący przejrzystej drabinki i motywacji ponad standardowy 10 poziom."
   }
 };

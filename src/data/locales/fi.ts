@@ -230,5 +230,28 @@ export const fiFeatures: Record<string, HumanFeatureData> = {
       }
     ],
     "audience": "Pelaajat, jotka haluavat optimoida karttavalikoimansa todellisen datan pohjalta."
+  },
+  "extendedLevels": {
+    "id": "extendedLevels",
+    "number": "11",
+    "title": "Laajennetut taitotasot 1–20",
+    "category": "PROFIILI",
+    "summary": "Näyttää eliittitasot 11–20 250 ELO-pisteen välein ja korvaa vakiotasojen näkymän.",
+    "overview": "Korvaa FACEITin perinteisen 1–10 tasoasteikon laajennetulla 20 divisioonan kilpailujärjestelmällä 250 ELO-pisteen portailla. Korkean ratingin pelaajat eivät enää jämähdä tasolle 10, vaan saavat aidot eliittitasojen 11–20 merkit ja uudistetun tasovalikon suoraan alustan käyttöliittymään.",
+    "benefits": [
+      {
+        "title": "20 kilpailullista tasoa",
+        "desc": "Tarkka jako kokeneille pelaajille yhden yleisen 10-tason sijaan."
+      },
+      {
+        "title": "Tarkka 250 ELO-porras",
+        "desc": "Jokaisella divisioonalla on selkeä ja läpinäkyvä pisteraja seuraavalle tasolle."
+      },
+      {
+        "title": "Uudistettu tasomodaali",
+        "desc": "Kaikki tasot 1–20 sekä Challenger-divisioona selkeästi nähtävillä yhdellä klikkauksella."
+      }
+    ],
+    "audience": "Yli 2 000 ELO-pisteen pelaajille, jotka kaipaavat selkeää ja motivoivaa kehityspolkua 10-tason jälkeen."
   }
 };

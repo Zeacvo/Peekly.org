@@ -230,5 +230,28 @@ export const deFeatures: Record<string, HumanFeatureData> = {
       }
     ],
     "audience": "Spieler, die ihren Map-Pool datengestützt und strategisch optimieren möchten."
+  },
+  "extendedLevels": {
+    "id": "extendedLevels",
+    "number": "11",
+    "title": "Erweiterte Skill-Level 1–20",
+    "category": "PROFIL",
+    "summary": "Zeigt Elite-Ränge 11–20 in 250-ELO-Schritten an und ersetzt das Standard-Level-Modal.",
+    "overview": "Ersetzt die Standard-Skala von 1–10 auf FACEIT durch ein erweitertes 20-Divisionen-System mit präzisen 250-ELO-Schritten. Spieler mit hohem Rating sind nicht mehr auf Stufe 10 begrenzt, sondern erhalten authentische Elite-Abzeichen für die Level 11 bis 20 sowie eine überarbeitete Stufenübersicht direkt auf der Plattform.",
+    "benefits": [
+      {
+        "title": "20 Wettkampf-Divisionen",
+        "desc": "Faire Staffelung für High-ELO-Spieler statt einer undifferenzierten Stufe 10."
+      },
+      {
+        "title": "Präzise 250-ELO-Schritte",
+        "desc": "Jede Division bietet einen transparenten Schwellenwert für den nächsten Rangaufstieg."
+      },
+      {
+        "title": "Aktualisiertes Level-Modal",
+        "desc": "Direkter Zugriff auf die vollständige Übersicht aller Stufen von 1 bis 20 und Challenger."
+      }
+    ],
+    "audience": "Spieler mit mehr als 2.000 ELO, die eine klare und motivierende Rangprogression jenseits von Level 10 suchen."
   }
 };

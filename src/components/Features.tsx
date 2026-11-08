@@ -11,6 +11,7 @@ import {
   EyeOff, 
   TrendingUp, 
   LayoutGrid,
+  Award,
   ArrowRight
 } from 'lucide-react';
 
@@ -532,6 +533,75 @@ const CardTextures: Record<string, React.FC> = {
       </g>
     </svg>
   ),
+
+  // 011: EXTENDED SKILL LEVELS (11–20 Division Modal with circular badges, ELO brackets, #FF5500 hover)
+  extendedLevels: () => (
+    <svg role="img" aria-label="Extended Skill Levels preview" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-200" width="300" height="180" viewBox="0 0 300 180" fill="none">
+      <rect width="300" height="180" fill="#090909" />
+
+      {/* Main Skill Levels Modal Window */}
+      <rect x="25" y="16" width="250" height="148" fill="#0d0d0d" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+
+      {/* Header Line */}
+      <line x1="25" y1="40" x2="275" y2="40" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+      {/* Title skeleton bar */}
+      <rect x="38" y="26" width="60" height="6" fill="#ffffff" />
+      {/* Close button × */}
+      <path d="M 256 25 L 264 33 M 264 25 L 256 33" stroke="#555555" strokeWidth="1.2" strokeLinecap="round" />
+
+      {/* Right scrollbar */}
+      <rect x="268" y="44" width="2" height="114" fill="#181818" />
+      <rect x="268" y="50" width="2" height="38" fill="#444444" />
+
+      {/* Row 1: Elite Rank Level 20 (4,501+ ELO) */}
+      <g transform="translate(38, 48)">
+        {/* Circular Rank Badge */}
+        <circle cx="14" cy="14" r="12" fill="#141414" stroke="#ffffff" strokeWidth="1.5" className="group-hover:stroke-[#FF5500] transition-colors duration-200" />
+        <circle cx="14" cy="14" r="8" fill="#1e1e1e" />
+        <text x="14" y="17.5" textAnchor="middle" fill="#ffffff" fontSize="9" fontWeight="bold" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" className="group-hover:fill-[#FF5500] transition-colors duration-200 select-none">20</text>
+        
+        {/* Level Label */}
+        <rect x="36" y="9" width="46" height="6" fill="#ffffff" className="group-hover:fill-[#FF5500] transition-colors duration-200" />
+        {/* Bullet & Threshold */}
+        <circle cx="90" cy="12" r="1.5" fill="#666666" />
+        <rect x="98" y="9.5" width="40" height="5" fill="#888888" />
+        
+        {/* Right Status Badge */}
+        <rect x="162" y="5" width="58" height="18" fill="#161616" stroke="rgba(255,255,255,0.15)" strokeWidth="1" className="group-hover:stroke-[#FF5500] transition-colors duration-200" />
+        <rect x="170" y="11" width="42" height="6" fill="#ffffff" className="group-hover:fill-[#FF5500] transition-colors duration-200" />
+      </g>
+
+      <line x1="38" y1="80" x2="260" y2="80" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+
+      {/* Row 2: Elite Rank Level 15 (3,251 - 3,500 ELO) */}
+      <g transform="translate(38, 86)">
+        <circle cx="14" cy="13" r="12" fill="#141414" stroke="#888888" strokeWidth="1.2" />
+        <circle cx="14" cy="13" r="8" fill="#1c1c1c" />
+        <text x="14" y="16.5" textAnchor="middle" fill="#888888" fontSize="8.5" fontWeight="bold" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" className="select-none">15</text>
+        
+        <rect x="36" y="9" width="44" height="5" fill="#777777" />
+        <circle cx="88" cy="11.5" r="1.5" fill="#555555" />
+        <rect x="96" y="9.5" width="48" height="4" fill="#555555" />
+      </g>
+
+      <line x1="38" y1="116" x2="260" y2="116" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+
+      {/* Row 3: Entry Elite Rank Level 11 (2,251 - 2,500 ELO) */}
+      <g transform="translate(38, 122)">
+        <circle cx="14" cy="13" r="12" fill="#141414" stroke="#666666" strokeWidth="1" />
+        <circle cx="14" cy="13" r="8" fill="#1a1a1a" />
+        <text x="14" y="16.5" textAnchor="middle" fill="#666666" fontSize="8.5" fontWeight="bold" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" className="select-none">11</text>
+        
+        <rect x="36" y="9" width="42" height="5" fill="#555555" />
+        <circle cx="86" cy="11.5" r="1.5" fill="#444444" />
+        <rect x="94" y="9.5" width="48" height="4" fill="#444444" />
+      </g>
+
+      {/* Bottom subtle divider and LEARN MORE bar */}
+      <line x1="25" y1="150" x2="275" y2="150" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+      <rect x="38" y="154" width="56" height="5" fill="#444444" className="group-hover:fill-[#FF5500] transition-colors duration-200" />
+    </svg>
+  ),
 };
 
 export const Features: React.FC<FeaturesProps> = ({ currentLang, onSelectFeature }) => {
@@ -548,6 +618,7 @@ export const Features: React.FC<FeaturesProps> = ({ currentLang, onSelectFeature
     enhancedHistory: <Download className="w-5 h-5 stroke-[1.75]" />,
     sidebarElo: <TrendingUp className="w-5 h-5 stroke-[1.75]" />,
     mapSelectorStats: <LayoutGrid className="w-5 h-5 stroke-[1.75]" />,
+    extendedLevels: <Award className="w-5 h-5 stroke-[1.75]" />,
   };
 
   return (

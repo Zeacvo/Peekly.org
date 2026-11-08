@@ -272,6 +272,12 @@ export const translations: Record<Language, Translations> = {
           "tab": "profile",
           "title": "Map Selector Win Rates",
           "desc": "Displays team and personal win rate badges directly on matchmaking queue map tiles."
+        },
+        {
+          "id": "extendedLevels",
+          "tab": "profile",
+          "title": "Extended Skill Levels",
+          "desc": "Displays elite ranks 11–20 with 250 ELO steps and replaces the skill bracket modal."
         }
       ]
     },
@@ -369,6 +375,12 @@ export const translations: Record<Language, Translations> = {
           "tab": "profile",
           "title": "Винрейт на карточках карт",
           "desc": "Отображает плашки винрейта прямо на плитках карт в очереди матча."
+        },
+        {
+          "id": "extendedLevels",
+          "tab": "profile",
+          "title": "Расширенные уровни 1–20",
+          "desc": "Расширяет систему рангов с 10 до 20 дивизионов с шагом в 250 ELO и обновленным окном уровней."
         }
       ]
     },
@@ -466,6 +478,12 @@ export const translations: Record<Language, Translations> = {
           "tab": "profile",
           "title": "地图选择器胜率",
           "desc": "在匹配队列的地图选择卡片上直接覆盖展示实时胜率浮层。"
+        },
+        {
+          "id": "extendedLevels",
+          "tab": "profile",
+          "title": "扩展竞技段位 1–20",
+          "desc": "以250 ELO为阶梯显示11–20精英段位，并替换平台默认的段位说明弹窗。"
         }
       ]
     },
@@ -563,6 +581,12 @@ export const translations: Record<Language, Translations> = {
           "tab": "profile",
           "title": "Map-Auswahl Winrates",
           "desc": "Zeigt Winrate-Badges direkt auf den Kartenauswahl-Kacheln der Matchmaking-Warteschlange."
+        },
+        {
+          "id": "extendedLevels",
+          "tab": "profile",
+          "title": "Erweiterte Skill-Level 1–20",
+          "desc": "Zeigt Elite-Ränge 11–20 in 250-ELO-Schritten an und ersetzt das Standard-Level-Modal."
         }
       ]
     },
@@ -660,6 +684,12 @@ export const translations: Record<Language, Translations> = {
           "tab": "profile",
           "title": "Wskaźniki wygranych wyboru map",
           "desc": "Wyświetla plakietki procentu wygranych bezpośrednio na kafelkach wyboru map w kolejce."
+        },
+        {
+          "id": "extendedLevels",
+          "tab": "profile",
+          "title": "Rozszerzone poziomy 1–20",
+          "desc": "Wyświetla elitarne rangi 11–20 z krokami co 250 ELO i zastępuje okno poziomów FACEIT."
         }
       ]
     },
@@ -757,6 +787,12 @@ export const translations: Record<Language, Translations> = {
           "tab": "profile",
           "title": "Taux de victoire du sélecteur de cartes",
           "desc": "Affiche les badges de taux de victoire directement sur les tuiles de cartes en file d'attente."
+        },
+        {
+          "id": "extendedLevels",
+          "tab": "profile",
+          "title": "Niveaux de compétence 1–20",
+          "desc": "Affiche les rangs d'élite 11–20 par paliers de 250 ELO et remplace la fenêtre des niveaux."
         }
       ]
     },
@@ -854,6 +890,12 @@ export const translations: Record<Language, Translations> = {
           "tab": "profile",
           "title": "Tasas de victoria del selector de mapas",
           "desc": "Muestra placas de porcentaje de victorias en las casillas de mapas en cola."
+        },
+        {
+          "id": "extendedLevels",
+          "tab": "profile",
+          "title": "Niveles de habilidad 1–20",
+          "desc": "Muestra rangos de élite 11–20 con intervalos de 250 ELO y actualiza la ventana de rangos."
         }
       ]
     },
@@ -951,6 +993,12 @@ export const translations: Record<Language, Translations> = {
           "tab": "profile",
           "title": "Kortvælger Winrates",
           "desc": "Viser sejrsrater direkte på kortvalgsfliserne i matchmaking-køen."
+        },
+        {
+          "id": "extendedLevels",
+          "tab": "profile",
+          "title": "Udvidede færdighedsniveauer 1–20",
+          "desc": "Viser eliteranger 11–20 med 250 ELO-trin og erstatter oversigten over niveaubrackets."
         }
       ]
     },
@@ -1048,6 +1096,12 @@ export const translations: Record<Language, Translations> = {
           "tab": "profile",
           "title": "Taxas de Vitória do Seletor de Mapas",
           "desc": "Exibe placas de taxa de vitória diretamente nos blocos de mapas na fila de busca."
+        },
+        {
+          "id": "extendedLevels",
+          "tab": "profile",
+          "title": "Níveis de habilidade 1–20",
+          "desc": "Exibe patamares de elite 11–20 com passos de 250 de ELO e substitui o modal de níveis."
         }
       ]
     },
@@ -1145,6 +1199,12 @@ export const translations: Record<Language, Translations> = {
           "tab": "profile",
           "title": "Karttavalitsimen Voittoprosentit",
           "desc": "Näyttää voittoprosenttilaatat suoraan karttavalintalaatoilla otteluhaun jonossa."
+        },
+        {
+          "id": "extendedLevels",
+          "tab": "profile",
+          "title": "Laajennetut taitotasot 1–20",
+          "desc": "Näyttää eliittitasot 11–20 250 ELO-pisteen välein ja korvaa vakiotasojen näkymän."
         }
       ]
     },
@@ -1242,6 +1302,12 @@ export const translations: Record<Language, Translations> = {
           "tab": "profile",
           "title": "Kartväljarens Vinstprocent",
           "desc": "Visar vinstprocentbrickor direkt på kartvalskorten i matchmaking-kön."
+        },
+        {
+          "id": "extendedLevels",
+          "tab": "profile",
+          "title": "Utökade färdighetsnivåer 1–20",
+          "desc": "Visar elitgrader 11–20 med steg om 250 ELO och ersätter standardmodalen för nivåer."
         }
       ]
     },
@@ -1339,6 +1405,12 @@ export const translations: Record<Language, Translations> = {
           "tab": "profile",
           "title": "Harita Seçici Kazanma Oranları",
           "desc": "Eşleştirme kuyruğundaki harita seçim kartlarında doğrudan kazanma oranı rozetlerini gösterir."
+        },
+        {
+          "id": "extendedLevels",
+          "tab": "profile",
+          "title": "Genişletilmiş Beceri Seviyeleri 1–20",
+          "desc": "250 ELO adımlarıyla 11–20 elit rütbeleri gösterir ve seviye penceresini yeniler."
         }
       ]
     },
@@ -1436,6 +1508,12 @@ export const translations: Record<Language, Translations> = {
           "tab": "profile",
           "title": "Вінрейт на картках карт",
           "desc": "Відображає плашки вінрейту прямо на плитках карт у черзі матчу."
+        },
+        {
+          "id": "extendedLevels",
+          "tab": "profile",
+          "title": "Розширені рівні 1–20",
+          "desc": "Розширює систему рангів із 10 до 20 дивізіонів із кроком у 250 ELO та оновленим вікном рівнів."
         }
       ]
     },
@@ -1533,6 +1611,12 @@ export const translations: Record<Language, Translations> = {
           "tab": "profile",
           "title": "نسب فوز محدد الخرائط",
           "desc": "يعرض شارات نسب الفوز مباشرة على بطاقات اختيار الخرائط في قائمة الانتظار."
+        },
+        {
+          "id": "extendedLevels",
+          "tab": "profile",
+          "title": "مستويات المهارة الموسعة 1–20",
+          "desc": "تعرض رتب النخبة 11–20 بخطوات قدرها 250 نقطة ELO وتستبدل نافذة المستويات الافتراضية."
         }
       ]
     },
@@ -1630,6 +1714,12 @@ export const translations: Record<Language, Translations> = {
           "tab": "profile",
           "title": "マップセレクター勝率",
           "desc": "マッチ待機キューのマップ選択タイル上に勝率バッジを直接表示します。"
+        },
+        {
+          "id": "extendedLevels",
+          "tab": "profile",
+          "title": "拡張スキルレベル 1–20",
+          "desc": "250 ELO刻みでエリートランク11〜20を表示し、標準のレベルモーダルを刷新します。"
         }
       ]
     },
@@ -1727,6 +1817,12 @@ export const translations: Record<Language, Translations> = {
           "tab": "profile",
           "title": "맵 선택기 승률",
           "desc": "매치메이킹 대기열의 맵 선택 타일 위에 팀 승률 뱃지를 직접 표시합니다."
+        },
+        {
+          "id": "extendedLevels",
+          "tab": "profile",
+          "title": "확장 스킬 레벨 1–20",
+          "desc": "250 ELO 단위로 11–20 엘리트 랭크를 표시하고 기본 레벨 모달을 대체합니다."
         }
       ]
     },

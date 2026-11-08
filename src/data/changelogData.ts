@@ -302,11 +302,14 @@ function getVersion100Items(lang: Language): ChangelogItem[] {
     title: tLang.changelogPage.initialReleaseTitle || 'Initial public release in Google Chrome Web Store',
     desc: tLang.changelogPage.initialReleaseDesc || 'Full tactical interface and automation suite for competitive FACEIT CS2.',
   };
-  const featureItems: ChangelogItem[] = (tLang.features?.items || []).map((item, idx) => ({
-    num: String(idx + 2).padStart(2, '0'),
-    title: item.title,
-    desc: item.desc,
-  }));
+  const featureItems: ChangelogItem[] = (tLang.features?.items || [])
+    .filter((item) => item.id !== 'extendedLevels')
+    .slice(0, 10)
+    .map((item, idx) => ({
+      num: String(idx + 2).padStart(2, '0'),
+      title: item.title,
+      desc: item.desc,
+    }));
   return [initialItem, ...featureItems];
 }
 

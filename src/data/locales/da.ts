@@ -230,5 +230,28 @@ export const daFeatures: Record<string, HumanFeatureData> = {
       }
     ],
     "audience": "Spillere, der ønsker at optimere deres kortvalg baseret på konkrete statistikker."
+  },
+  "extendedLevels": {
+    "id": "extendedLevels",
+    "number": "11",
+    "title": "Udvidede færdighedsniveauer 1–20",
+    "category": "PROFIL",
+    "summary": "Viser eliteranger 11–20 med 250 ELO-trin og erstatter oversigten over niveaubrackets.",
+    "overview": "Erstatter den traditionelle 1–10 skala på FACEIT med et udvidet konkurrencesystem på 20 divisioner med præcise 250 ELO-trin. Spillere med højt ratingloft stopper ikke længere ved niveau 10, men opnår eksklusive elitedivisionsemblemer fra niveau 11 til 20 og et opgraderet niveaumodal direkte i platformen.",
+    "benefits": [
+      {
+        "title": "20 konkurrencedivisioner",
+        "desc": "Retfærdig opdeling af topspillere frem for et fælles niveau 10-loft."
+      },
+      {
+        "title": "Præcise 250 ELO-trin",
+        "desc": "Hver division har en gennemskuelig grænse for oprykning til næste niveau."
+      },
+      {
+        "title": "Opgraderet niveaumodal",
+        "desc": "Hurtigt overblik over samtlige rækker fra niveau 1 til 20 samt Challenger."
+      }
+    ],
+    "audience": "Spillere med over 2.000 ELO, som ønsker en transparent og motiverende rangstige over niveau 10."
   }
 };

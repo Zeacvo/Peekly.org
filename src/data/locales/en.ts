@@ -230,5 +230,28 @@ export const enFeatures: Record<string, HumanFeatureData> = {
       }
     ],
     "audience": "Players who want a calculated, data-driven queue pool."
+  },
+  "extendedLevels": {
+    "id": "extendedLevels",
+    "number": "11",
+    "title": "Extended Skill Levels",
+    "category": "PROFILE",
+    "summary": "Displays elite ranks 11–20 with 250 ELO steps and replaces the skill bracket modal.",
+    "overview": "Replaces FACEIT's standard 1–10 skill scale with an expanded 20-division competitive system with granular 250 ELO steps. High-rating players no longer cap at Level 10, receiving authentic elite division badges from Level 11 to 20 and an upgraded skill bracket modal directly in the platform interface.",
+    "benefits": [
+      {
+        "title": "20 Competitive Tiers",
+        "desc": "Granular division breakdown for high-ELO players instead of a single Level 10 cap."
+      },
+      {
+        "title": "Precise 250 ELO Steps",
+        "desc": "Every division has a clear and transparent milestone to reach the next tier."
+      },
+      {
+        "title": "Upgraded Skill Bracket Modal",
+        "desc": "Instant access to the complete tier breakdown from Level 1 to 20 and Challenger."
+      }
+    ],
+    "audience": "Players with 2,000+ ELO seeking meaningful rank progression and transparent division thresholds beyond standard Level 10."
   }
 };

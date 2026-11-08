@@ -230,5 +230,28 @@ export const esFeatures: Record<string, HumanFeatureData> = {
       }
     ],
     "audience": "Jugadores que desean gestionar su pool de mapas de manera estratégica y analítica."
+  },
+  "extendedLevels": {
+    "id": "extendedLevels",
+    "number": "11",
+    "title": "Niveles de habilidad 1–20",
+    "category": "PERFIL",
+    "summary": "Muestra rangos de élite 11–20 con intervalos de 250 ELO y actualiza la ventana de rangos.",
+    "overview": "Sustituye la escala básica de 1 a 10 de FACEIT por un sistema competitivo de 20 divisiones con pasos de 250 puntos ELO. Los jugadores con alto rango ya no se estancan en el nivel 10, obteniendo insignias de élite del nivel 11 al 20 y una ventana explicativa de rangos completamente renovada en la plataforma.",
+    "benefits": [
+      {
+        "title": "20 divisiones competitivas",
+        "desc": "Segmentación precisa para jugadores de alto ELO en lugar de un único nivel 10 genérico."
+      },
+      {
+        "title": "Pasos precisos de 250 ELO",
+        "desc": "Cada división cuenta con un umbral claro y transparente para ascender al siguiente nivel."
+      },
+      {
+        "title": "Ventana de rangos mejorada",
+        "desc": "Consulta instantánea de todas las divisiones del nivel 1 al 20 y Challenger en un solo clic."
+      }
+    ],
+    "audience": "Jugadores con más de 2.000 ELO que buscan una progresión competitiva auténtica más allá del nivel 10."
   }
 };

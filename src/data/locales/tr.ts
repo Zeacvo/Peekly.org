@@ -230,5 +230,28 @@ export const trFeatures: Record<string, HumanFeatureData> = {
       }
     ],
     "audience": "Harita havuzunu verilere dayalı stratejik şekilde yönetmek isteyen oyuncular."
+  },
+  "extendedLevels": {
+    "id": "extendedLevels",
+    "number": "11",
+    "title": "Genişletilmiş Beceri Seviyeleri 1–20",
+    "category": "PROFİL",
+    "summary": "250 ELO adımlarıyla 11–20 elit rütbeleri gösterir ve seviye penceresini yeniler.",
+    "overview": "FACEIT'in standart 1–10 seviye ölçeğini 250 ELO adımlı 20 rekabetçi kümeye genişletir. Yüksek dereceli oyuncular artık yalnızca 10. seviyede sıkışıp kalmaz; 11'den 20'ye kadar özel elit rütbe simgelerine ve doğrudan platform arayüzünde yenilenmiş seviye aralıkları penceresine kavuşur.",
+    "benefits": [
+      {
+        "title": "20 rekabetçi küme",
+        "desc": "Tek bir 10. seviye yerine yüksek ELO'lu oyuncular için adil ve net ayrım."
+      },
+      {
+        "title": "250 ELO net adımlar",
+        "desc": "Her kümenin bir sonraki seviyeye geçiş için açık ve şeffaf bir puan eşiği vardır."
+      },
+      {
+        "title": "Yenilenmiş seviye penceresi",
+        "desc": "Seviye 1'den 20'ye kadar tüm aşamalara ve Challenger kümesine tek tıkla anında erişim."
+      }
+    ],
+    "audience": "Standart 10. seviyenin ötesinde şeffaf ve motive edici bir ilerleme hedefleyen 2.000+ ELO oyuncuları."
   }
 };
