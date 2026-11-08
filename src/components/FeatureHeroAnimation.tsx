@@ -865,10 +865,6 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
             <line x1="25" y1="40" x2="275" y2="40" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
             <rect x="38" y="26" width="60" height="6" fill="#ffffff" />
             <path d="M 256 25 L 264 33 M 264 25 L 256 33" stroke="#555555" strokeWidth="1.2" strokeLinecap="round" />
-
-            {/* Right scrollbar */}
-            <rect x="268" y="44" width="2" height="114" fill="#181818" />
-            <rect x="268" y="50" width="2" height="38" fill="#444444" />
           </g>
 
           {/* Row 1: Elite Rank Level 20 */}
@@ -916,10 +912,6 @@ export const FeatureHeroAnimation: React.FC<AnimationProps> = ({ featureId }) =>
               <rect x="94" y="9.5" width={48 * row3Ease} height="4" fill="#444444" />
             </g>
           )}
-
-          {/* Bottom subtle divider and LEARN MORE bar */}
-          <line x1="25" y1="150" x2="275" y2="150" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-          <rect x="38" y="154" width="56" height="5" fill="#444444" />
         </svg>
       );
     }

@@ -549,10 +549,6 @@ const CardTextures: Record<string, React.FC> = {
       {/* Close button × */}
       <path d="M 256 25 L 264 33 M 264 25 L 256 33" stroke="#555555" strokeWidth="1.2" strokeLinecap="round" />
 
-      {/* Right scrollbar */}
-      <rect x="268" y="44" width="2" height="114" fill="#181818" />
-      <rect x="268" y="50" width="2" height="38" fill="#444444" />
-
       {/* Row 1: Elite Rank Level 20 (4,501+ ELO) */}
       <g transform="translate(38, 48)">
         {/* Circular Rank Badge */}
@@ -596,10 +592,6 @@ const CardTextures: Record<string, React.FC> = {
         <circle cx="86" cy="11.5" r="1.5" fill="#444444" />
         <rect x="94" y="9.5" width="48" height="4" fill="#444444" />
       </g>
-
-      {/* Bottom subtle divider and LEARN MORE bar */}
-      <line x1="25" y1="150" x2="275" y2="150" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-      <rect x="38" y="154" width="56" height="5" fill="#444444" className="group-hover:fill-[#FF5500] transition-colors duration-200" />
     </svg>
   ),
 };
