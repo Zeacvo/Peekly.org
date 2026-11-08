@@ -308,7 +308,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <span>&gt;</span>
                 <span className="inline-block text-white animate-terminal-blink">_</span>
               </span>
-              <span className="hidden sm:inline text-neutral-400 group-hover:text-white transition-colors leading-none">
+              <span className="inline text-neutral-400 group-hover:text-white transition-colors leading-none whitespace-nowrap">
                 {t.nav.changelog}
               </span>
             </button>
@@ -324,8 +324,7 @@ export const Header: React.FC<HeaderProps> = ({
                 aria-haspopup="listbox"
               >
                 <LanguageIcon className="w-3.5 h-3.5 text-neutral-400 group-hover:text-white transition-colors shrink-0" />
-                <span className="sm:hidden font-mono uppercase font-medium leading-none">{currentLangObj.code}</span>
-                <span className="hidden sm:inline leading-none">{currentLangObj.name}</span>
+                <span className="inline leading-none whitespace-nowrap">{currentLangObj.name}</span>
                 <ChevronDown
                   className={`w-3 h-3 shrink-0 text-neutral-500 group-hover:text-white transition-transform duration-150 ${
                     langDropdownOpen ? 'rotate-180' : ''
