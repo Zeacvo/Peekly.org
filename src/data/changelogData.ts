@@ -319,7 +319,7 @@ export const changelogReleases: ChangelogRelease[] = [
   },
   {
     version: '1.0.0',
-    date: '03.11.2026',
+    date: '10.10.2026',
     isLatest: false,
     getItems: (lang: Language) => getVersion100Items(lang),
   },
