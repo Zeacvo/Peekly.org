@@ -309,26 +309,42 @@ export async function onRequest(context: EventContext): Promise<Response> {
     const payload = ${payloadJson};
 
     function sendToExtension() {
-      // 1. Send via chrome.runtime.sendMessage to Peekly extension
+      // 1. Send via chrome.runtime.sendMessage to all known Peekly extension IDs
+      const KNOWN_EXTENSION_IDS = [
+        'ohkbcdegfepkjgljolmmonkpncjhoaek',
+        'cmfgneodcjfofdcglbbhcghijgcjcokk',
+      ];
       try {
         if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
-          chrome.runtime.sendMessage('ohkbcdegfepkjgljolmmonkpncjhoaek', {
-            type: 'PEEKLY_AUTH_SUCCESS',
-            profile: payload,
-          }, (res) => {
-            console.log('[Peekly Auth] Extension acknowledged:', res);
-          });
+          for (const extId of KNOWN_EXTENSION_IDS) {
+            try {
+              chrome.runtime.sendMessage(extId, {
+                type: 'PEEKLY_AUTH_SUCCESS',
+                profile: payload,
+              }, (res) => {
+                if (chrome.runtime?.lastError) void chrome.runtime.lastError;
+              });
+            } catch (e) {}
+          }
         }
       } catch (e) {}
 
-      // 2. PostMessage to opener if opened in a popup
+      // 2. Broadcast window postMessage & custom event for content scripts
+      try {
+        window.postMessage({ type: 'PEEKLY_AUTH_SUCCESS', profile: payload }, '*');
+      } catch (e) {}
+      try {
+        document.dispatchEvent(new CustomEvent('PEEKLY_AUTH_SUCCESS', { detail: payload }));
+      } catch (e) {}
+
+      // 3. PostMessage to opener if opened in a popup
       try {
         if (window.opener) {
           window.opener.postMessage({ type: 'PEEKLY_AUTH_SUCCESS', profile: payload }, '*');
         }
       } catch (e) {}
 
-      // 3. LocalStorage sync for cross-tab listeners
+      // 4. LocalStorage sync for cross-tab listeners
       try {
         localStorage.setItem('peekly_auth_token', JSON.stringify({ profile: payload, ts: Date.now() }));
       } catch (e) {}

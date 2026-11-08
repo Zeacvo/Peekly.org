@@ -509,8 +509,8 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#000000] text-white selection:bg-[#FF5500] selection:text-black font-sans antialiased relative">
-      {/* 1. Fixed Header (hidden on login, register, and link success pages) */}
-      {!isLogin && !isRegister && !isLinkSuccess && (
+      {/* 1. Fixed Header (hidden on login and register pages) */}
+      {!isLogin && !isRegister && (
         <Header 
           currentLang={currentLang} 
           onLanguageChange={handleLanguageChange}
@@ -538,6 +538,7 @@ export const App: React.FC = () => {
             <LinkSuccessPage
               currentLang={currentLang}
               onGoHome={handleGoHome}
+              onGoProfile={handleOpenProfile}
             />
           ) : isAdmin ? (
             <AdminDashboard
@@ -628,8 +629,8 @@ export const App: React.FC = () => {
         </Suspense>
       </main>
 
-      {/* Footer (hidden on 404, auth error, admin dashboard, login, register, and link success for clean minimalist layout) */}
-      {!isNotFound && !isAuthError && !isAdmin && !isLogin && !isRegister && !isLinkSuccess && (
+      {/* Footer (hidden on 404, auth error, admin dashboard, login, and register for clean minimalist layout) */}
+      {!isNotFound && !isAuthError && !isAdmin && !isLogin && !isRegister && (
         <Footer 
           currentLang={currentLang} 
           onOpenPrivacy={handleOpenPrivacy}

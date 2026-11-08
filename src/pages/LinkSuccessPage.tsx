@@ -1,12 +1,30 @@
 import React, { useEffect, useState } from 'react';
+import type { Language } from '../translations';
+import { linkSuccessTranslations } from '../data/linkSuccessTranslations';
 
 interface LinkSuccessPageProps {
-  currentLang?: string;
+  currentLang?: Language;
   onGoHome?: () => void;
+  onGoProfile?: (guid?: string) => void;
 }
 
-export const LinkSuccessPage: React.FC<LinkSuccessPageProps> = ({ onGoHome }) => {
+export const LinkSuccessPage: React.FC<LinkSuccessPageProps> = ({
+  currentLang = 'ru',
+  onGoProfile,
+}) => {
   const [profile, setProfile] = useState<any>(null);
+
+  const lang: Language = currentLang || 'ru';
+  const t = linkSuccessTranslations[lang] || linkSuccessTranslations.ru;
+  const isRtl = lang === 'ar';
+
+  useEffect(() => {
+    const prevTitle = document.title;
+    document.title = `${t.pageTitle} — Peekly for FACEIT`;
+    return () => {
+      document.title = prevTitle;
+    };
+  }, [t.pageTitle]);
 
   useEffect(() => {
     try {
@@ -14,30 +32,76 @@ export const LinkSuccessPage: React.FC<LinkSuccessPageProps> = ({ onGoHome }) =>
       const dataParam = urlParams.get('data');
       let parsed: any = null;
       if (dataParam) {
+        let raw = dataParam;
+        for (let i = 0; i < 5; i++) {
+          if (!raw.includes('%')) break;
+          try {
+            const next = decodeURIComponent(raw);
+            if (next === raw) break;
+            raw = next;
+          } catch {
+            break;
+          }
+        }
         try {
-          parsed = JSON.parse(decodeURIComponent(dataParam));
+          parsed = JSON.parse(raw);
         } catch {
-          parsed = JSON.parse(dataParam);
+          try {
+            parsed = JSON.parse(dataParam);
+          } catch {}
         }
       }
       if (!parsed) {
         const match = document.cookie.match(/peekly_user=([^;]+)/);
         if (match) {
-          parsed = JSON.parse(decodeURIComponent(match[1]));
+          let cRaw = match[1];
+          for (let i = 0; i < 5; i++) {
+            if (!cRaw.includes('%')) break;
+            try {
+              const next = decodeURIComponent(cRaw);
+              if (next === cRaw) break;
+              cRaw = next;
+            } catch {
+              break;
+            }
+          }
+          try {
+            parsed = JSON.parse(cRaw);
+          } catch {}
         }
       }
       if (parsed) {
         setProfile(parsed);
       }
 
-      // Notify extension
-      const EXTENSION_ID = 'ohkbcdegfepkjgljolmmonkpncjhoaek';
+      // Notify extension via all known IDs, window message, and custom event
+      const KNOWN_EXTENSION_IDS = [
+        'ohkbcdegfepkjgljolmmonkpncjhoaek',
+        'cmfgneodcjfofdcglbbhcghijgcjcokk',
+      ];
       if (typeof window !== 'undefined' && (window as any).chrome?.runtime?.sendMessage) {
-        (window as any).chrome.runtime.sendMessage(EXTENSION_ID, {
-          type: 'PEEKLY_AUTH_SUCCESS',
-          profile: parsed,
-        }, () => {});
+        for (const extId of KNOWN_EXTENSION_IDS) {
+          try {
+            (window as any).chrome.runtime.sendMessage(
+              extId,
+              {
+                type: 'PEEKLY_AUTH_SUCCESS',
+                profile: parsed,
+              },
+              () => {
+                if ((window as any).chrome?.runtime?.lastError) {
+                  void (window as any).chrome.runtime.lastError;
+                }
+              }
+            );
+          } catch {}
+        }
       }
+
+      window.postMessage({ type: 'PEEKLY_AUTH_SUCCESS', profile: parsed }, '*');
+      try {
+        document.dispatchEvent(new CustomEvent('PEEKLY_AUTH_SUCCESS', { detail: parsed }));
+      } catch {}
 
       if (window.opener) {
         window.opener.postMessage({ type: 'PEEKLY_AUTH_SUCCESS', profile: parsed }, '*');
@@ -49,306 +113,76 @@ export const LinkSuccessPage: React.FC<LinkSuccessPageProps> = ({ onGoHome }) =>
     } catch (e) {
       console.warn('[LinkSuccessPage] Init error:', e);
     }
-
-    const timer = setTimeout(() => {
-      try {
-        window.close();
-      } catch {}
-    }, 4000);
-
-    return () => clearTimeout(timer);
   }, []);
 
   const handleClose = () => {
     try {
+      window.opener = null;
+      window.open('', '_self');
       window.close();
     } catch {}
-    setTimeout(() => {
-      window.location.href = '/profile';
-    }, 200);
+    try {
+      window.close();
+    } catch {}
   };
 
   return (
     <div
-      style={{
-        backgroundColor: '#000000',
-        color: '#FFFFFF',
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        fontFamily:
-          '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-      }}
+      dir={isRtl ? 'rtl' : 'ltr'}
+      className="min-h-[calc(100vh-64px)] sm:min-h-[calc(100vh-80px)] pt-[calc(5rem+env(safe-area-inset-top,0px))] sm:pt-24 pb-16 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-1 items-center justify-center z-10 animate-apple-reveal font-sans"
     >
-      {/* Header */}
-      <header
-        style={{
-          width: '100%',
-          height: 64,
-          background: '#000000',
-          borderBottom: '1px solid #1A1A1F',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 24px',
-          boxSizing: 'border-box',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <a
-            href="/"
-            onClick={onGoHome ? (e) => { e.preventDefault(); onGoHome(); } : undefined}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              fontWeight: 800,
-              fontSize: 14,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color: '#FFFFFF',
-              textDecoration: 'none',
-            }}
+      <div className="bg-[#090909] border border-[#1A1A1F] rounded-none p-8 sm:p-11 max-w-[480px] w-full text-center flex flex-col items-center select-none shadow-2xl">
+        {/* White checkmark badge */}
+        <div className="w-12 h-12 rounded-full border-2 border-white flex items-center justify-center mb-5 text-white shrink-0">
+          <svg
+            className="w-6 h-6 text-white"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            <svg width="22" height="22" viewBox="6 22 88 56" fill="currentColor">
-              <path
-                d="M 8 50 C 24 30, 36 24, 50 24 C 64 24, 76 30, 92 50 C 76 70, 64 76, 50 76 C 36 76, 24 70, 8 50 Z M 50 29 A 21 21 0 1 0 50 71 A 21 21 0 1 0 50 29 Z"
-                fillRule="evenodd"
-              />
-              <circle cx="50" cy="50" r="13.5" fill="none" stroke="#000000" strokeWidth="3.2" />
-              <circle cx="50" cy="50" r="4.5" />
-            </svg>
-            <span>PEEKLY</span>
-          </a>
-          <a
-            href="/"
-            onClick={onGoHome ? (e) => { e.preventDefault(); onGoHome(); } : undefined}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              padding: '6px 12px',
-              background: '#090909',
-              border: '1px solid #1A1A1F',
-              borderRadius: 0,
-              color: '#929292',
-              fontSize: 12,
-              fontWeight: 600,
-              textDecoration: 'none',
-              transition: 'color 0.15s ease, border-color 0.15s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#FF5500';
-              e.currentTarget.style.borderColor = '#FF5500';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#929292';
-              e.currentTarget.style.borderColor = '#1A1A1F';
-            }}
-          >
-            &lt; Back to Home
-          </a>
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
         </div>
-      </header>
 
-      {/* Main card */}
-      <main
-        style={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '32px 16px',
-        }}
-      >
-        <div
-          style={{
-            background: '#090909',
-            border: '1px solid #1A1A1F',
-            borderRadius: 0,
-            padding: '44px 36px',
-            maxWidth: 480,
-            width: '100%',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            boxSizing: 'border-box',
-          }}
-        >
-          {/* Green checkmark badge */}
-          <div
-            style={{
-              width: 48,
-              height: 48,
-              border: '2px solid #00E676',
-              borderRadius: '9999px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: 20,
-              color: '#00E676',
-            }}
-          >
-            <svg
-              width="26"
-              height="26"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#00E676"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          </div>
+        {/* Title */}
+        <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight uppercase mb-2.5">
+          {t.title}
+        </h1>
 
-          <h1
-            style={{
-              fontSize: 20,
-              fontWeight: 800,
-              color: '#FFFFFF',
-              letterSpacing: '-0.01em',
-              marginBottom: 10,
-              textTransform: 'uppercase',
-            }}
-          >
-            Successfully linked!
-          </h1>
-          <p
-            style={{
-              fontSize: 13,
-              lineHeight: 1.5,
-              color: '#929292',
-              maxWidth: 360,
-              marginBottom: 28,
-            }}
-          >
-            {profile?.nickname
-              ? `Your FACEIT account (${profile.nickname}) is now connected to Peekly. You can close this window and return to the extension.`
-              : 'Your FACEIT account is now connected to Peekly. You can close this window and return to the extension.'}
-          </p>
+        {/* Description */}
+        <p className="text-[13px] leading-relaxed text-[#929292] max-w-[380px] mb-7 select-text">
+          {profile?.nickname
+            ? t.descWithNick.replace('{nickname}', profile.nickname)
+            : t.desc}
+        </p>
 
-          <div
-            style={{
-              display: 'flex',
-              gap: 12,
-              width: '100%',
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-            }}
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
+          <button
+            type="button"
+            onClick={handleClose}
+            className="px-6 py-3 bg-white text-black font-bold text-xs uppercase tracking-wider border border-white rounded-none transition-colors duration-150 hover:bg-[#FF5500] hover:border-[#FF5500] hover:text-white cursor-pointer min-w-[150px] focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
           >
-            <button
-              onClick={handleClose}
-              style={{
-                background: '#FFFFFF',
-                color: '#000000',
-                fontSize: 12,
-                fontWeight: 700,
-                letterSpacing: '0.04em',
-                textTransform: 'uppercase',
-                padding: '11px 24px',
-                border: '1px solid #FFFFFF',
-                borderRadius: 0,
-                cursor: 'pointer',
-                minWidth: 140,
-                transition: 'background 0.15s ease, border-color 0.15s ease, color 0.15s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#FF5500';
-                e.currentTarget.style.borderColor = '#FF5500';
-                e.currentTarget.style.color = '#FFFFFF';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#FFFFFF';
-                e.currentTarget.style.borderColor = '#FFFFFF';
-                e.currentTarget.style.color = '#000000';
-              }}
-            >
-              Close Window
-            </button>
-            <a
-              href="/profile"
-              style={{
-                background: '#090909',
-                color: '#FFFFFF',
-                fontSize: 12,
-                fontWeight: 700,
-                letterSpacing: '0.04em',
-                textTransform: 'uppercase',
-                padding: '11px 24px',
-                border: '1px solid #1A1A1F',
-                borderRadius: 0,
-                textDecoration: 'none',
-                minWidth: 140,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'border-color 0.15s ease, color 0.15s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#FF5500';
-                e.currentTarget.style.color = '#FF5500';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#1A1A1F';
-                e.currentTarget.style.color = '#FFFFFF';
-              }}
-            >
-              Go to Profile
-            </a>
-          </div>
+            {t.closeWindow}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (onGoProfile) {
+                onGoProfile();
+              } else {
+                window.location.href = '/profile';
+              }
+            }}
+            className="px-6 py-3 bg-[#090909] text-white font-bold text-xs uppercase tracking-wider border border-[#1A1A1F] rounded-none transition-colors duration-150 hover:border-[#FF5500] hover:text-[#FF5500] cursor-pointer min-w-[150px] inline-flex items-center justify-center focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
+          >
+            {t.goToProfile}
+          </button>
         </div>
-      </main>
-
-      {/* Footer */}
-      <footer
-        style={{
-          width: '100%',
-          background: '#000000',
-          borderTop: '1px solid #1A1A1F',
-          padding: '24px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          fontSize: 11,
-          color: '#929292',
-          boxSizing: 'border-box',
-          flexWrap: 'wrap',
-          gap: 12,
-        }}
-      >
-        <div>
-          <span>PEEKLY — CS2 / FACEIT Companion</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <a
-            href="/privacy"
-            style={{ color: '#929292', textDecoration: 'none' }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#FF5500';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#929292';
-            }}
-          >
-            Privacy Policy
-          </a>
-          <a
-            href="/terms"
-            style={{ color: '#929292', textDecoration: 'none' }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#FF5500';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#929292';
-            }}
-          >
-            Terms of Service
-          </a>
-          <span>&copy; 2026 Peekly. All rights reserved.</span>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 };

@@ -736,7 +736,7 @@ export async function onRequest(context: EventContext): Promise<Response> {
     if (isExtension) {
       const linkSuccessUrl = new URL('/link/success', context.request.url);
       linkSuccessUrl.searchParams.set('src', 'ext');
-      linkSuccessUrl.searchParams.set('data', encodeURIComponent(JSON.stringify(sessionData)));
+      linkSuccessUrl.searchParams.set('data', JSON.stringify(sessionData));
       targetUrl = linkSuccessUrl.toString();
     } else {
       targetUrl = new URL('/profile', context.request.url).toString();
