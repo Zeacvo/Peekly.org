@@ -1172,7 +1172,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         <button
                           type="button"
                           onClick={handleResetAvatar}
-                          className="mt-2.5 w-20 flex items-center justify-center gap-1.5 text-[11px] font-mono font-medium text-[#71717A] hover:text-[#EF4444] transition-colors cursor-pointer bg-transparent border-none p-0 focus:outline-none mx-auto"
+                          className="mt-2.5 w-20 flex items-center justify-center gap-1.5 text-[11px] font-mono font-medium text-[#71717A] hover:text-[#e11019] transition-colors cursor-pointer bg-transparent border-none p-0 focus:outline-none mx-auto"
                           title={t.resetAvatar}
                         >
                           <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -1487,7 +1487,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       <button
                         type="button"
                         onClick={handleLogout}
-                        className="w-8 h-8 flex items-center justify-center border border-[#1A1A1F] text-[#929292] hover:text-[#EF4444] hover:border-[#EF4444] transition-colors rounded-none shrink-0 cursor-pointer"
+                        className="w-8 h-8 flex items-center justify-center border border-[#1A1A1F] text-[#929292] hover:text-[#e11019] hover:border-[#e11019] transition-colors rounded-none shrink-0 cursor-pointer"
                         title={t.signOutSession}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -1510,10 +1510,10 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               </div>
 
               {/* Card 4: Danger Zone */}
-              <div className="bg-[#090909] border border-[#EF4444] p-6">
+              <div className="bg-[#090909] border border-[#e11019] p-6">
                 <div className="mb-4">
-                  <h2 className="text-xs font-bold tracking-wider text-[#EF4444] flex items-center gap-2">
-                    <AlertTriangle className="w-3.5 h-3.5 text-[#EF4444]" />
+                  <h2 className="text-xs font-bold tracking-wider text-[#e11019] flex items-center gap-2">
+                    <AlertTriangle className="w-3.5 h-3.5 text-[#e11019]" />
                     <span>{t.dangerZoneTitle}</span>
                   </h2>
                   <p className="text-xs text-[#929292] mt-1 leading-relaxed">
@@ -1527,7 +1527,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     setDeleteConfirmText('');
                     setIsDeleteModalOpen(true);
                   }}
-                  className="h-10 px-4 text-xs font-mono font-medium tracking-wider text-[#EF4444] border border-[#EF4444] bg-[#EF4444]/10 hover:bg-[#EF4444] hover:text-[#FFFFFF] transition-all cursor-pointer rounded-none"
+                  className="h-10 px-4 text-xs font-mono font-medium tracking-wider text-[#e11019] border border-[#e11019] bg-[#e11019]/10 hover:bg-[#e11019] hover:text-[#FFFFFF] transition-all cursor-pointer rounded-none"
                 >
                   {t.deleteAccountBtn}
                 </button>
@@ -1993,7 +1993,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       {/* ========================================================= */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-[#000000] border border-[#EF4444] p-6 relative">
+          <div className="w-full max-w-md bg-[#000000] border border-[#e11019] p-6 relative">
             <button
               type="button"
               onClick={() => {
@@ -2004,8 +2004,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             >
               <X className="w-4 h-4" />
             </button>
-            <div className="flex items-center gap-2 text-[#EF4444] font-bold text-sm mb-3">
-              <AlertTriangle className="w-5 h-5 text-[#EF4444]" />
+            <div className="flex items-center gap-2 text-[#e11019] font-bold text-sm mb-3">
+              <AlertTriangle className="w-5 h-5 text-[#e11019]" />
               <span>{t.deleteAccount}</span>
             </div>
             <p className="text-xs text-[#929292] leading-relaxed mb-4">
@@ -2022,7 +2022,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 value={deleteConfirmText}
                 onChange={(e) => setDeleteConfirmText(e.target.value)}
                 placeholder={currentUser?.nickname || 'nickname'}
-                className="w-full h-10 bg-[#0F0F11] border border-white/20 focus:border-[#EF4444] text-white placeholder-neutral-600 px-3 text-xs font-mono outline-none rounded-none"
+                className="w-full h-10 bg-[#0F0F11] border border-white/20 focus:border-[#e11019] text-white placeholder-neutral-600 px-3 text-xs font-mono outline-none rounded-none"
               />
             </div>
             <div className="flex items-center justify-end gap-3">
@@ -2042,8 +2042,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 disabled={isSubmitting || deleteConfirmText.trim() !== (currentUser?.nickname || '')}
                 className={`px-5 py-2 text-xs font-bold transition-colors rounded-none font-mono ${
                   deleteConfirmText.trim() === (currentUser?.nickname || '') && !isSubmitting
-                    ? 'bg-[#EF4444] hover:bg-red-600 text-white cursor-pointer'
-                    : 'bg-[#EF4444]/10 text-[#EF4444]/40 border border-[#EF4444]/30 cursor-not-allowed'
+                    ? 'bg-[#e11019] hover:bg-[#b80b13] text-white cursor-pointer'
+                    : 'bg-[#e11019]/10 text-[#e11019]/40 border border-[#e11019]/30 cursor-not-allowed'
                 }`}
               >
                 {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin inline mr-1" /> : null}
