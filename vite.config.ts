@@ -158,6 +158,11 @@ export default defineConfig({
     spa404Plugin(),
   ],
   build: {
+    target: 'es2022',
+    cssMinify: true,
+    modulePreload: {
+      polyfill: false,
+    },
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -166,6 +171,9 @@ export default defineConfig({
           }
           if (id.includes('node_modules/lucide-react/')) {
             return 'icons';
+          }
+          if (id.includes('src/data/locales/')) {
+            return 'feature-locales';
           }
         },
       },
