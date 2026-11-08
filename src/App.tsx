@@ -603,6 +603,7 @@ export const App: React.FC = () => {
           onOpenPrivacy={handleOpenPrivacy}
           onOpenTerms={handleOpenTerms}
           onGoHome={handleGoHome}
+          hideChangelog={isTerms || isPrivacy}
         />
       )}
 

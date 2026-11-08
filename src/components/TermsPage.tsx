@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import type { Language } from '../translations';
-import { InstallExtensionButton } from './InstallExtensionButton';
 import { termsTranslations } from '../data/termsTranslations';
 
 interface TermsPageProps {
@@ -224,11 +223,6 @@ export const TermsPage: React.FC<TermsPageProps> = ({ currentLang, onBack }) => 
             </div>
           </div>
         </div>
-      </div>
-
-      {/* 4. Bottom Prominent Action CTA Button with Browser Dropdown */}
-      <div className="w-full flex justify-center mt-12 mb-16">
-        <InstallExtensionButton currentLang={currentLang} />
       </div>
     </div>
   );

@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import type { Language } from '../translations';
 import { privacyTranslations } from '../data/privacyTranslations';
-import { InstallExtensionButton } from './InstallExtensionButton';
 
 interface PrivacyPageProps {
   currentLang: Language;
@@ -516,11 +515,6 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ currentLang, onBack })
 
         </div>
 
-      </div>
-
-      {/* 4. Bottom Prominent Action CTA Button with Browser Dropdown */}
-      <div className="w-full flex justify-center mt-12 mb-16">
-        <InstallExtensionButton currentLang={currentLang} />
       </div>
 
     </div>

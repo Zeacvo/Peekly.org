@@ -157,7 +157,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [countryFilter, setCountryFilter] = useState('ALL');
   const [planFilter, setPlanFilter] = useState<'ALL' | 'FREE' | 'PRO'>('ALL');
   const [sortBy, setSortBy] = useState<'last_login' | 'created_at' | 'elo' | 'nickname'>('last_login');
-  const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   // 2. Fetch Data from Protected Server Endpoint
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -397,11 +397,29 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard?.writeText(text);
-    setCopiedEmail(text);
-    setTimeout(() => setCopiedEmail(null), 2000);
+  const copyToClipboard = (text: string, key?: string) => {
+    try {
+      navigator.clipboard?.writeText(text);
+    } catch {}
+    setCopiedKey(key || text);
+    setTimeout(() => setCopiedKey(null), 2000);
   };
+
+  const renderCopyBtn = (textToCopy: string, key: string, label: string) => (
+    <button
+      type="button"
+      onClick={() => copyToClipboard(textToCopy, key)}
+      className="opacity-0 group-hover:opacity-100 text-[10px] text-[#929292] hover:text-white px-1.5 py-0.5 bg-white/5 border border-[#222228] transition-opacity cursor-pointer rounded-none shrink-0"
+      title={label}
+    >
+      {copiedKey === key ? '✓' : (
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+        </svg>
+      )}
+    </button>
+  );
 
   if (isAuthorized === false) {
     return (
@@ -664,73 +682,104 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
                         {/* Col 1: Nickname */}
                         <td className="py-3 px-4 border-r border-dashed border-[#1A1A1F]">
-                          <div className="flex items-center gap-2.5">
-                            <div className="w-7 h-7 bg-[#000000] border border-[#222228] rounded-none flex items-center justify-center shrink-0 overflow-hidden">
-                              <UserAvatar user={player} size={14} className="w-3.5 h-3.5 text-[#FFFFFF]" />
+                          <div className="flex items-center justify-between gap-2.5">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className="w-7 h-7 bg-[#000000] border border-[#222228] rounded-none flex items-center justify-center shrink-0 overflow-hidden">
+                                <UserAvatar user={player} size={14} className="w-3.5 h-3.5 text-[#FFFFFF]" />
+                              </div>
+                              <a
+                                href={`/id/${encodeURIComponent(player.nickname)}/`}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  if (onNavigateProfile) {
+                                    onNavigateProfile(player.guid);
+                                  } else {
+                                    window.location.href = `/id/${encodeURIComponent(player.nickname)}/`;
+                                  }
+                                }}
+                                className="font-bold text-[#FFFFFF] hover:text-[#FF5500] transition-colors truncate"
+                                title={`${t.openProfile} ${player.nickname}`}
+                              >
+                                {player.nickname}
+                              </a>
                             </div>
-                            <a
-                              href={`/id/${encodeURIComponent(player.nickname)}/`}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                if (onNavigateProfile) {
-                                  onNavigateProfile(player.guid);
-                                } else {
-                                  window.location.href = `/id/${encodeURIComponent(player.nickname)}/`;
-                                }
-                              }}
-                              className="font-bold text-[#FFFFFF] hover:text-[#FF5500] transition-colors"
-                              title={`${t.openProfile} ${player.nickname}`}
-                            >
-                              {player.nickname}
-                            </a>
+                            {renderCopyBtn(
+                              player.nickname,
+                              `nick-${player.guid}`,
+                              currentLang === 'ru' ? 'Копировать никнейм' : 'Copy nickname'
+                            )}
                           </div>
                         </td>
 
                         {/* Col 2: Email — 100% white */}
                         <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F]">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-between gap-2">
                             <a
                               href={`mailto:${player.email}`}
-                              className="text-[#FFFFFF] hover:text-[#FF5500] transition-colors"
+                              className="text-[#FFFFFF] hover:text-[#FF5500] transition-colors truncate"
                             >
                               {player.email}
                             </a>
-                            <button
-                              type="button"
-                              onClick={() => copyToClipboard(player.email)}
-                              className="opacity-0 group-hover:opacity-100 text-[10px] text-[#929292] hover:text-white px-1.5 py-0.5 bg-white/5 border border-[#222228] transition-opacity cursor-pointer rounded-none"
-                              title={t.copyEmail}
-                            >
-                              {copiedEmail === player.email ? '✓' : (
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                                </svg>
-                              )}
-                            </button>
+                            {renderCopyBtn(
+                              player.email,
+                              `email-${player.guid}`,
+                              t.copyEmail || 'Copy email'
+                            )}
                           </div>
                         </td>
 
                         {/* Col 3: Elo & Level — 100% white */}
                         <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F]">
-                          {player.elo ? `${player.elo.toLocaleString()} & ${player.level || 1} level` : '—'}
+                          <div className="flex items-center justify-between gap-2">
+                            <span>
+                              {player.elo ? `${player.elo.toLocaleString()} & ${player.level || 1} level` : '—'}
+                            </span>
+                            {renderCopyBtn(
+                              player.elo ? `${player.elo.toLocaleString()} & ${player.level || 1} level` : '—',
+                              `elo-${player.guid}`,
+                              currentLang === 'ru' ? 'Копировать ELO и уровень' : 'Copy ELO and level'
+                            )}
+                          </div>
                         </td>
 
                         {/* Col 4: Country — 100% white */}
                         <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F]">
-                          {getCountryName(player.country) || 'Belarus'}
+                          <div className="flex items-center justify-between gap-2">
+                            <span>{getCountryName(player.country) || 'Belarus'}</span>
+                            {renderCopyBtn(
+                              getCountryName(player.country) || 'Belarus',
+                              `country-${player.guid}`,
+                              currentLang === 'ru' ? 'Копировать страну' : 'Copy country'
+                            )}
+                          </div>
                         </td>
 
                         {/* Col 5: Registration & Activity — 100% white */}
                         <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F]">
-                          <span>{formatDateOnly(player.created_at)}</span>
-                          <span className="mx-1.5 text-[#FFFFFF]">&</span>
-                          <span>{formatDateOnly(player.last_login_at)}</span>
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="whitespace-nowrap">
+                              <span>{formatDateOnly(player.created_at)}</span>
+                              <span className="mx-1.5 text-[#FFFFFF]">&</span>
+                              <span>{formatDateOnly(player.last_login_at)}</span>
+                            </div>
+                            {renderCopyBtn(
+                              `${formatDateOnly(player.created_at)} & ${formatDateOnly(player.last_login_at)}`,
+                              `dates-${player.guid}`,
+                              currentLang === 'ru' ? 'Копировать регистрацию и активность' : 'Copy registration and activity'
+                            )}
+                          </div>
                         </td>
 
                         {/* Col 6: Plan — 100% white */}
                         <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F]">
-                          {player.plan?.toLowerCase() === 'pro' ? 'Pro' : 'Free'}
+                          <div className="flex items-center justify-between gap-2">
+                            <span>{player.plan?.toLowerCase() === 'pro' ? 'Pro' : 'Free'}</span>
+                            {renderCopyBtn(
+                              player.plan?.toLowerCase() === 'pro' ? 'Pro' : 'Free',
+                              `plan-${player.guid}`,
+                              currentLang === 'ru' ? 'Копировать тариф' : 'Copy plan'
+                            )}
+                          </div>
                         </td>
 
                         {/* Col 7: Actions — icon only */}

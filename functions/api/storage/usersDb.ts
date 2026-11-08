@@ -40,10 +40,27 @@ export function calculateFaceitLevel(elo: number): number {
 }
 
 // Initial verified players authenticated via FACEIT Connect (cleaned of stale mocks)
-export const INITIAL_PLAYERS: PlayerUser[] = [];
+export const INITIAL_PLAYERS: PlayerUser[] = [
+  {
+    guid: 'usr-zeacvo-ceo',
+    nickname: 'Zeacvo',
+    email: 'zeacvo@icloud.com',
+    avatar: 'https://assets.faceit-cdn.net/avatars/default_avatar.png',
+    country: 'BY',
+    elo: 1699,
+    level: 8,
+    created_at: '2026-11-03T12:00:00.000Z',
+    last_login_at: '2026-11-07T12:00:00.000Z',
+    plan: 'FREE',
+    role: 'OWNER',
+    is_faceit_linked: true,
+  },
+];
 
 // Persistent in-memory fallback store across runtime requests
-const memoryUsers = new Map<string, PlayerUser>();
+const memoryUsers = new Map<string, PlayerUser>(
+  INITIAL_PLAYERS.map((p) => [p.guid, p])
+);
 
 export async function upsertPlayer(
   env: Record<string, unknown> | undefined,
