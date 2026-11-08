@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { ChevronLeft } from 'lucide-react';
-import { translations, changelogVersionMap } from '../translations';
+import { ChevronLeft, ChevronDown } from 'lucide-react';
+import { translations } from '../translations';
 import type { Language } from '../translations';
 import { InstallExtensionButton } from './InstallExtensionButton';
+import { changelogReleases, getLocalizedVersionTitle } from '../data/changelogData';
 
 interface ChangelogPageProps {
   currentLang: Language;
@@ -28,130 +29,9 @@ const backLabelMap: Record<Language, string> = {
   zh: '返回首页',
 };
 
-interface ChangelogItem {
-  num: string;
-  title: string;
-  desc: string;
-}
-
-const changelogModulesRu: ChangelogItem[] = [
-  {
-    num: '01',
-    title: 'Первый публичный релиз в Google Chrome Web Store',
-    desc: 'Полный набор тактического интерфейса и автоматизации для соревновательного FACEIT CS2.',
-  },
-  {
-    num: '02',
-    title: 'Радар маппула в лобби',
-    desc: 'Отображает радар маппула команд в лобби матча на основе последних 30 игр.',
-  },
-  {
-    num: '03',
-    title: 'Статистика игроков в матче',
-    desc: 'Отображает плашки со статистикой за 30 игр и раскладку по картам под каждым игроком.',
-  },
-  {
-    num: '04',
-    title: 'Плашка среднего ELO команд',
-    desc: 'Отображает контрастные плашки среднего ELO со значком ранга в баннере счета.',
-  },
-  {
-    num: '05',
-    title: 'Автокопирование IP сервера',
-    desc: 'Автоматически копирует команду connect в буфер при назначении сервера.',
-  },
-  {
-    num: '06',
-    title: 'Режим фокусировки лобби',
-    desc: 'Скрывает ростеры игроков и баннер счета, оставляя карту, сервер и радар.',
-  },
-  {
-    num: '07',
-    title: 'Автопринятие матча',
-    desc: 'Автоматически подтверждает готовность при нахождении матча с задержкой.',
-  },
-  {
-    num: '08',
-    title: 'Автопринятие инвайтов в группу',
-    desc: 'Автоматически принимает входящие приглашения в группу с задержкой.',
-  },
-  {
-    num: '09',
-    title: 'Расширенная история матчей',
-    desc: 'Добавляет в таблицу матчей показатели K/R, ADR, PCR и кнопку скачивания демозаписи (Demo).',
-  },
-  {
-    num: '10',
-    title: 'Виджет ELO в сайдбаре',
-    desc: 'Отображает компактный 2-элементный блок ELO с иконкой ранга и счетом.',
-  },
-  {
-    num: '11',
-    title: 'Винрейт на карточках карт',
-    desc: 'Отображает плашки винрейта прямо на плитках карт в очереди матча.',
-  },
-];
-
-const changelogModulesEn: ChangelogItem[] = [
-  {
-    num: '01',
-    title: 'Initial public release in Google Chrome Web Store',
-    desc: 'Full-featured tactical interface and automation suite for competitive FACEIT CS2.',
-  },
-  {
-    num: '02',
-    title: 'Map Pool Radar Chart',
-    desc: 'Renders team map pool radar chart in matchroom based on last 30 matches.',
-  },
-  {
-    num: '03',
-    title: 'Match Player Stats Overlay',
-    desc: 'Displays 30-match performance stats and map breakdown under each player in the matchroom.',
-  },
-  {
-    num: '04',
-    title: 'Team Average ELO Badge',
-    desc: 'Displays high-contrast team average ELO pills with rank icons in match banner.',
-  },
-  {
-    num: '05',
-    title: 'Auto-Copy Server IP',
-    desc: 'Automatically copies connect command to clipboard when IP is assigned.',
-  },
-  {
-    num: '06',
-    title: 'Lobby Focus Mode',
-    desc: 'Hides team rosters and score banner, keeping server, map, and radar visible.',
-  },
-  {
-    num: '07',
-    title: 'Auto-Accept Match Check',
-    desc: 'Automatically confirms ready check dialog upon match creation.',
-  },
-  {
-    num: '08',
-    title: 'Auto-Accept Party Invites',
-    desc: 'Automatically accepts incoming party invitations with configurable delay.',
-  },
-  {
-    num: '09',
-    title: 'Enhanced Match History',
-    desc: 'Adds K/R, ADR, PCR columns and a direct Demo download button to the match history table.',
-  },
-  {
-    num: '10',
-    title: 'Sidebar ELO Widget',
-    desc: 'Displays compact 2-element ELO widget with skill level icon and live score in rail.',
-  },
-  {
-    num: '11',
-    title: 'Map Selector Win Rates',
-    desc: 'Displays team and personal win rate badges directly on matchmaking queue map tiles.',
-  },
-];
-
 export const ChangelogPage: React.FC<ChangelogPageProps> = ({ currentLang, onBack }) => {
   const [elapsedTime, setElapsedTime] = useState<number>(0);
+  const [openVersions, setOpenVersions] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -208,23 +88,12 @@ export const ChangelogPage: React.FC<ChangelogPageProps> = ({ currentLang, onBac
     { id: 10, group: 3, y: 217, w1: 74, w2: 122 },
   ];
 
-  const versionString = changelogVersionMap[currentLang] || tLang.changelogPage.version || 'Version 1.0.0';
-
-  const changes: ChangelogItem[] = (() => {
-    if (currentLang === 'ru') return changelogModulesRu;
-    if (currentLang === 'en') return changelogModulesEn;
-    const initialItem: ChangelogItem = {
-      num: '01',
-      title: tLang.changelogPage.initialReleaseTitle || 'Initial public release in Google Chrome Web Store',
-      desc: tLang.changelogPage.initialReleaseDesc || 'Full tactical interface and automation suite for competitive FACEIT CS2.',
-    };
-    const featureItems: ChangelogItem[] = tLang.features.items.map((item, idx) => ({
-      num: String(idx + 2).padStart(2, '0'),
-      title: item.title,
-      desc: item.desc,
+  const toggleVersion = (version: string) => {
+    setOpenVersions((prev) => ({
+      ...prev,
+      [version]: !prev[version],
     }));
-    return [initialItem, ...featureItems];
-  })();
+  };
 
   return (
     <main className="pt-[calc(5rem+env(safe-area-inset-top,0px))] sm:pt-24 pb-0 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-stretch z-10 animate-apple-reveal">
@@ -263,12 +132,10 @@ export const ChangelogPage: React.FC<ChangelogPageProps> = ({ currentLang, onBac
             <circle cx="67" cy="33" r="3.5" fill="#555555" />
 
             {/* Group Separator Dividers (Between Matchroom, Automation, Profile) */}
-            {/* Divider 1: between Matchroom (rows 1-5) and Automation (rows 6-7) */}
             <line x1="36" y1="143" x2="404" y2="143" stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" strokeWidth="1" />
-            {/* Divider 2: between Automation (rows 6-7) and Profile (rows 8-10) */}
             <line x1="36" y1="179" x2="404" y2="179" stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" strokeWidth="1" />
 
-            {/* 11 Visual Architecture Modules (Clean List of Skeleton Rows Starting Directly Under Header) */}
+            {/* 11 Visual Architecture Modules */}
             {visualModules.map((mod, idx) => {
               const rowStart = 0.15 + idx * 0.14;
               const rowProgress = Math.max(0, Math.min(1, (t - rowStart) / 0.20));
@@ -277,15 +144,12 @@ export const ChangelogPage: React.FC<ChangelogPageProps> = ({ currentLang, onBac
 
               return (
                 <g key={mod.id} opacity={0.3 + 0.7 * activeEase}>
-                  {/* 1. Minimalist Dot Marker */}
                   <circle 
                     cx="41" 
                     cy={mod.y + 3} 
                     r="2" 
                     fill={isActive ? "#737373" : "#262626"} 
                   />
-
-                  {/* 2. Abstract White Module Title Skeleton Bar */}
                   <rect 
                     x="52" 
                     y={mod.y + 0.5} 
@@ -294,8 +158,6 @@ export const ChangelogPage: React.FC<ChangelogPageProps> = ({ currentLang, onBac
                     fill={isActive ? "#ffffff" : "#222222"} 
                     opacity={isActive ? 0.9 : 0.3} 
                   />
-
-                  {/* 3. Abstract Grey Description Skeleton Bar */}
                   <rect 
                     x={52 + mod.w1 + 8} 
                     y={mod.y + 1} 
@@ -304,8 +166,6 @@ export const ChangelogPage: React.FC<ChangelogPageProps> = ({ currentLang, onBac
                     fill={isActive ? "#555555" : "#1a1a1a"} 
                     opacity={isActive ? 0.8 : 0.25} 
                   />
-
-                  {/* 4. Right Subtle Status Marker */}
                   <rect 
                     x="374" 
                     y={mod.y + 1} 
@@ -321,36 +181,79 @@ export const ChangelogPage: React.FC<ChangelogPageProps> = ({ currentLang, onBac
         </div>
       </div>
 
-      {/* 3. Text Content — ровно 100% ширины контейнера, БЕЗ max-w-* и БЕЗ px-* */}
+      {/* 3. Text Content — ровно 100% ширины контейнера */}
       <div className="w-full max-w-none px-0 mx-0 flex flex-col items-start text-left cursor-default select-text mb-0">
 
-        {/* История обновлений Peekly (Шрифт 1) */}
+        {/* История обновлений Peekly */}
         <h1 className="w-full max-w-none text-3xl md:text-4xl font-bold tracking-tight text-white mb-2 cursor-text select-text font-sans">
           {tLang.changelogPage.title}
         </h1>
 
-        {/* Вводный текст описания (Шрифт 3) */}
+        {/* Вводный текст описания */}
         <p className="w-full max-w-none font-sans text-sm md:text-[15px] font-normal text-[#929292] leading-relaxed text-justify mb-8 cursor-text select-text">
           {tLang.changelogPage.desc}
         </p>
 
-        {/* Версия 1.0.0 (Шрифт 2) */}
-        <h2 className="w-full max-w-none font-sans text-base md:text-lg font-bold tracking-tight text-white mb-2 mt-8 cursor-text select-text">
-          {versionString}
-        </h2>
+        {/* Collapsible Versions Accordion */}
+        <div className="w-full flex flex-col gap-4 mt-2 font-sans">
+          {changelogReleases.map((release) => {
+            const isOpen = !!openVersions[release.version];
+            const title = getLocalizedVersionTitle(release.version, currentLang);
+            const items = release.getItems(currentLang);
 
-        {/* Список компонентов (Шрифт 3 + стилизованные номера 01–11 с компактным gap-2.5) */}
-        <div className="w-full max-w-none space-y-3 font-sans">
-          {changes.map((item, idx) => (
-            <div key={idx} className="w-full max-w-none flex items-baseline gap-2.5 cursor-text select-text">
-              <span className="font-mono text-sm md:text-[15px] font-bold text-[#929292] select-none shrink-0">
-                {item.num}
-              </span>
-              <span className="w-full max-w-none font-sans text-sm md:text-[15px] font-normal text-[#929292] leading-relaxed text-justify">
-                {item.title} — {item.desc}
-              </span>
-            </div>
-          ))}
+            return (
+              <div
+                key={release.version}
+                className="w-full bg-[#090909] border border-[#1A1A1F] hover:border-white/20 transition-all rounded-none"
+              >
+                {/* Header Toggle Row */}
+                <button
+                  type="button"
+                  onClick={() => toggleVersion(release.version)}
+                  className="w-full px-5 py-4 flex items-center justify-between text-left cursor-pointer group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white select-none transition-colors"
+                  aria-expanded={isOpen}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="font-sans text-base md:text-lg font-bold tracking-tight text-white group-hover:text-[#FF5500] transition-colors">
+                      {title}
+                    </span>
+                    {release.version === '1.1.0' && (
+                      <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider bg-white/10 text-white rounded-none border border-white/20 select-none">
+                        {currentLang === 'ru' ? 'СВЕЖИЙ РЕЛИЗ' : 'LATEST'}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3 text-[#929292] group-hover:text-[#FF5500] transition-colors">
+                    <span className="text-xs font-mono hidden sm:inline text-[#929292] select-none">
+                      {items.length} {currentLang === 'ru' ? 'пунктов' : 'items'}
+                    </span>
+                    <ChevronDown
+                      className={`w-5 h-5 transition-transform duration-200 stroke-[2] ${
+                        isOpen ? 'rotate-180 text-white' : ''
+                      }`}
+                    />
+                  </div>
+                </button>
+
+                {/* Collapsible Items List */}
+                {isOpen && (
+                  <div className="px-5 pb-6 pt-3 border-t border-[#1A1A1F] space-y-3 font-sans">
+                    {items.map((item, idx) => (
+                      <div key={idx} className="w-full flex items-baseline gap-2.5 cursor-text select-text">
+                        <span className="font-mono text-sm md:text-[15px] font-bold text-[#929292] select-none shrink-0">
+                          {item.num}
+                        </span>
+                        <span className="w-full font-sans text-sm md:text-[15px] font-normal text-[#929292] leading-relaxed text-justify">
+                          <span className="text-white font-medium">{item.title}</span> — {item.desc}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
       </div>
