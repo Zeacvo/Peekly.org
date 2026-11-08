@@ -477,13 +477,13 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
               <button
                 type="submit"
                 disabled={isLoading || verificationCode.trim().length !== 6}
-                className={`w-full h-[50px] mt-4 rounded-none font-mono font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center ${
+                className={`w-full h-[50px] mt-4 rounded-none font-mono font-bold text-xs transition-colors flex items-center justify-center ${
                   isLoading || verificationCode.trim().length !== 6
                     ? 'bg-[#151518] text-[#404048] cursor-not-allowed border-none'
                     : 'bg-white text-black hover:bg-neutral-200 cursor-pointer border-none'
                 }`}
               >
-                {isLoading ? 'VERIFYING...' : 'VERIFY & CONTINUE'}
+                {isLoading ? 'Verifying...' : 'Verify & Continue'}
               </button>
 
               <div className="flex items-center justify-between mt-6 text-xs font-mono">
@@ -554,7 +554,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
         {/* Clean Divider with OR */}
         <div className="w-full flex items-center my-2">
           <div className="flex-1 border-t border-white/10" />
-          <span className="px-3 text-[10px] font-mono uppercase tracking-widest text-neutral-500">
+          <span className="px-3 text-[10px] font-mono text-neutral-500">
             {t.orDivider}
           </span>
           <div className="flex-1 border-t border-white/10" />
@@ -630,7 +630,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                       style={{ width: `${pwdReq.score}%` }}
                     />
                   </div>
-                  <div className="text-xs font-bold uppercase tracking-wider text-neutral-200 mt-1 mb-2">
+                  <div className="text-xs font-bold text-neutral-200 mt-1 mb-2">
                     {t.passwordRequirementsTitle}
                   </div>
                   <div className="space-y-1.5 font-mono text-xs">
@@ -806,7 +806,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
           <button
             type="submit"
             disabled={isLoading || !isRegisterFormValid}
-            className={`w-full h-11 rounded-none font-mono font-bold text-xs uppercase tracking-wider transition ${
+            className={`w-full h-11 rounded-none font-mono font-bold text-xs transition ${
               isLoading || !isRegisterFormValid
                 ? 'opacity-40 cursor-not-allowed bg-white/20 text-neutral-400 border-none shadow-none'
                 : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'

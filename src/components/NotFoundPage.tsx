@@ -41,7 +41,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({ currentLang = 'en', 
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex items-center justify-center px-7 sm:px-8 py-3.5 bg-white text-black font-sans text-xs sm:text-sm font-bold tracking-wider uppercase rounded-none border border-white hover:bg-[#FF5500] hover:text-black hover:border-white transition-colors duration-150 cursor-pointer shadow-2xl active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
+        className="inline-flex items-center justify-center px-7 sm:px-8 py-3.5 bg-white text-black font-sans text-xs sm:text-sm font-semibold rounded-none border border-white hover:bg-[#FF5500] hover:text-black hover:border-white transition-colors duration-150 cursor-pointer shadow-2xl active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
       >
         <span>{t.button}</span>
       </button>

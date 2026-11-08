@@ -301,7 +301,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             {/* Clean Divider with OR */}
             <div className="w-full flex items-center my-1">
               <div className="flex-1 border-t border-white/10" />
-              <span className="px-3 text-[10px] font-mono uppercase tracking-widest text-neutral-500">
+              <span className="px-3 text-[10px] font-mono text-neutral-500">
                 {t.orDivider}
               </span>
               <div className="flex-1 border-t border-white/10" />
@@ -364,7 +364,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               <button
                 type="submit"
                 disabled={!email.trim()}
-                className={`w-full h-11 rounded-none font-mono font-bold text-xs uppercase tracking-wider transition ${
+                className={`w-full h-11 rounded-none font-mono font-bold text-xs transition ${
                   !email.trim()
                     ? 'bg-white/20 text-neutral-400 cursor-not-allowed border-none shadow-none'
                     : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
@@ -382,7 +382,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             <div className="w-full flex flex-col">
               <div className="w-full h-11 border border-white/20 border-b-0 bg-black px-3.5 flex items-center justify-between rounded-none">
                 <div className="min-w-0 pr-2">
-                  <span className="text-[10px] uppercase font-mono text-neutral-500 mr-2">
+                  <span className="text-[10px] font-mono text-neutral-500 mr-2">
                     Email:
                   </span>
                   <span className="text-white text-sm font-sans truncate">{email}</span>
@@ -452,7 +452,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             <button
               type="submit"
               disabled={isLoading || !password.trim()}
-              className={`w-full h-11 rounded-none font-mono font-bold text-xs uppercase tracking-wider transition ${
+              className={`w-full h-11 rounded-none font-mono font-bold text-xs transition ${
                 isLoading || !password.trim()
                   ? 'bg-white/20 text-neutral-400 cursor-not-allowed border-none shadow-none'
                   : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
@@ -481,7 +481,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               <div className="w-10 h-10 border border-[#1A1A1F] bg-[#090909] flex items-center justify-center mb-3">
                 <KeyRound className="w-5 h-5 text-[#FF5500]" />
               </div>
-              <h2 className="text-lg font-bold font-mono uppercase tracking-wider text-white mb-1">
+              <h2 className="text-lg font-bold font-mono text-white mb-1">
                 {isRu ? 'Двухэтапная аутентификация' : 'Two-Factor Authentication'}
               </h2>
               <p className="text-xs font-mono text-[#929292] leading-relaxed max-w-[320px]">
@@ -511,13 +511,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             <button
               type="submit"
               disabled={isLoading || twoFactorCode.trim().length !== 6}
-              className={`w-full h-11 rounded-none font-mono font-bold text-xs uppercase tracking-wider transition ${
+              className={`w-full h-11 rounded-none font-mono font-bold text-xs transition ${
                 isLoading || twoFactorCode.trim().length !== 6
                   ? 'bg-white/20 text-neutral-400 cursor-not-allowed border-none shadow-none'
                   : 'bg-white text-black hover:bg-neutral-200 cursor-pointer shadow-sm'
               }`}
             >
-              {isLoading ? t.pleaseWait : (isRu ? 'ПОДТВЕРДИТЬ И ВОЙТИ' : 'VERIFY & SIGN IN')}
+              {isLoading ? t.pleaseWait : (isRu ? 'Подтвердить и войти' : 'Verify & Sign in')}
             </button>
 
             <button

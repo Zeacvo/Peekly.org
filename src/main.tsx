@@ -40,9 +40,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
               } catch {}
               window.location.href = '/';
             }}
-            style={{ backgroundColor: '#ffffff', color: '#000000', border: 'none', padding: '12px 24px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer', letterSpacing: '1px', textTransform: 'uppercase' }}
+            style={{ backgroundColor: '#ffffff', color: '#000000', border: 'none', padding: '12px 24px', fontWeight: '600', fontSize: '13px', cursor: 'pointer' }}
           >
-            RELOAD
+            Reload
           </button>
         </div>
       );

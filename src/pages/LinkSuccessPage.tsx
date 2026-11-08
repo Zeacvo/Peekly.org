@@ -160,7 +160,7 @@ export const LinkSuccessPage: React.FC<LinkSuccessPageProps> = ({
           <button
             type="button"
             onClick={handleHomeOrClose}
-            className="px-6 py-3 bg-white text-black font-bold text-xs uppercase tracking-wider border border-white rounded-none transition-colors duration-150 hover:bg-[#FF5500] hover:border-[#FF5500] hover:text-white cursor-pointer min-w-[140px] focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
+            className="px-6 py-3 bg-white text-black font-semibold text-sm border border-white rounded-none transition-colors duration-150 hover:bg-[#FF5500] hover:border-[#FF5500] hover:text-white cursor-pointer min-w-[140px] focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
           >
             {t.goHome}
           </button>
@@ -173,7 +173,7 @@ export const LinkSuccessPage: React.FC<LinkSuccessPageProps> = ({
                 window.location.href = '/profile';
               }
             }}
-            className="px-6 py-3 bg-[#090909] text-white font-bold text-xs uppercase tracking-wider border border-[#1A1A1F] rounded-none transition-colors duration-150 hover:border-[#FF5500] hover:text-[#FF5500] cursor-pointer min-w-[140px] inline-flex items-center justify-center focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
+            className="px-6 py-3 bg-[#090909] text-white font-semibold text-sm border border-[#1A1A1F] rounded-none transition-colors duration-150 hover:border-[#FF5500] hover:text-[#FF5500] cursor-pointer min-w-[140px] inline-flex items-center justify-center focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
           >
             {t.goToProfile}
           </button>
