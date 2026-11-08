@@ -62,6 +62,21 @@ p, article, h1, h2, h3, h4, h5, h6, .cursor-text {
   cursor: text;
 }
 
+/* Rock-solid Footer Layout: Left column on left, Right column on right */
+.footer-container {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: flex-end !important;
+}
+
+@media (max-width: 639px) {
+  .footer-container {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+}
+
 button, a, [role="button"], .cursor-pointer {
   cursor: pointer;
 }

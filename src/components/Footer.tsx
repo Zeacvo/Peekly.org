@@ -62,7 +62,7 @@ export const Footer: React.FC<FooterProps> = ({
 
   return (
     <footer className={`w-full bg-[#000000] border-t border-[#1A1A1F] relative z-10 shrink-0 ${compact ? 'py-3 sm:py-4' : 'mt-auto py-8 sm:py-10'}`}>
-      <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-start sm:items-end justify-between ${compact ? 'gap-2 sm:gap-4' : 'gap-6'} text-xs text-[#929292]`}>
+      <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 footer-container ${compact ? 'gap-2 sm:gap-4' : 'gap-6'} text-xs text-[#929292]`}>
         
         {/* Left Column: Logo & Legal Disclaimer */}
         <div className={`flex flex-col items-start text-left max-w-md ${compact ? 'gap-1' : 'gap-3'}`}>
@@ -88,7 +88,7 @@ export const Footer: React.FC<FooterProps> = ({
         </div>
 
         {/* Right Column: Navigation Links & Copyright */}
-        <div className={`flex flex-col items-start sm:items-end text-left sm:text-right ${compact ? 'gap-1 text-[11px]' : 'gap-1.5 text-[12px]'}`}>
+        <div className={`flex flex-col items-end text-right max-sm:items-start max-sm:text-left ${compact ? 'gap-1 text-[11px]' : 'gap-1.5 text-[12px]'}`}>
           {/* Row 1: Privacy Policy Link */}
           <a
             href="/privacy"
