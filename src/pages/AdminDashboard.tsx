@@ -158,6 +158,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [planFilter, setPlanFilter] = useState<'ALL' | 'FREE' | 'PRO'>('ALL');
   const [sortBy, setSortBy] = useState<'last_login' | 'created_at' | 'elo' | 'nickname'>('last_login');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [rowActionHover, setRowActionHover] = useState<{ guid: string; action: 'select' | 'delete' } | null>(null);
 
   // 2. Fetch Data from Protected Server Endpoint
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -657,17 +658,31 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 ) : (
                   filteredUsers.map((player, index) => {
                     const canSelect = isSelectable(player);
+                    const isSelected = selectedIds.includes(player.guid);
+                    const isSelectHover = rowActionHover?.guid === player.guid && rowActionHover.action === 'select';
+                    const isDeleteActive =
+                      (rowActionHover?.guid === player.guid && rowActionHover.action === 'delete') ||
+                      (deleteModal.isOpen && deleteModal.ids.includes(player.guid));
+
                     return (
                       <tr
                         key={player.guid}
-                        className={`border-b border-[#1A1A1F] hover:bg-[#0c0c0e] transition-colors ${
+                        className={`border-b border-[#1A1A1F] transition-colors ${
                           index % 2 === 0 ? 'bg-[#000000]' : 'bg-[#090909]'
                         } ${
-                          selectedIds.includes(player.guid) ? '!bg-[#FF5500]/[0.08]' : ''
+                          isSelected ? '!bg-[#FF5500]/[0.08]' : ''
+                        } ${
+                          isSelectHover ? '!bg-white/[0.06]' : ''
+                        } ${
+                          isDeleteActive ? '!bg-white/[0.10]' : ''
                         }`}
                       >
                         {/* Col 0: Checkbox */}
-                        <td className="py-3 px-4 w-10 text-center border-r border-dashed border-[#1A1A1F]">
+                        <td
+                          className="py-3 px-4 w-10 text-center border-r border-dashed border-[#1A1A1F] cursor-pointer"
+                          onMouseEnter={() => setRowActionHover({ guid: player.guid, action: 'select' })}
+                          onMouseLeave={() => setRowActionHover(null)}
+                        >
                           <input
                             type="checkbox"
                             checked={selectedIds.includes(player.guid)}
@@ -681,7 +696,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </td>
 
                         {/* Col 1: Nickname */}
-                        <td className="py-3 px-4 border-r border-dashed border-[#1A1A1F] group/cell">
+                        <td className="py-3 px-4 border-r border-dashed border-[#1A1A1F] group/cell hover:bg-white/[0.05] transition-colors">
                           <div className="flex items-center gap-2.5">
                             <div className="w-7 h-7 bg-[#000000] border border-[#222228] rounded-none flex items-center justify-center shrink-0 overflow-hidden">
                               <UserAvatar user={player} size={14} className="w-3.5 h-3.5 text-[#FFFFFF]" />
@@ -710,7 +725,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </td>
 
                         {/* Col 2: Email — 100% white */}
-                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F] group/cell">
+                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F] group/cell hover:bg-white/[0.05] transition-colors">
                           <div className="flex items-center gap-2">
                             <a
                               href={`mailto:${player.email}`}
@@ -727,7 +742,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </td>
 
                         {/* Col 3: Elo & Level — 100% white */}
-                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F] group/cell">
+                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F] group/cell hover:bg-white/[0.05] transition-colors">
                           <div className="flex items-center gap-2">
                             <span>
                               {player.elo ? `${player.elo.toLocaleString()} & ${player.level || 1} level` : '—'}
@@ -741,7 +756,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </td>
 
                         {/* Col 4: Country — 100% white */}
-                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F] group/cell">
+                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F] group/cell hover:bg-white/[0.05] transition-colors">
                           <div className="flex items-center gap-2">
                             <span>{getCountryName(player.country) || 'Belarus'}</span>
                             {renderCopyBtn(
@@ -753,7 +768,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </td>
 
                         {/* Col 5: Registration & Activity — 100% white */}
-                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F] group/cell">
+                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F] group/cell hover:bg-white/[0.05] transition-colors">
                           <div className="flex items-center gap-2">
                             <div className="whitespace-nowrap">
                               <span>{formatDateOnly(player.created_at)}</span>
@@ -769,7 +784,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </td>
 
                         {/* Col 6: Plan — 100% white */}
-                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F] group/cell">
+                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F] group/cell hover:bg-white/[0.05] transition-colors">
                           <div className="flex items-center gap-2">
                             <span>{player.plan?.toLowerCase() === 'pro' ? 'Pro' : 'Free'}</span>
                             {renderCopyBtn(
@@ -781,7 +796,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </td>
 
                         {/* Col 7: Actions — icon only */}
-                        <td className="py-3 px-4 text-right">
+                        <td
+                          className="py-3 px-4 text-right"
+                          onMouseEnter={() => setRowActionHover({ guid: player.guid, action: 'delete' })}
+                          onMouseLeave={() => setRowActionHover(null)}
+                        >
                           <button
                             type="button"
                             onClick={() => handleRequestSingleDelete(player)}
