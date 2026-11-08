@@ -51,6 +51,7 @@ export const changelog110: Record<Language, ChangelogItem[]> = {
     { num: '10', title: 'Удобное открытие меню профиля', desc: 'Всплывающее окно статистики больше не появляется случайно и не перекрывает кнопки профиля, поддержки и настроек FACEIT.' },
     { num: '11', title: 'Чистая таблица истории игр', desc: 'Убраны лишние полосы, двойные рамки и полосы прокрутки, таблица аккуратно вписана в стандартный интерфейс FACEIT.' },
     { num: '12', title: 'Повышение стабильности работы', desc: 'Оптимизирована фоновая загрузка статистики, снижена нагрузка на браузер и устранены скрытые сбои при переходах между страницами.' },
+    { num: '13', title: 'Динамический чёрно-бело-оранжевый дизайн', desc: 'Интерфейс расширения полностью адаптирован под стиль сайта с динамической чёрно-бело-оранжевой темой и фирменными акцентами.' },
   ],
   en: [
     { num: '01', title: 'Official Release in Mozilla Firefox', desc: 'The extension is now officially available in the Mozilla Add-ons catalog with full support for all intelligence and automation features.' },
@@ -65,6 +66,7 @@ export const changelog110: Record<Language, ChangelogItem[]> = {
     { num: '10', title: 'Streamlined Profile Menu Access', desc: 'Telemetry overlays no longer trigger inadvertently or obstruct native FACEIT profile, support, and navigation menus.' },
     { num: '11', title: 'Clean Match History Layout', desc: 'Eliminated redundant scrollbars, double borders, and layout shifts, seamlessly blending match tables into native FACEIT UI.' },
     { num: '12', title: 'Core Stability & Performance Upgrades', desc: 'Optimized background telemetry polling, reduced browser resource footprint, and resolved silent edge-case navigation exceptions.' },
+    { num: '13', title: 'Dynamic Black-and-White-Orange Theme', desc: 'The extension interface is fully adapted to match the site aesthetic with a dynamic black, white, and orange color palette and signature accents.' },
   ],
   uk: [
     { num: '01', title: 'Офіційний реліз у Mozilla Firefox', desc: 'Розширення тепер офіційно доступне в каталозі Mozilla Add-ons із повною підтримкою всіх можливостей аналітики та автоматизації.' },
@@ -79,6 +81,7 @@ export const changelog110: Record<Language, ChangelogItem[]> = {
     { num: '10', title: 'Зручне відкриття меню профілю', desc: 'Спливаюче вікно статистики більше не з’являється випадково та не перекриває кнопки профілю, підтримки та налаштувань FACEIT.' },
     { num: '11', title: 'Чиста таблиця історії ігор', desc: 'Прибрано зайві смуги, подвійні рамки та скролбари, таблицю акуратно вписано в стандартний інтерфейс FACEIT.' },
     { num: '12', title: 'Підвищення стабільності роботи', desc: 'Оптимізовано фонове завантаження статистики, знижено навантаження на браузер і усунуто приховані збої під час переходів між сторінками.' },
+    { num: '13', title: 'Динамічний чорно-біло-помаранчевий дизайн', desc: 'Інтерфейс розширення повністю адаптовано під стиль сайту з динамічною чорно-біло-помаранчевою темою та фірмовими акцентами.' },
   ],
   de: [
     { num: '01', title: 'Offizieller Release in Mozilla Firefox', desc: 'Die Erweiterung ist nun offiziell im Mozilla Add-ons Store mit voller Unterstützung aller Analyse- und Automatisierungsfunktionen verfügbar.' },
@@ -93,6 +96,7 @@ export const changelog110: Record<Language, ChangelogItem[]> = {
     { num: '10', title: 'Komfortabler Zugriff auf das Profilmenü', desc: 'Statistik-Overlays erscheinen nicht mehr unbeabsichtigt und verbergen weder Profil-, Support- noch Einstellungs-Buttons auf FACEIT.' },
     { num: '11', title: 'Aufgeräumte Spielverlaufstabelle', desc: 'Überflüssige Ränder, doppelte Rahmen und Scrollleisten wurden entfernt; die Tabelle fügt sich nahtlos in das FACEIT-Design ein.' },
     { num: '12', title: 'Erhöhte Systemstabilität', desc: 'Optimierte Hintergrundabfragen, geringere Browserauslastung und Behebung seltener Navigationsfehler.' },
+    { num: '13', title: 'Dynamisches Schwarz-Weiß-Orange-Design', desc: 'Die Erweiterungsoberfläche wurde vollständig an das Design der Website mit einer dynamischen Schwarz-Weiß-Orange-Farbpalette und unverwechselbaren Akzenten angepasst.' },
   ],
   fr: [
     { num: '01', title: 'Sortie officielle sur Mozilla Firefox', desc: 'L\'extension est désormais officiellement disponible sur Mozilla Add-ons avec toutes les fonctionnalités d\'analyse et d\'automatisation.' },
@@ -107,6 +111,7 @@ export const changelog110: Record<Language, ChangelogItem[]> = {
     { num: '10', title: 'Accès fluide au menu du profil', desc: 'Les fenêtres de statistiques ne s\'ouvrent plus accidentellement et ne masquent plus les menus et paramètres FACEIT.' },
     { num: '11', title: 'Tableau d\'historique épuré', desc: 'Suppression des bordures doubles et barres de défilement inutiles pour une intégration parfaite dans l\'interface FACEIT.' },
     { num: '12', title: 'Stabilité et performances renforcées', desc: 'Chargement des statistiques optimisé en arrière-plan, empreinte navigateur réduite et fluidité accrue.' },
+    { num: '13', title: 'Design dynamique noir, blanc et orange', desc: 'L\'interface de l\'extension a été entièrement adaptée au style du site avec un thème dynamique noir-blanc-orange et des accents signature.' },
   ],
   es: [
     { num: '01', title: 'Lanzamiento oficial en Mozilla Firefox', desc: 'La extensión ya está disponible oficialmente en Mozilla Add-ons con soporte completo para todas las funciones de análisis y automatización.' },
@@ -121,6 +126,7 @@ export const changelog110: Record<Language, ChangelogItem[]> = {
     { num: '10', title: 'Apertura cómoda del menú de perfil', desc: 'La ventana de estadísticas ya no se despliega por error ni obstruye botones de perfil o ajustes en FACEIT.' },
     { num: '11', title: 'Tabla de historial limpia y ordenada', desc: 'Se eliminaron barras de desplazamiento y bordes dobles, adaptando la tabla a la interfaz nativa de FACEIT.' },
     { num: '12', title: 'Mayor estabilidad y rendimiento', desc: 'Carga de telemetría optimizada en segundo plano, menor consumo del navegador y transiciones fluidas.' },
+    { num: '13', title: 'Diseño dinámico negro, blanco y naranja', desc: 'La interfaz de la extensión se ha adaptado por completo al diseño del sitio web con un tema dinámico en negro, blanco y naranja con detalles distintivos.' },
   ],
   pl: [
     { num: '01', title: 'Oficjalne wydanie w Mozilla Firefox', desc: 'Rozszerzenie jest teraz oficjalnie dostępne w katalogu Mozilla Add-ons z pełną obsługą wszystkich funkcji analitycznych i automatyzacji.' },
@@ -135,6 +141,7 @@ export const changelog110: Record<Language, ChangelogItem[]> = {
     { num: '10', title: 'Wygodne otwieranie menu profilu', desc: 'Wyskakujące okno statystyk nie pojawia się przypadkowo i nie zasłania przycisków profilu, wsparcia oraz ustawień FACEIT.' },
     { num: '11', title: 'Przejrzysta tabela historii meczów', desc: 'Usunięto zbędne podwójne ramki i paski przewijania, idealnie integrując tabelę z interfejsem FACEIT.' },
     { num: '12', title: 'Zwiększenie stabilności działania', desc: 'Zoptymalizowano pobieranie danych w tle, zmniejszono obciążenie przeglądarki i wyeliminowano błędy nawigacji.' },
+    { num: '13', title: 'Dynamiczny czarno-biało-pomarańczowy design', desc: 'Interfejs rozszerzenia został w pełni dostosowany do stylu strony dzięki dynamicznej czarno-biało-pomarańczowej kolorystyce i charakterystycznym akcentom.' },
   ],
   pt: [
     { num: '01', title: 'Lançamento oficial no Mozilla Firefox', desc: 'A extensão agora está oficialmente disponível no catálogo do Mozilla Add-ons com suporte completo a todos os recursos de inteligência e automação.' },
@@ -149,6 +156,7 @@ export const changelog110: Record<Language, ChangelogItem[]> = {
     { num: '10', title: 'Acesso simplificado ao menu do perfil', desc: 'A janela flutuante de estatísticas não surge por engano nem cobre menus de perfil e configurações da FACEIT.' },
     { num: '11', title: 'Tabela de histórico de partidas limpa', desc: 'Bordas duplas e barras de rolagem desnecessárias foram removidas para uma integração perfeita à FACEIT.' },
     { num: '12', title: 'Maior estabilidade operacional', desc: 'Carregamento em segundo plano otimizado, menor consumo de memória e navegação sem travamentos.' },
+    { num: '13', title: 'Design dinâmico preto, branco e laranja', desc: 'A interface da extensão foi totalmente adaptada ao estilo do site com um tema dinâmico em preto, branco e laranja e detalhes característicos.' },
   ],
   da: [
     { num: '01', title: 'Officiel udgivelse i Mozilla Firefox', desc: 'Udvidelsen er nu officielt tilgængelig i Mozilla Add-ons-kataloget med fuld understøttelse af alle analyse- og automatiseringsfunktioner.' },
@@ -163,6 +171,7 @@ export const changelog110: Record<Language, ChangelogItem[]> = {
     { num: '10', title: 'Ubesværet adgang til profilmenuen', desc: 'Statistikvinduet åbner ikke utilsigtet og dækker ikke profil-, support- eller indstillingsknapper på FACEIT.' },
     { num: '11', title: 'Ren kamphistoriktabel', desc: 'Fjernet overflødige rammer og rullepaneler, så tabellen falder naturligt ind i FACEITs brugerflade.' },
     { num: '12', title: 'Forbedret systemstabilitet', desc: 'Optimeret baggrundsindlæsning, reduceret browserbelastning og færre skjulte fejl ved sideskift.' },
+    { num: '13', title: 'Dynamisk sort-hvid-orange design', desc: 'Udvidelsens brugerflade er fuldstændig tilpasset webstedets æstetik med et dynamisk sort-hvidt-orange farvetema og karakteristiske accenter.' },
   ],
   fi: [
     { num: '01', title: 'Virallinen julkaisu Mozilla Firefoxille', desc: 'Laajennus on nyt virallisesti saatavilla Mozilla Add-ons -kaupassa täydellä analyysi- ja automaatiotoimintojen tuella.' },
@@ -177,6 +186,7 @@ export const changelog110: Record<Language, ChangelogItem[]> = {
     { num: '10', title: 'Profiilivalikon sujuva avaaminen', desc: 'Tilastoikkuna ei enää avaudu vahingossa eikä peitä FACEIT-profiilin, tuen tai asetusten painikkeita.' },
     { num: '11', title: 'Selkeä otteluhistoriataulukko', desc: 'Poistettu ylimääräiset reunukset ja vierityspalkit, sovittaen taulukko siististi osaksi FACEIT-käyttöliittymää.' },
     { num: '12', title: 'Toimintavarmuuden parannukset', desc: 'Optimoitu tilastojen taustalataus, pienennetty selaimen kuormitusta ja korjattu piilevät virheet sivujen välillä.' },
+    { num: '13', title: 'Dynaaminen musta-valko-oranssi ulkoasu', desc: 'Laajennuksen käyttöliittymä on täysin sovitettu sivuston tyyliin dynaamisella musta-valko-oranssilla värimaailmalla ja tunnusomaisilla korostuksilla.' },
   ],
   sv: [
     { num: '01', title: 'Officiell lansering i Mozilla Firefox', desc: 'Tillägget är nu officiellt tillgängligt i Mozilla Add-ons med fullt stöd för alla analys- och automatiseringsfunktioner.' },
@@ -191,6 +201,7 @@ export const changelog110: Record<Language, ChangelogItem[]> = {
     { num: '10', title: 'Smidig åtkomst till profilmenyn', desc: 'Statistikfönstret öppnas inte oavsiktligt och blockerar inte längre profil-, support- eller inställningsknappar.' },
     { num: '11', title: 'Ren matchhistoriktabell', desc: 'Borttagna dubbla ramar och onödiga rullningslister för en sömlös integrering i FACEITs gränssnitt.' },
     { num: '12', title: 'Ökad stabilitet och prestanda', desc: 'Optimerad bakgrundshämtning, minskad belastning på webbläsaren och åtgärdade dolda navigeringsfel.' },
+    { num: '13', title: 'Dynamisk svart-vit-orange design', desc: 'Tilläggets gränssnitt har anpassats helt till webbplatsens design med ett dynamiskt svart-vit-orange färgtema och distinkta accenter.' },
   ],
   tr: [
     { num: '01', title: 'Mozilla Firefox Resmi Sürümü', desc: 'Eklenti artık tüm analiz ve otomasyon özellikleriyle birlikte Mozilla Add-ons mağazasında resmi olarak yayınlandı.' },
@@ -205,6 +216,7 @@ export const changelog110: Record<Language, ChangelogItem[]> = {
     { num: '10', title: 'Profil Menüsüne Rahat Erişim', desc: 'İstatistik penceresi artık yanlışlıkla açılmaz ve FACEIT profil, destek ve ayar butonlarını engellemez.' },
     { num: '11', title: 'Temiz Maç Geçmişi Tablosu', desc: 'Gereksiz kenarlıklar ve kaydırma çubukları kaldırılarak tablo standart FACEIT arayüzüne kusursuzca entegre edildi.' },
     { num: '12', title: 'Gelişmiş Çalışma Kararlılığı', desc: 'Arka plan veri yüklemesi optimize edildi, tarayıcı yükü azaltıldı ve sayfalar arası geçişlerdeki gizli çökmeler giderildi.' },
+    { num: '13', title: 'Dinamik Siyah-Beyaz-Turuncu Tasarım', desc: 'Eklenti arayüzü, dinamik siyah, beyaz ve turuncu renk paleti ve özel vurgularla sitenin tarzına tamamen uyarlanmıştır.' },
   ],
   ar: [
     { num: '01', title: 'الإطلاق الرسمي على متصفح Mozilla Firefox', desc: 'الملحق متاح الآن رسميًا على متجر Mozilla Add-ons مع دعم كامل لكافة ميزات التحليل والأتمتة التكتيكية.' },
@@ -219,6 +231,7 @@ export const changelog110: Record<Language, ChangelogItem[]> = {
     { num: '10', title: 'وصول مريح إلى قائمة الملف الشخصي', desc: 'لم تعد نافذة الإحصائيات المنبثقة تظهر بالخطأ أو تحجب أزرار الملف الشخصي والدعم والإعدادات على FACEIT.' },
     { num: '11', title: 'جدول سجل مباريات نقي ومتناسق', desc: 'تمت إزالة الحواف المزدوجة وأشرطة التمرير الزائدة لدمج الجدول بسلاسة داخل واجهة FACEIT.' },
     { num: '12', title: 'تعزيز استقرار وأداء النظام', desc: 'تحسين تحميل البيانات في الخلفية، وتقليل استهلاك موارد المتصفح، ومنع الأخطاء غير المتوقعة.' },
+    { num: '13', title: 'تصميم ديناميكي باللون الأسود والأبيض والبرتقالي', desc: 'تم تكييف واجهة الإضافة بالكامل لتتناسب مع نمط الموقع باستخدام سمة ديناميكية سوداء وبيضاء وبرتقالية مع لمسات مميزة.' },
   ],
   ja: [
     { num: '01', title: 'Mozilla Firefox公式リリース', desc: '拡張機能がMozilla Add-onsストアで正式に公開され、すべての分析機能および自動化機能に完全対応しました。' },
@@ -233,6 +246,7 @@ export const changelog110: Record<Language, ChangelogItem[]> = {
     { num: '10', title: 'プロフィールメニューへのスムーズなアクセス', desc: '統計オーバーレイが不意に表示されてFACEITのプロフィール、サポート、設定ボタンを遮ることがなくなりました。' },
     { num: '11', title: '無駄のないクリアなマッチ履歴テーブル', desc: '不要なスクロールバーや二重の枠線を排除し、FACEITの標準インターフェースに美しく調和させました。' },
     { num: '12', title: '動作安定性とパフォーマンスの向上', desc: 'バックグラウンドの統計読み込みを最適化し、ブラウザの負荷軽減とページ遷移時の安定性を高めました。' },
+    { num: '13', title: 'ダイナミックな黒・白・オレンジのデザイン', desc: '拡張機能のUIが完全に刷新され、サイトと統一されたダイナミックな黒・白・オレンジのカラーパレットと象徴的なアクセントに対応しました。' },
   ],
   ko: [
     { num: '01', title: 'Mozilla Firefox 공식 출시', desc: '이제 Mozilla Add-ons 스토어에서 모든 전술 분석 및 자동화 기능을 지원하는 확장 프로그램을 공식 이용할 수 있습니다.' },
@@ -247,6 +261,7 @@ export const changelog110: Record<Language, ChangelogItem[]> = {
     { num: '10', title: '편리한 프로필 меню 열기', desc: '통계 팝업이 예기치 않게 열려 FACEIT 프로필, 지원 및 설정 버튼을 가리는 현상을 방지했습니다.' },
     { num: '11', title: '정돈된 전적 테이블 인터페이스', desc: '불필요한 이중 테두리와 스크롤바를 정리하여 FACEIT 표준 UI에 자연스럽게 녹아들도록 개선했습니다.' },
     { num: '12', title: '시스템 안정성 및 구동 성능 강화', desc: '백그라운드 통계 동기화를 최적화하여 브라우저 부담을 줄이고 페이지 이동 간 충돌 요소를 제거했습니다.' },
+    { num: '13', title: '다이내믹 블랙·화이트·오렌지 디자인', desc: '확장 프로그램 인터페이스가 사이트 고유의 다이내믹 블랙, 화이트, 오렌지 컬러 팔레트 및 시그니처 액센트에 맞춰 완벽하게 개편되었습니다.' },
   ],
   zh: [
     { num: '01', title: 'Mozilla Firefox 官方正式上线', desc: '扩展插件现已正式上架 Mozilla Add-ons 商店，全面支持所有战术分析与对局自动化功能。' },
@@ -261,6 +276,7 @@ export const changelog110: Record<Language, ChangelogItem[]> = {
     { num: '10', title: '更便捷地开启个人中心菜单', desc: '数据悬浮层不再误触弹出，彻底消除遮挡FACEIT个人资料、客服支持及设置按钮的困扰。' },
     { num: '11', title: '清爽整洁的战绩历史表格', desc: '移除了多余的边框与滚动条，让对局列表与FACEIT原生界面浑然一体。' },
     { num: '12', title: '整体运行稳定性与性能飞跃', desc: '深度优化后台数据加载，降低浏览器资源占用，并消除页面切换过程中的潜在异常。' },
+    { num: '13', title: '黑白橙动态专属主题', desc: '扩展程序界面现已全面适配网站设计风格，采用动态黑白橙三色视觉调色板及标志性高对比度强调色。' },
   ],
 };
 
