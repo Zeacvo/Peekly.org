@@ -213,15 +213,20 @@ export const ChangelogPage: React.FC<ChangelogPageProps> = ({ currentLang, onBac
                   className="w-full px-5 py-4 flex items-center justify-between text-left cursor-pointer group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white select-none transition-colors"
                   aria-expanded={isOpen}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="font-sans text-base md:text-lg font-bold tracking-tight text-white group-hover:text-[#FF5500] transition-colors">
-                      {title}
-                    </span>
-                    {release.version === '1.1.0' && (
-                      <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider bg-white/10 text-white rounded-none border border-white/20 select-none">
-                        {currentLang === 'ru' ? 'СВЕЖИЙ РЕЛИЗ' : 'LATEST'}
+                  <div className="flex flex-col items-start gap-1">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <span className="font-sans text-base md:text-lg font-bold tracking-tight text-white group-hover:text-[#FF5500] transition-colors">
+                        {title}
                       </span>
-                    )}
+                      {release.isLatest && (
+                        <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider bg-white/10 text-white rounded-none border border-white/20 select-none">
+                          {currentLang === 'ru' ? 'СВЕЖИЙ РЕЛИЗ' : 'LATEST'}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs font-mono text-[#929292] select-none">
+                      {release.date}
+                    </span>
                   </div>
 
                   <div className="flex items-center gap-3 text-[#929292] group-hover:text-[#FF5500] transition-colors">
