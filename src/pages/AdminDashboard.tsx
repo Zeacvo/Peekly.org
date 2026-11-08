@@ -409,7 +409,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     <button
       type="button"
       onClick={() => copyToClipboard(textToCopy, key)}
-      className="opacity-0 group-hover:opacity-100 text-[10px] text-[#929292] hover:text-white px-1.5 py-0.5 bg-white/5 border border-[#222228] transition-opacity cursor-pointer rounded-none shrink-0"
+      className="opacity-0 group-hover/cell:opacity-100 text-[10px] text-[#929292] hover:text-white px-1.5 py-0.5 bg-white/5 border border-[#222228] transition-opacity cursor-pointer rounded-none shrink-0"
       title={label}
     >
       {copiedKey === key ? '✓' : (
@@ -660,7 +660,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     return (
                       <tr
                         key={player.guid}
-                        className={`border-b border-[#1A1A1F] hover:bg-[#0c0c0e] transition-colors group ${
+                        className={`border-b border-[#1A1A1F] hover:bg-[#0c0c0e] transition-colors ${
                           index % 2 === 0 ? 'bg-[#000000]' : 'bg-[#090909]'
                         } ${
                           selectedIds.includes(player.guid) ? '!bg-[#FF5500]/[0.08]' : ''
@@ -681,28 +681,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </td>
 
                         {/* Col 1: Nickname */}
-                        <td className="py-3 px-4 border-r border-dashed border-[#1A1A1F]">
-                          <div className="flex items-center justify-between gap-2.5">
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="w-7 h-7 bg-[#000000] border border-[#222228] rounded-none flex items-center justify-center shrink-0 overflow-hidden">
-                                <UserAvatar user={player} size={14} className="w-3.5 h-3.5 text-[#FFFFFF]" />
-                              </div>
-                              <a
-                                href={`/id/${encodeURIComponent(player.nickname)}/`}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  if (onNavigateProfile) {
-                                    onNavigateProfile(player.guid);
-                                  } else {
-                                    window.location.href = `/id/${encodeURIComponent(player.nickname)}/`;
-                                  }
-                                }}
-                                className="font-bold text-[#FFFFFF] hover:text-[#FF5500] transition-colors truncate"
-                                title={`${t.openProfile} ${player.nickname}`}
-                              >
-                                {player.nickname}
-                              </a>
+                        <td className="py-3 px-4 border-r border-dashed border-[#1A1A1F] group/cell">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-7 h-7 bg-[#000000] border border-[#222228] rounded-none flex items-center justify-center shrink-0 overflow-hidden">
+                              <UserAvatar user={player} size={14} className="w-3.5 h-3.5 text-[#FFFFFF]" />
                             </div>
+                            <a
+                              href={`/id/${encodeURIComponent(player.nickname)}/`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                if (onNavigateProfile) {
+                                  onNavigateProfile(player.guid);
+                                } else {
+                                  window.location.href = `/id/${encodeURIComponent(player.nickname)}/`;
+                                }
+                              }}
+                              className="font-bold text-[#FFFFFF] hover:text-[#FF5500] transition-colors truncate"
+                              title={`${t.openProfile} ${player.nickname}`}
+                            >
+                              {player.nickname}
+                            </a>
                             {renderCopyBtn(
                               player.nickname,
                               `nick-${player.guid}`,
@@ -712,8 +710,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </td>
 
                         {/* Col 2: Email — 100% white */}
-                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F]">
-                          <div className="flex items-center justify-between gap-2">
+                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F] group/cell">
+                          <div className="flex items-center gap-2">
                             <a
                               href={`mailto:${player.email}`}
                               className="text-[#FFFFFF] hover:text-[#FF5500] transition-colors truncate"
@@ -729,8 +727,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </td>
 
                         {/* Col 3: Elo & Level — 100% white */}
-                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F]">
-                          <div className="flex items-center justify-between gap-2">
+                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F] group/cell">
+                          <div className="flex items-center gap-2">
                             <span>
                               {player.elo ? `${player.elo.toLocaleString()} & ${player.level || 1} level` : '—'}
                             </span>
@@ -743,8 +741,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </td>
 
                         {/* Col 4: Country — 100% white */}
-                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F]">
-                          <div className="flex items-center justify-between gap-2">
+                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F] group/cell">
+                          <div className="flex items-center gap-2">
                             <span>{getCountryName(player.country) || 'Belarus'}</span>
                             {renderCopyBtn(
                               getCountryName(player.country) || 'Belarus',
@@ -755,8 +753,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </td>
 
                         {/* Col 5: Registration & Activity — 100% white */}
-                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F]">
-                          <div className="flex items-center justify-between gap-2">
+                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F] group/cell">
+                          <div className="flex items-center gap-2">
                             <div className="whitespace-nowrap">
                               <span>{formatDateOnly(player.created_at)}</span>
                               <span className="mx-1.5 text-[#FFFFFF]">&</span>
@@ -771,8 +769,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </td>
 
                         {/* Col 6: Plan — 100% white */}
-                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F]">
-                          <div className="flex items-center justify-between gap-2">
+                        <td className="py-3 px-4 text-[#FFFFFF] border-r border-dashed border-[#1A1A1F] group/cell">
+                          <div className="flex items-center gap-2">
                             <span>{player.plan?.toLowerCase() === 'pro' ? 'Pro' : 'Free'}</span>
                             {renderCopyBtn(
                               player.plan?.toLowerCase() === 'pro' ? 'Pro' : 'Free',
