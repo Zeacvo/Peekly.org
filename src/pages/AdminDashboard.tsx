@@ -729,7 +729,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           <div className="flex items-center gap-2">
                             <a
                               href={`mailto:${player.email}`}
-                              className="text-[#FFFFFF] hover:text-[#FF5500] transition-colors truncate"
+                              className="text-[#FFFFFF] transition-colors truncate"
                             >
                               {player.email}
                             </a>
