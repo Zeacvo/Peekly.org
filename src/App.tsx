@@ -532,7 +532,7 @@ export const App: React.FC = () => {
       )}
 
       {/* Main Content: Dynamic View Routing with Lazy Suspense */}
-      <main className={`min-h-screen flex-1 flex flex-col w-full relative z-10 ${isNotFound || isAuthError ? 'overflow-hidden' : ''}`}>
+      <main className={`flex-1 flex flex-col w-full relative z-10 ${!isLinkSuccess ? 'min-h-screen' : ''} ${isNotFound || isAuthError ? 'overflow-hidden' : ''}`}>
         <Suspense fallback={<div className="min-h-screen flex-1 flex flex-col w-full bg-black" />}>
           {isLinkSuccess ? (
             <LinkSuccessPage
