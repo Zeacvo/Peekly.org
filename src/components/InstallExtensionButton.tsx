@@ -49,14 +49,14 @@ export const InstallExtensionButton: React.FC<InstallExtensionButtonProps> = ({
   }, []);
 
   return (
-    <div className={`relative inline-flex flex-col items-center ${className}`} ref={containerRef}>
+    <div className={`relative inline-flex flex-col items-center w-full max-w-[280px] sm:w-auto sm:max-w-none ${className}`} ref={containerRef}>
       <button
         type="button"
         onClick={toggleDropdown}
         aria-expanded={isOpen}
         aria-haspopup="menu"
         aria-label="Install extension options"
-        className="inline-flex items-center justify-center text-center h-11 px-8 rounded-none btn-header-install font-sans text-[15px] font-semibold tracking-normal cursor-pointer active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white leading-none box-border shadow-2xl min-w-[220px]"
+        className="inline-flex items-center justify-center text-center h-11 px-5 sm:px-8 rounded-none btn-header-install font-sans text-sm sm:text-[15px] font-semibold tracking-normal cursor-pointer active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white leading-none box-border shadow-2xl w-full sm:w-auto min-w-[200px] sm:min-w-[220px]"
       >
         <span>{label}</span>
       </button>

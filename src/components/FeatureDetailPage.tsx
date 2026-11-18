@@ -118,7 +118,7 @@ export const FeatureDetailPage: React.FC<FeatureDetailPageProps> = ({
   const audienceTitle = audienceTitleMap[currentLang] || 'Ideal for';
 
   return (
-    <main className="pt-[calc(5rem+env(safe-area-inset-top,0px))] sm:pt-24 pb-0 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-stretch z-10">
+    <div className="pt-[calc(5rem+env(safe-area-inset-top,0px))] sm:pt-24 pb-0 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-stretch z-10">
       
       {/* 1. Back Navigation Button */}
       <div className="w-full flex justify-start mb-6">
@@ -132,8 +132,8 @@ export const FeatureDetailPage: React.FC<FeatureDetailPageProps> = ({
       </div>
 
       {/* 2. Hero Animation Block (Clean Presentation with Monolithic Dark Canvas - UNTOUCHED) */}
-      <div className="w-full bg-[#0d0d0d] border border-white/20 overflow-hidden mb-10 shadow-2xl relative" style={{ contain: 'layout' }}>
-        <div className="h-72 sm:h-96 min-h-[288px] sm:min-h-[384px] w-full flex items-center justify-center p-4 bg-[#0d0d0d]">
+      <div className="w-full bg-[#0d0d0d] border border-white/20 overflow-hidden mb-8 sm:mb-10 shadow-2xl relative" style={{ contain: 'layout' }}>
+        <div className="h-60 sm:h-96 min-h-[240px] sm:min-h-[384px] w-full flex items-center justify-center p-4 bg-[#0d0d0d]">
           <FeatureHeroAnimation featureId={data.id} />
         </div>
       </div>
@@ -147,33 +147,33 @@ export const FeatureDetailPage: React.FC<FeatureDetailPageProps> = ({
         </div>
         
         {/* Заголовок фичи: Шрифт 1 */}
-        <h1 className="w-full max-w-none font-sans text-3xl md:text-4xl font-bold tracking-tight text-white mb-6 cursor-text select-text">
+        <h1 className="w-full max-w-none font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white mb-6 cursor-text select-text">
           {displayTitle}
         </h1>
 
         {/* Секция 1: Как это работает в матче */}
         <div className="w-full max-w-none">
-          <h2 className="w-full max-w-none font-sans text-base md:text-lg font-bold tracking-tight text-white mb-2 mt-8 cursor-text select-text">
+          <h2 className="w-full max-w-none font-sans text-base md:text-lg font-bold tracking-tight text-white mb-2 mt-6 sm:mt-8 cursor-text select-text">
             {howItWorksTitle}
           </h2>
-          <p className="w-full max-w-none font-sans text-sm md:text-[15px] font-normal text-neutral-400 leading-relaxed text-justify cursor-text select-text">
+          <p className="w-full max-w-none font-sans text-sm md:text-[15px] font-normal text-neutral-400 leading-relaxed text-left sm:text-justify cursor-text select-text">
             {data.overview}
           </p>
         </div>
 
         {/* Секция 2: Кому особенно полезно */}
         <div className="w-full max-w-none">
-          <h2 className="w-full max-w-none font-sans text-base md:text-lg font-bold tracking-tight text-white mb-2 mt-8 cursor-text select-text">
+          <h2 className="w-full max-w-none font-sans text-base md:text-lg font-bold tracking-tight text-white mb-2 mt-6 sm:mt-8 cursor-text select-text">
             {audienceTitle}
           </h2>
-          <p className="w-full max-w-none font-sans text-sm md:text-[15px] font-normal text-neutral-400 leading-relaxed text-justify cursor-text select-text">
+          <p className="w-full max-w-none font-sans text-sm md:text-[15px] font-normal text-neutral-400 leading-relaxed text-left sm:text-justify cursor-text select-text">
             {data.audience}
           </p>
         </div>
 
         {/* Секция 3: Преимущества для команды */}
         <div className="w-full max-w-none">
-          <h2 className="w-full max-w-none font-sans text-base md:text-lg font-bold tracking-tight text-white mb-2 mt-8 cursor-text select-text">
+          <h2 className="w-full max-w-none font-sans text-base md:text-lg font-bold tracking-tight text-white mb-2 mt-6 sm:mt-8 cursor-text select-text">
             {benefitSectionTitle}
           </h2>
           <div className="w-full max-w-none space-y-3 font-sans">
@@ -182,7 +182,7 @@ export const FeatureDetailPage: React.FC<FeatureDetailPageProps> = ({
                 <span className="font-mono text-sm md:text-[15px] font-bold text-neutral-500 select-none shrink-0">
                   {String(idx + 1).padStart(2, '0')}
                 </span>
-                <span className="w-full max-w-none font-sans text-sm md:text-[15px] font-normal text-neutral-400 leading-relaxed text-justify">
+                <span className="w-full max-w-none font-sans text-sm md:text-[15px] font-normal text-neutral-400 leading-relaxed text-left sm:text-justify">
                   {b.desc}
                 </span>
               </div>
@@ -193,10 +193,10 @@ export const FeatureDetailPage: React.FC<FeatureDetailPageProps> = ({
       </div>
 
       {/* 4. Bottom Prominent Action CTA Button with Browser Dropdown */}
-      <div className="w-full flex justify-center mt-12 mb-16">
+      <div className="w-full flex justify-center mt-10 sm:mt-12 mb-14 sm:mb-16">
         <InstallExtensionButton currentLang={currentLang} />
       </div>
 
-    </main>
+    </div>
   );
 };

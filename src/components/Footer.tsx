@@ -13,6 +13,25 @@ interface FooterProps {
   compact?: boolean;
 }
 
+const changelogLabelMap: Record<Language, string> = {
+  en: 'Changelog',
+  ru: 'История версий',
+  uk: 'Історія версій',
+  de: 'Versionsverlauf',
+  pl: 'Historia wersji',
+  fr: 'Historique des versions',
+  es: 'Historial de versiones',
+  da: 'Ændringslog',
+  pt: 'Histórico de versões',
+  fi: 'Muutosloki',
+  sv: 'Ändringslogg',
+  tr: 'Sürüm Geçmişi',
+  zh: '更新日志',
+  ar: 'سجل التغييرات',
+  ja: '更新履歴',
+  ko: '버전 기록',
+};
+
 const termsLabelMap: Record<Language, string> = {
   en: 'Terms of Service',
   da: 'Servicevilkår',
@@ -53,6 +72,7 @@ const privacyLabelMap: Record<Language, string> = {
 
 export const Footer: React.FC<FooterProps> = ({ 
   currentLang, 
+  onOpenChangelog,
   onOpenPrivacy,
   onOpenTerms,
   onGoHome,
@@ -89,6 +109,23 @@ export const Footer: React.FC<FooterProps> = ({
 
         {/* Right Column: Navigation Links & Copyright */}
         <div className={`flex flex-col items-end text-right max-sm:items-start max-sm:text-left ${compact ? 'gap-1 text-[11px]' : 'gap-1.5 text-[12px]'}`}>
+          {/* Row 0: Changelog Link (Universal access across devices) */}
+          <a
+            href="/changelog"
+            onClick={(e) => {
+              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              e.preventDefault();
+              if (onOpenChangelog) onOpenChangelog();
+              else {
+                history.pushState(null, '', '/changelog');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }
+            }}
+            className="text-xs text-[#929292] hover:text-white transition-colors cursor-pointer bg-transparent border-none p-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
+          >
+            {changelogLabelMap[currentLang] || 'Changelog'}
+          </a>
+
           {/* Row 1: Privacy Policy Link */}
           <a
             href="/privacy"

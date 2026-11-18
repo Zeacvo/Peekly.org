@@ -267,7 +267,7 @@ export const Header: React.FC<HeaderProps> = ({
             if (onGoHome) onGoHome();
             else window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          className="header-logo flex items-center gap-2.5 h-12 group cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0"
+          className="header-logo flex items-center gap-2 sm:gap-2.5 h-10 sm:h-12 group cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0"
           role="button"
           tabIndex={0}
           onKeyDown={(e) => {
@@ -280,19 +280,19 @@ export const Header: React.FC<HeaderProps> = ({
           aria-label="Peekly Home"
         >
           <PeeklyLogo
-            size={28}
-            className="h-7 w-auto sm:h-8 sm:w-auto md:h-9 md:w-auto text-white group-hover:text-[#FF5500] transition-colors duration-150 shrink-0"
+            size={24}
+            className="h-6 w-auto sm:h-8 sm:w-auto md:h-9 md:w-auto text-white group-hover:text-[#FF5500] transition-colors duration-150 shrink-0"
           />
-          <span className="font-sans text-xl sm:text-2xl md:text-3xl font-black tracking-wider text-white leading-none select-none">
+          <span className="font-sans text-lg sm:text-2xl md:text-3xl font-black tracking-wider text-white leading-none select-none">
             PEEKLY
           </span>
         </a>
 
         {/* Right: Navigation, Auth & Install CTA */}
-        <div className="flex items-center gap-3 sm:gap-4 md:gap-5 shrink-0">
+        <div className="flex items-center gap-2.5 sm:gap-4 md:gap-5 shrink-0">
           {/* Sub-container containing [История версий], [Язык], [Аватарка]: Dropdown spans from > to end of avatar */}
-          <div className="relative flex items-center gap-3 sm:gap-4 md:gap-5 shrink-0" ref={userDropdownRef}>
-            {/* Changelog Link */}
+          <div className="relative flex items-center gap-2.5 sm:gap-4 md:gap-5 shrink-0" ref={userDropdownRef}>
+            {/* Changelog Link: Hidden on mobile (< md), accessible in footer and profile menu */}
             <button
               type="button"
               onClick={() => {
@@ -301,7 +301,7 @@ export const Header: React.FC<HeaderProps> = ({
                 setInstallDropdownOpen(false);
                 if (onOpenChangelog) onOpenChangelog();
               }}
-              className="group inline-flex items-center gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
+              className="group hidden md:inline-flex items-center gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
               aria-label={t.nav.changelog}
             >
               <span className="font-mono text-white flex items-center leading-none">
@@ -375,9 +375,9 @@ export const Header: React.FC<HeaderProps> = ({
                 aria-expanded={userDropdownOpen}
                 aria-haspopup="menu"
                 aria-label="User account menu"
-                className="relative flex items-center justify-center w-11 h-11 bg-[#000000] hover:bg-white/[0.06] border border-[#222228] hover:border-white transition-all rounded-none cursor-pointer overflow-hidden p-0 focus-visible:ring-1 focus-visible:ring-white shrink-0"
+                className="relative flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 bg-[#000000] hover:bg-white/[0.06] border border-[#222228] hover:border-white transition-all rounded-none cursor-pointer overflow-hidden p-0 focus-visible:ring-1 focus-visible:ring-white shrink-0"
               >
-                <UserAvatar user={userSession} size={20} className="w-5 h-5 text-[#FFFFFF]" imgClassName="w-full h-full object-cover" />
+                <UserAvatar user={userSession} size={18} className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-[#FFFFFF]" imgClassName="w-full h-full object-cover" />
               </button>
             ) : (
               <button
@@ -388,19 +388,19 @@ export const Header: React.FC<HeaderProps> = ({
                   setInstallDropdownOpen(false);
                   if (onOpenAuthModal) onOpenAuthModal();
                 }}
-                className="inline-flex items-center justify-center text-center h-11 px-6 rounded-none bg-black text-white hover:border-white border border-[#222228] font-sans text-[15px] font-semibold tracking-normal transition-colors shrink-0 cursor-pointer focus-visible:ring-1 focus-visible:ring-white leading-none box-border"
+                className="inline-flex items-center justify-center text-center h-9 sm:h-11 px-3 sm:px-6 rounded-none bg-black text-white hover:border-white border border-[#222228] font-sans text-xs sm:text-[15px] font-semibold tracking-normal transition-colors shrink-0 cursor-pointer focus-visible:ring-1 focus-visible:ring-white leading-none box-border"
                 title={authT.signInTitle}
               >
                 <span>{authT.nav_sign_in}</span>
               </button>
             )}
 
-            {/* User Dropdown Menu spanning from >_ История версий to end of avatar */}
+            {/* User Dropdown Menu */}
             {userSession && userDropdownOpen && (
               <div
                 role="menu"
                 aria-label="User Account Options"
-                className="absolute left-0 right-0 top-full mt-2 bg-[#090909] border border-[#1A1A1F] rounded-none shadow-2xl p-4 flex flex-col gap-3 z-50 animate-fade-in"
+                className="absolute right-0 top-full mt-2 w-60 sm:w-64 max-w-[calc(100vw-2rem)] bg-[#090909] border border-[#1A1A1F] rounded-none shadow-2xl p-4 flex flex-col gap-3 z-50 animate-fade-in"
               >
                 {/* Profile Header */}
                 <div className="flex items-center gap-3">
@@ -414,7 +414,7 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
                 </div>
 
-                {/* Navigation Links: Exactly 2 Actions */}
+                {/* Navigation Links */}
                 <div className="flex flex-col gap-2">
                   {/* 1. My Profile (White Button) */}
                   <button
@@ -444,7 +444,22 @@ export const Header: React.FC<HeaderProps> = ({
                     <span>{myProfileLabelMap[currentLang] || 'My profile'}</span>
                   </button>
 
-                  {/* 2. Sign Out (Gray Button) */}
+                  {/* 2. Changelog Link */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      setLangDropdownOpen(false);
+                      setInstallDropdownOpen(false);
+                      if (onOpenChangelog) onOpenChangelog();
+                    }}
+                    className="btn-brand-signout h-10 font-medium text-sm flex items-center justify-center gap-1.5"
+                  >
+                    <span className="font-mono text-white text-xs">&gt;_</span>
+                    <span>{t.nav.changelog}</span>
+                  </button>
+
+                  {/* 3. Sign Out (Gray Button) */}
                   <button
                     type="button"
                     onClick={() => {
@@ -462,8 +477,8 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
 
-          {/* Install Extension CTA Button & Dropdown */}
-          <div className="relative inline-flex items-center shrink-0" ref={installDropdownRef}>
+          {/* Install Extension CTA Button & Dropdown (Hidden on mobile < sm, prominent on desktop) */}
+          <div className="relative hidden sm:inline-flex items-center shrink-0" ref={installDropdownRef}>
             <button
               type="button"
               onClick={toggleInstallDropdown}

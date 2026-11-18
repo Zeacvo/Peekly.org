@@ -633,6 +633,7 @@ export const App: React.FC = () => {
       {!isNotFound && !isAuthError && !isAdmin && !isLogin && !isRegister && (
         <Footer 
           currentLang={currentLang} 
+          onOpenChangelog={handleOpenChangelog}
           onOpenPrivacy={handleOpenPrivacy}
           onOpenTerms={handleOpenTerms}
           onGoHome={handleGoHome}

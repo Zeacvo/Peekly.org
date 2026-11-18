@@ -28,6 +28,7 @@ html, body, #root {
   background-color: #000000 !important;
   color: #FFFFFF !important;
   min-height: 100%;
+  max-width: 100%;
   overflow-x: hidden;
 }
 
