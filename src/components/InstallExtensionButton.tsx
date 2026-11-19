@@ -13,20 +13,21 @@ export const InstallExtensionButton: React.FC<InstallExtensionButtonProps> = ({
   className = '',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [openUpward, setOpenUpward] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const tLang = translations[currentLang] || translations.en;
   const label = tLang.nav?.install || 'Install extension';
 
   const toggleDropdown = () => {
-    if (!isOpen && containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      // If less than 260px below, but enough room above, open upward
-      setOpenUpward(spaceBelow < 260 && rect.top > 260);
-    }
-    setIsOpen((prev) => !prev);
+    setIsOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        setTimeout(() => {
+          containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 60);
+      }
+      return next;
+    });
   };
 
   useEffect(() => {
@@ -49,25 +50,35 @@ export const InstallExtensionButton: React.FC<InstallExtensionButtonProps> = ({
   }, []);
 
   return (
-    <div className={`relative inline-flex flex-col items-center w-full max-w-[280px] sm:w-auto sm:max-w-none ${className}`} ref={containerRef}>
+    <div className={`flex flex-col items-center w-full max-w-[280px] sm:w-[260px] ${className}`} ref={containerRef}>
       <button
         type="button"
         onClick={toggleDropdown}
         aria-expanded={isOpen}
         aria-haspopup="menu"
         aria-label="Install extension options"
-        className="inline-flex items-center justify-center text-center h-11 px-5 sm:px-8 rounded-none btn-header-install font-sans text-sm sm:text-[15px] font-semibold tracking-normal cursor-pointer active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white leading-none box-border shadow-2xl w-full sm:w-auto min-w-[200px] sm:min-w-[220px]"
+        className="inline-flex items-center justify-center gap-2 text-center h-11 px-5 sm:px-6 rounded-none btn-header-install font-sans text-sm sm:text-[15px] font-semibold tracking-normal cursor-pointer active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white leading-none box-border shadow-2xl w-full"
       >
         <span>{label}</span>
+        <svg
+          className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            fillRule="evenodd"
+            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+            clipRule="evenodd"
+          />
+        </svg>
       </button>
 
       {isOpen && (
         <div
           role="menu"
           aria-label="Supported Browsers"
-          className={`absolute left-0 right-0 ${
-            openUpward ? 'bottom-full mb-2' : 'top-full mt-2'
-          } w-full min-w-full bg-[#090909] border border-[#1A1A1F] rounded-none shadow-2xl flex flex-col py-1 z-50 text-left`}
+          className="w-full bg-[#090909] border border-[#1A1A1F] rounded-none shadow-2xl flex flex-col py-1 mt-2 text-left"
         >
           {BROWSERS.map((browser) => (
             <a
