@@ -118,7 +118,7 @@ export const FeatureDetailPage: React.FC<FeatureDetailPageProps> = ({
   const audienceTitle = audienceTitleMap[currentLang] || 'Ideal for';
 
   return (
-    <div className="pt-[calc(5rem+env(safe-area-inset-top,0px))] sm:pt-24 pb-0 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-stretch z-10">
+    <div className="pt-[calc(6.5rem+env(safe-area-inset-top,0px))] md:pt-24 pb-0 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-stretch z-10">
       
       {/* 1. Back Navigation Button */}
       <div className="w-full flex justify-start mb-6">

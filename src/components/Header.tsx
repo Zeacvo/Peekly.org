@@ -124,6 +124,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [userSession, setUserSession] = useState<UserSession | null>(getStoredUser);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const installDropdownRef = useRef<HTMLDivElement>(null);
+  const mobileInstallDropdownRef = useRef<HTMLDivElement>(null);
   const userDropdownRef = useRef<HTMLDivElement>(null);
 
   const t = translations[currentLang] || translations.en;
@@ -231,7 +232,9 @@ export const Header: React.FC<HeaderProps> = ({
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setLangDropdownOpen(false);
       }
-      if (installDropdownRef.current && !installDropdownRef.current.contains(e.target as Node)) {
+      const clickedInsideDesktopInstall = !!(installDropdownRef.current && installDropdownRef.current.contains(e.target as Node));
+      const clickedInsideMobileInstall = !!(mobileInstallDropdownRef.current && mobileInstallDropdownRef.current.contains(e.target as Node));
+      if (!clickedInsideDesktopInstall && !clickedInsideMobileInstall) {
         setInstallDropdownOpen(false);
       }
       if (userDropdownRef.current && !userDropdownRef.current.contains(e.target as Node)) {
@@ -256,8 +259,9 @@ export const Header: React.FC<HeaderProps> = ({
   const currentLangObj = SUPPORTED_LANGUAGES.find((l) => l.code === currentLang) || SUPPORTED_LANGUAGES[0];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 min-h-[64px] sm:min-h-[80px] bg-black/80 backdrop-blur-md border-b border-[#1A1A1F] pt-[env(safe-area-inset-top)] transition-all">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 min-h-[64px] sm:min-h-[80px] flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-[#1A1A1F] pt-[env(safe-area-inset-top)] transition-all">
+      {/* Top Header Row (Desktop: full bar; Mobile: Row 1 with Logo + Lang + Auth) */}
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 md:h-20 min-h-[56px] md:min-h-[80px] flex items-center justify-between">
         {/* Left: Brand Logo */}
         <a
           href="/"
@@ -267,7 +271,7 @@ export const Header: React.FC<HeaderProps> = ({
             if (onGoHome) onGoHome();
             else window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          className="header-logo flex items-center gap-2 sm:gap-2.5 h-10 sm:h-12 group cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0"
+          className="header-logo flex items-center gap-2 sm:gap-2.5 h-10 md:h-12 group cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0"
           role="button"
           tabIndex={0}
           onKeyDown={(e) => {
@@ -281,9 +285,9 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <PeeklyLogo
             size={24}
-            className="h-6 w-auto sm:h-8 sm:w-auto md:h-9 md:w-auto text-white group-hover:text-[#FF5500] transition-colors duration-150 shrink-0"
+            className="h-6 w-auto md:h-9 md:w-auto text-white group-hover:text-[#FF5500] transition-colors duration-150 shrink-0"
           />
-          <span className="font-sans text-lg sm:text-2xl md:text-3xl font-black tracking-wider text-white leading-none select-none">
+          <span className="font-sans text-xl md:text-3xl font-black tracking-wider text-white leading-none select-none">
             PEEKLY
           </span>
         </a>
@@ -292,7 +296,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-2.5 sm:gap-4 md:gap-5 shrink-0">
           {/* Sub-container containing [История версий], [Язык], [Аватарка]: Dropdown spans from > to end of avatar */}
           <div className="relative flex items-center gap-2.5 sm:gap-4 md:gap-5 shrink-0" ref={userDropdownRef}>
-            {/* Changelog Link: Hidden on mobile (< md), accessible in footer and profile menu */}
+            {/* Changelog Link (Desktop ONLY, using rock-solid .header-desktop-item) */}
             <button
               type="button"
               onClick={() => {
@@ -301,7 +305,7 @@ export const Header: React.FC<HeaderProps> = ({
                 setInstallDropdownOpen(false);
                 if (onOpenChangelog) onOpenChangelog();
               }}
-              className="group hidden md:inline-flex items-center gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
+              className="header-desktop-item group items-center gap-1.5 font-sans text-xs md:text-[13px] font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
               aria-label={t.nav.changelog}
             >
               <span className="font-mono text-white flex items-center leading-none">
@@ -375,9 +379,9 @@ export const Header: React.FC<HeaderProps> = ({
                 aria-expanded={userDropdownOpen}
                 aria-haspopup="menu"
                 aria-label="User account menu"
-                className="relative flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 bg-[#000000] hover:bg-white/[0.06] border border-[#222228] hover:border-white transition-all rounded-none cursor-pointer overflow-hidden p-0 focus-visible:ring-1 focus-visible:ring-white shrink-0"
+                className="relative flex items-center justify-center w-8 h-8 sm:w-11 sm:h-11 bg-[#000000] hover:bg-white/[0.06] border border-[#222228] hover:border-white transition-all rounded-none cursor-pointer overflow-hidden p-0 focus-visible:ring-1 focus-visible:ring-white shrink-0"
               >
-                <UserAvatar user={userSession} size={18} className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-[#FFFFFF]" imgClassName="w-full h-full object-cover" />
+                <UserAvatar user={userSession} size={18} className="w-4 h-4 sm:w-5 sm:h-5 text-[#FFFFFF]" imgClassName="w-full h-full object-cover" />
               </button>
             ) : (
               <button
@@ -388,7 +392,7 @@ export const Header: React.FC<HeaderProps> = ({
                   setInstallDropdownOpen(false);
                   if (onOpenAuthModal) onOpenAuthModal();
                 }}
-                className="inline-flex items-center justify-center text-center h-9 sm:h-11 px-3 sm:px-6 rounded-none bg-black text-white hover:border-white border border-[#222228] font-sans text-xs sm:text-[15px] font-semibold tracking-normal transition-colors shrink-0 cursor-pointer focus-visible:ring-1 focus-visible:ring-white leading-none box-border"
+                className="inline-flex items-center justify-center text-center h-8 sm:h-11 px-3 sm:px-6 rounded-none bg-black text-white hover:border-white border border-[#222228] font-sans text-xs sm:text-[15px] font-semibold tracking-normal transition-colors shrink-0 cursor-pointer focus-visible:ring-1 focus-visible:ring-white leading-none box-border"
                 title={authT.signInTitle}
               >
                 <span>{authT.nav_sign_in}</span>
@@ -477,8 +481,8 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
 
-          {/* Install Extension CTA Button & Dropdown (Hidden on mobile < sm, prominent on desktop) */}
-          <div className="relative hidden sm:inline-flex items-center shrink-0" ref={installDropdownRef}>
+          {/* Desktop Install Extension CTA Button & Dropdown (.header-desktop-item guarantees display on desktop) */}
+          <div className="header-desktop-item relative items-center shrink-0" ref={installDropdownRef}>
             <button
               type="button"
               onClick={toggleInstallDropdown}
@@ -490,7 +494,7 @@ export const Header: React.FC<HeaderProps> = ({
               <span>{t.nav.install}</span>
             </button>
 
-            {/* Browser Install Dropdown Menu - EXACTLY matching width and position of button */}
+            {/* Browser Install Dropdown Menu - Desktop */}
             {installDropdownOpen && (
               <div
                 role="menu"
@@ -516,6 +520,70 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Mobile Sub-bar (Row 2 on Mobile ONLY, hidden on desktop >= 768px via .header-mobile-subbar) */}
+      <div className="header-mobile-subbar w-full px-4 h-11 border-t border-[#1A1A1F]/80 items-center justify-between bg-black/95">
+        {/* Left: >_ Changelog on Mobile */}
+        <button
+          type="button"
+          onClick={() => {
+            setLangDropdownOpen(false);
+            setUserDropdownOpen(false);
+            setInstallDropdownOpen(false);
+            if (onOpenChangelog) onOpenChangelog();
+          }}
+          className="group inline-flex items-center gap-1.5 font-sans text-xs font-normal text-neutral-400 hover:text-white leading-none whitespace-nowrap transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-white shrink-0 active:scale-95"
+          aria-label={t.nav.changelog}
+        >
+          <span className="font-mono text-white flex items-center leading-none text-xs">
+            <span>&gt;</span>
+            <span className="inline-block text-white animate-terminal-blink">_</span>
+          </span>
+          <span className="inline text-neutral-400 group-hover:text-white transition-colors leading-none whitespace-nowrap text-xs">
+            {t.nav.changelog}
+          </span>
+        </button>
+
+        {/* Right: Install Extension Button on Mobile */}
+        <div className="relative inline-flex items-center shrink-0" ref={mobileInstallDropdownRef}>
+          <button
+            type="button"
+            onClick={toggleInstallDropdown}
+            aria-expanded={installDropdownOpen}
+            aria-haspopup="menu"
+            aria-label="Install extension options"
+            className="inline-flex items-center justify-center text-center rounded-none btn-header-install btn-header-install-mobile font-sans font-semibold tracking-normal cursor-pointer active:scale-95 shrink-0 focus-visible:ring-1 focus-visible:ring-white leading-none box-border"
+          >
+            <span>{t.nav.install}</span>
+          </button>
+
+          {/* Browser Install Dropdown Menu - Mobile */}
+          {installDropdownOpen && (
+            <div
+              role="menu"
+              aria-label="Supported Browsers"
+              className="absolute right-0 top-full mt-1.5 w-56 max-w-[calc(100vw-2rem)] bg-[#090909] border border-[#1A1A1F] rounded-none shadow-2xl flex flex-col py-1 z-50 text-left"
+            >
+              {BROWSERS.map((browser) => (
+                <a
+                  key={browser.id}
+                  href={browser.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  role="menuitem"
+                  onClick={() => setInstallDropdownOpen(false)}
+                  className="group flex items-center gap-3 px-3.5 py-2 text-white/90 font-medium text-xs tracking-normal bg-transparent hover:bg-white/[0.08] hover:text-white transition-colors duration-100 cursor-pointer no-underline select-none rounded-none"
+                >
+                  <span className="text-white/80 group-hover:text-[#FF5500] transition-colors duration-100 shrink-0 flex items-center justify-center">
+                    {browser.icon('w-[18px] h-[18px] shrink-0 fill-current')}
+                  </span>
+                  <span className="truncate">{browser.name}</span>
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </header>
